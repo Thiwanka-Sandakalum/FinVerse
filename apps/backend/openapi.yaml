@@ -1,0 +1,352 @@
+openapi: 3.1.0
+info:
+  title: FinVerse - Core Financial Analytics API
+  description: REST API for Loans, Leasing, Fixed Deposits, ROI Prediction, and Banking Card Comparison
+  version: 1.0.0
+
+servers:
+  - url: https://api.finverse.com/core
+
+paths:
+  /loans:
+    get:
+      summary: Get all loan options
+      responses:
+        "200":
+          description: A list of loan options
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanListResponse"
+    post:
+      summary: Create a new loan option
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanOptionInput"
+      responses:
+        "201":
+          description: Created loan option
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanOption"
+
+  /loans/{id}:
+    get:
+      summary: Get a loan option by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Loan option found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanOption"
+    put:
+      summary: Update a loan option by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanOptionInput"
+      responses:
+        "200":
+          description: Updated loan option
+    delete:
+      summary: Delete a loan option by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted successfully
+
+  /leasing:
+    get:
+      summary: Get all leasing options
+      responses:
+        "200":
+          description: A list of leasing options
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeasingListResponse"
+    post:
+      summary: Create a new leasing option
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeasingOptionInput"
+      responses:
+        "201":
+          description: Created leasing option
+
+  /fixed-deposits:
+    get:
+      summary: Get all fixed deposit options
+      responses:
+        "200":
+          description: A list of fixed deposits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FixedDepositListResponse"
+    post:
+      summary: Create a new fixed deposit option
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FixedDepositInput"
+      responses:
+        "201":
+          description: Created fixed deposit option
+
+  /fixed-deposits/{id}:
+    get:
+      summary: Get fixed deposit by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Fixed deposit found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FixedDeposit"
+
+  /roi/predict:
+    post:
+      summary: Predict ROI for an investment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ROIPredictInput"
+      responses:
+        "200":
+          description: Predicted return
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ROIPredictResponse"
+
+  /roi/analyze-risk:
+    post:
+      summary: Analyze risk for an investment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RiskAnalysisInput"
+      responses:
+        "200":
+          description: Risk assessment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskAnalysisResult"
+
+  /cards:
+    get:
+      summary: Get all banking card options
+      responses:
+        "200":
+          description: A list of bank cards
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardListResponse"
+    post:
+      summary: Create a new card option
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BankCardInput"
+      responses:
+        "201":
+          description: Created card option
+
+  /cards/{id}:
+    get:
+      summary: Get card by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Card option found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BankCard"
+
+components:
+  schemas:
+    LoanOption:
+      type: object
+      properties:
+        id: { type: integer }
+        bankName: { type: string }
+        interest: { type: number }
+        term: { type: integer }
+        type: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    LoanOptionInput:
+      type: object
+      required: [bankName, interest, term, type]
+      properties:
+        bankName: { type: string }
+        interest: { type: number }
+        term: { type: integer }
+        type: { type: string }
+
+    LoanListResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/LoanOption" }
+
+    LeasingOption:
+      type: object
+      properties:
+        id: { type: integer }
+        bankName: { type: string }
+        leaseRate: { type: number }
+        duration: { type: integer }
+        assetType: { type: string }
+
+    LeasingOptionInput:
+      type: object
+      required: [bankName, leaseRate, duration, assetType]
+      properties:
+        bankName: { type: string }
+        leaseRate: { type: number }
+        duration: { type: integer }
+        assetType: { type: string }
+
+    LeasingListResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/LeasingOption" }
+
+    FixedDeposit:
+      type: object
+      properties:
+        id: { type: integer }
+        bank: { type: string }
+        rate: { type: number }
+        period: { type: integer }
+        compound: { type: boolean }
+
+    FixedDepositInput:
+      type: object
+      required: [bank, rate, period, compound]
+      properties:
+        bank: { type: string }
+        rate: { type: number }
+        period: { type: integer }
+        compound: { type: boolean }
+
+    FixedDepositListResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/FixedDeposit" }
+
+    ROIPredictInput:
+      type: object
+      required: [amount, rate, years]
+      properties:
+        amount: { type: number }
+        rate: { type: number }
+        years: { type: number }
+        compound: { type: boolean }
+
+    ROIPredictResponse:
+      type: object
+      properties:
+        projectedReturn: { type: number }
+        compoundInterest: { type: boolean }
+
+    RiskAnalysisInput:
+      type: object
+      required: [amount, volatility, duration]
+      properties:
+        amount: { type: number }
+        volatility: { type: number }
+        duration: { type: number }
+
+    RiskAnalysisResult:
+      type: object
+      properties:
+        riskScore: { type: number }
+        assessment: { type: string }
+
+    BankCard:
+      type: object
+      properties:
+        id: { type: integer }
+        bankName: { type: string }
+        cardType: { type: string }
+        annualFee: { type: number }
+        rewardProgram: { type: string }
+        interestRate: { type: number }
+
+    BankCardInput:
+      type: object
+      required: [bankName, cardType, annualFee, rewardProgram, interestRate]
+      properties:
+        bankName: { type: string }
+        cardType: { type: string }
+        annualFee: { type: number }
+        rewardProgram: { type: string }
+        interestRate: { type: number }
+
+    CardListResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/BankCard" }
