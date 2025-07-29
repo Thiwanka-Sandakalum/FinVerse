@@ -1,0 +1,164 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+/// This is used when running `npx prisma db seed`
+generator seeder {
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model InstitutionType {
+    id           String        @id @default(uuid())
+    code         String        @unique
+    name         String
+    description  String?
+    institutions Institution[]
+}
+
+model Institution {
+    id            String   @id @default(uuid())
+    typeId        String
+    name          String
+    slug          String   @unique
+    logoUrl       String?
+    licenseNumber String?
+    countryCode   String
+    isActive      Boolean  @default(true)
+    createdAt     DateTime @default(now()) @db.Timestamptz(6)
+    updatedAt     DateTime @updatedAt @db.Timestamptz(6)
+
+    type     InstitutionType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+    products Product[]
+}
+
+model ProductCategory {
+    id           String            @id @default(uuid())
+    parentId     String?
+    name         String
+    slug         String            @unique
+    description  String?
+    level        Int               @default(0)
+    parent       ProductCategory?  @relation("CategoryParent", fields: [parentId], references: [id], onDelete: SetNull)
+    children     ProductCategory[] @relation("CategoryParent")
+    productTypes ProductType[]
+}
+
+model ProductType {
+    id          String          @id @default(uuid())
+    categoryId  String
+    code        String          @unique
+    name        String
+    description String?
+    category    ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    products    Product[]
+}
+
+model Product {
+    id            String   @id @default(uuid())
+    institutionId String
+    productTypeId String
+    name          String
+    slug          String   @unique
+    details       Json?    @db.JsonB
+    isFeatured    Boolean  @default(false)
+    isActive      Boolean  @default(true)
+    createdAt     DateTime @default(now()) @db.Timestamptz(6)
+    updatedAt     DateTime @updatedAt @db.Timestamptz(6)
+
+    institution Institution          @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+    productType ProductType          @relation(fields: [productTypeId], references: [id], onDelete: Cascade)
+    tags        ProductTagMap[]
+    versions    ProductVersion[]
+    rateHistory ProductRateHistory[]
+
+    savedProducts SavedProduct[]
+    sharedLinks   SharedLink[]
+    reviews       Review[]
+}
+
+model ProductTag {
+    id       String          @id @default(uuid())
+    name     String
+    slug     String          @unique
+    products ProductTagMap[]
+}
+
+model ProductTagMap {
+    productId String
+    tagId     String
+    product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+    tag       ProductTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+    @@id([productId, tagId])
+    @@index([productId])
+    @@index([tagId])
+}
+
+model ProductVersion {
+    id            String   @id @default(uuid())
+    productId     String
+    versionNumber Int
+    snapshot      Json     @db.JsonB
+    changedBy     String?
+    changeNote    String?
+    createdAt     DateTime @default(now()) @db.Timestamptz(6)
+
+    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductRateHistory {
+    id         String   @id @default(uuid())
+    productId  String
+    metric     String
+    value      Decimal
+    currency   String?
+    recordedAt DateTime @default(now()) @db.Timestamptz(6)
+    source     String?
+
+    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+    @@index([metric, recordedAt(sort: Desc)])
+}
+
+model SavedProduct {
+    id          String   @id @default(uuid())
+    clerkUserId String // From Clerk JWT
+    productId   String
+    createdAt   DateTime @default(now()) @db.Timestamptz(6)
+
+    product Product @relation(fields: [productId], references: [id])
+}
+
+model CompareList {
+    id          String   @id @default(uuid())
+    clerkUserId String // From Clerk JWT
+    productIds  String[] // Postgres array of UUIDs (for product comparison)
+    createdAt   DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model SharedLink {
+    id          String   @id @default(uuid())
+    productId   String
+    clerkUserId String? // Optional, to track who shared
+    channel     String // "whatsapp", "email", etc.
+    sharedAt    DateTime @default(now()) @db.Timestamptz(6)
+
+    product Product @relation(fields: [productId], references: [id])
+}
+
+model Review {
+    id          String   @id @default(uuid())
+    clerkUserId String // From Clerk JWT
+    productId   String
+    rating      Int // Rating between 1 and 5
+    comment     String?
+    createdAt   DateTime @default(now()) @db.Timestamptz(6)
+
+    product Product @relation(fields: [productId], references: [id])
+}

@@ -1,3 +1,20 @@
+# FinVerse
+
+A monorepo containing backend microservices and React frontend for the FinVerse application.
+
+## Project Structure
+
+```
+FinVerse/
+├── apps/                  # All applications (both FE and BE)
+│   ├── backend/           # Backend microservices
+│   └── frontend/          # React frontend application
+│       └── web/           # Main web application
+└── packages/              # Shared packages/libraries
+    ├── common/            # Common utilities and types
+    └── ui-components/     # Shared UI components
+```
+
 # Financial Analysis Platform
 
 The **Financial Analysis Platform** is an enterprise-grade solution designed to provide in-depth financial insights and analytics for individuals and businesses. This platform aggregates and analyzes data from various financial services to assist in strategic decision-making, offering features like loan and leasing analysis, interest rate forecasting, stock market tracking, foreign exchange rate analysis, and much more. The platform integrates AI-driven analytics, real-time data, and a user-friendly interface for an enhanced financial experience.

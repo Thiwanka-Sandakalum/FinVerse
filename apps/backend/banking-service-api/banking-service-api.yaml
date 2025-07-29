@@ -1,0 +1,2253 @@
+openapi: 3.0.3
+info:
+  title: FinVerse Banking Service API
+  description: |
+    Comprehensive RESTful API for banking services and financial products management,
+    including creation, editing, bookmarking, comparing, sharing, rating products,
+    and managing related financial data.
+  version: 1.1.0
+  contact:
+    name: FinVerse API Team
+    email: api@finverse.com
+    url: https://developer.finverse.com
+
+servers:
+  - url: https://api.finverse.com/v1
+    description: Production server
+  - url: https://staging-api.finverse.com/v1
+    description: Staging server
+  - url: http://localhost:3000/api/v1
+    description: Development server
+
+tags:
+  - name: Products
+    description: Product management operations
+  - name: Saved Products
+    description: Operations related to bookmarking products
+  - name: Compare Lists
+    description: Operations for product comparison
+  - name: Shared Products
+    description: Operations for sharing products
+  - name: Reviews
+    description: Operations for product reviews and ratings
+  - name: Tags
+    description: Product tag management
+  - name: Institutions
+    description: Financial institution management
+  - name: Product Types
+    description: Product type management
+  - name: Product Categories
+    description: Product category management
+  - name: Rate History
+    description: Product rate history operations
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        institutionId:
+          type: string
+          format: uuid
+        productTypeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Personal Loan"
+        slug:
+          type: string
+          example: "personal-loan"
+        details:
+          type: object
+          properties:
+            description:
+              type: string
+              example: "Low-interest loan for personal use"
+            terms:
+              type: string
+            fees:
+              type: string
+              example: "5% p.a."
+            eligibility:
+              type: string
+              example: "18+"
+            additionalInfo:
+              type: object
+              description: "Any additional product-specific information"
+        isFeatured:
+          type: boolean
+          default: false
+        isActive:
+          type: boolean
+          default: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        institution:
+          $ref: "#/components/schemas/Institution"
+        productType:
+          $ref: "#/components/schemas/ProductType"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductTag"
+      required:
+        - institutionId
+        - productTypeId
+        - name
+        - slug
+
+    ProductCreate:
+      type: object
+      properties:
+        institutionId:
+          type: string
+          format: uuid
+        productTypeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Personal Loan"
+        details:
+          type: object
+          properties:
+            description:
+              type: string
+              example: "Low-interest loan for personal use"
+            terms:
+              type: string
+            fees:
+              type: string
+              example: "5% p.a."
+            eligibility:
+              type: string
+              example: "18+"
+            additionalInfo:
+              type: object
+        isFeatured:
+          type: boolean
+          default: false
+      required:
+        - institutionId
+        - productTypeId
+        - name
+
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Updated Loan"
+        details:
+          type: object
+          properties:
+            description:
+              type: string
+              example: "Updated description"
+            terms:
+              type: string
+            fees:
+              type: string
+              example: "6% p.a."
+            eligibility:
+              type: string
+            additionalInfo:
+              type: object
+        isFeatured:
+          type: boolean
+
+    Institution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        typeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "FinBank Corp"
+        slug:
+          type: string
+          example: "finbank-corp"
+        logoUrl:
+          type: string
+          format: uri
+          example: "https://storage.finverse.com/logos/finbank.png"
+        licenseNumber:
+          type: string
+          example: "FIN12345678"
+        countryCode:
+          type: string
+          example: "US"
+        isActive:
+          type: boolean
+          default: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        type:
+          $ref: "#/components/schemas/InstitutionType"
+      required:
+        - typeId
+        - name
+        - slug
+        - countryCode
+
+    InstitutionCreate:
+      type: object
+      properties:
+        typeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "FinBank Corp"
+        logoUrl:
+          type: string
+          format: uri
+          example: "https://storage.finverse.com/logos/finbank.png"
+        licenseNumber:
+          type: string
+          example: "FIN12345678"
+        countryCode:
+          type: string
+          example: "US"
+      required:
+        - typeId
+        - name
+        - countryCode
+
+    InstitutionUpdate:
+      type: object
+      properties:
+        typeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "FinBank Corp Updated"
+        logoUrl:
+          type: string
+          format: uri
+          example: "https://storage.finverse.com/logos/finbank-updated.png"
+        licenseNumber:
+          type: string
+          example: "FIN87654321"
+        countryCode:
+          type: string
+          example: "US"
+        isActive:
+          type: boolean
+
+    InstitutionType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        code:
+          type: string
+          example: "BANK"
+        name:
+          type: string
+          example: "Bank"
+        description:
+          type: string
+          example: "Commercial banking institution"
+      required:
+        - code
+        - name
+
+    InstitutionTypeCreate:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "BANK"
+        name:
+          type: string
+          example: "Bank"
+        description:
+          type: string
+          example: "Commercial banking institution"
+      required:
+        - code
+        - name
+
+    ProductCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          example: "Loans"
+        slug:
+          type: string
+          example: "loans"
+        description:
+          type: string
+          example: "Various loan products"
+        level:
+          type: integer
+          example: 0
+        parent:
+          $ref: "#/components/schemas/ProductCategory"
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductCategory"
+      required:
+        - name
+        - slug
+
+    ProductCategoryCreate:
+      type: object
+      properties:
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          example: "Loans"
+        description:
+          type: string
+          example: "Various loan products"
+      required:
+        - name
+
+    ProductType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        categoryId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "PERSONAL_LOAN"
+        name:
+          type: string
+          example: "Personal Loan"
+        description:
+          type: string
+          example: "Loans for personal use"
+        category:
+          $ref: "#/components/schemas/ProductCategory"
+      required:
+        - categoryId
+        - code
+        - name
+
+    ProductTypeCreate:
+      type: object
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "PERSONAL_LOAN"
+        name:
+          type: string
+          example: "Personal Loan"
+        description:
+          type: string
+          example: "Loans for personal use"
+      required:
+        - categoryId
+        - code
+        - name
+
+    SavedProduct:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        clerkUserId:
+          type: string
+        productId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        product:
+          $ref: "#/components/schemas/Product"
+      required:
+        - clerkUserId
+        - productId
+
+    CompareList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        clerkUserId:
+          type: string
+        productIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - clerkUserId
+        - productIds
+
+    SharedLink:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        clerkUserId:
+          type: string
+          nullable: true
+        channel:
+          type: string
+          example: "whatsapp"
+        sharedAt:
+          type: string
+          format: date-time
+        product:
+          $ref: "#/components/schemas/Product"
+      required:
+        - productId
+        - channel
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        clerkUserId:
+          type: string
+        productId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        product:
+          $ref: "#/components/schemas/Product"
+      required:
+        - clerkUserId
+        - productId
+        - rating
+
+    ProductTag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+      required:
+        - name
+        - slug
+
+    ProductVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        versionNumber:
+          type: integer
+        snapshot:
+          type: object
+        changedBy:
+          type: string
+          nullable: true
+        changeNote:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        product:
+          $ref: "#/components/schemas/Product"
+      required:
+        - productId
+        - versionNumber
+        - snapshot
+
+    ProductRateHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        metric:
+          type: string
+          example: "interest_rate"
+        value:
+          type: number
+          format: float
+          example: 5.25
+        currency:
+          type: string
+          example: "USD"
+          nullable: true
+        recordedAt:
+          type: string
+          format: date-time
+        source:
+          type: string
+          nullable: true
+        product:
+          $ref: "#/components/schemas/Product"
+      required:
+        - productId
+        - metric
+        - value
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      required:
+        - code
+        - message
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        meta:
+          type: object
+          properties:
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+      required:
+        - data
+        - meta
+
+paths:
+  /products:
+    get:
+      summary: Get All Products
+      description: Retrieve a list of all products (can be filtered by categories, types, etc.)
+      tags:
+        - Products
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: institutionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: productTypeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: isFeatured
+          in: query
+          schema:
+            type: boolean
+        - name: minRate
+          in: query
+          schema:
+            type: number
+        - name: maxRate
+          in: query
+          schema:
+            type: number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Product"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Create Product
+      description: Create a new financial product
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductCreate"
+      responses:
+        "201":
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not an Institution Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get Product Details
+      description: Retrieve detailed information about a specific product
+      tags:
+        - Products
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Edit Product
+      description: Edit an existing product
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not an Institution Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Delete Product
+      description: Delete a specific product from the platform
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not an Institution Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{id}/activate:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    patch:
+      summary: Activate/Deactivate Product
+      description: Toggle the product's active/inactive status
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isActive:
+                  type: boolean
+              required:
+                - isActive
+      responses:
+        "200":
+          description: Product status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not an Institution Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/versions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get Product Version History
+      description: Get the version history for a specific product
+      tags:
+        - Products
+      responses:
+        "200":
+          description: List of product versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductVersion"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{id}/rates:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get Product Rate History
+      description: Get the rate history for a specific product
+      tags:
+        - Rate History
+      parameters:
+        - name: metric
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: List of product rate history entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductRateHistory"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Add Rate History Entry
+      description: Add a new rate history entry for a product
+      tags:
+        - Rate History
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metric:
+                  type: string
+                  example: "interest_rate"
+                value:
+                  type: number
+                  format: float
+                  example: 5.25
+                currency:
+                  type: string
+                  example: "USD"
+                  nullable: true
+                source:
+                  type: string
+                  nullable: true
+              required:
+                - metric
+                - value
+      responses:
+        "201":
+          description: Rate history entry created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductRateHistory"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /saved-products:
+    get:
+      summary: Get Saved Products
+      description: Retrieve a list of all saved (bookmarked) products for the user
+      tags:
+        - Saved Products
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: A list of saved products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavedProduct"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Save (Bookmark) Product
+      description: Save (bookmark) a product for a user
+      tags:
+        - Saved Products
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+              required:
+                - productId
+      responses:
+        "201":
+          description: Product saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedProduct"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /saved-products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    delete:
+      summary: Delete Saved Product
+      description: Remove a saved (bookmarked) product from a user's saved list
+      tags:
+        - Saved Products
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Product removed from saved list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not the owner of the saved product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Saved product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /compare-list:
+    get:
+      summary: Get Compare List
+      description: Retrieve the current comparison list for the user
+      tags:
+        - Compare Lists
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: A list of comparison lists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompareList"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Add to Compare List
+      description: Add products to the comparison list
+      tags:
+        - Compare Lists
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+              required:
+                - productIds
+      responses:
+        "201":
+          description: Products added to compare list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompareList"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: One or more products not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /compare-list/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    delete:
+      summary: Delete Compare List
+      description: Delete a comparison list
+      tags:
+        - Compare Lists
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Compare list deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not the owner of the compare list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Compare list not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shared-products:
+    get:
+      summary: Get Shared Links
+      description: Retrieve a list of all shared products by the user
+      tags:
+        - Shared Products
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: A list of shared links
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SharedLink"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Share Product
+      description: Share a product via a specified channel (e.g., email, WhatsApp)
+      tags:
+        - Shared Products
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+                channel:
+                  type: string
+                  example: "whatsapp"
+              required:
+                - productId
+                - channel
+      responses:
+        "201":
+          description: Product shared successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedLink"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /reviews:
+    post:
+      summary: Submit Product Review
+      description: Submit a product review and rating
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+              required:
+                - productId
+                - rating
+      responses:
+        "201":
+          description: Review submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /reviews/user:
+    get:
+      summary: Get Reviews by User
+      description: Retrieve reviews submitted by the current user
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: A list of reviews by the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /reviews/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    put:
+      summary: Edit Product Review
+      description: Edit an existing review for a product
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+              required:
+                - rating
+      responses:
+        "200":
+          description: Review updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not the owner of the review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Review not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Delete Product Review
+      description: Delete a review submitted by a user
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Review deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not the owner of the review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Review not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{productId}/reviews:
+    parameters:
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get Product Reviews
+      description: Get all reviews for a specific product
+      tags:
+        - Reviews
+      responses:
+        "200":
+          description: A list of reviews for the product
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/tags:
+    get:
+      summary: Get Product Tags
+      description: Retrieve all tags assigned to products
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: A list of product tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductTag"
+
+    post:
+      summary: Create Product Tag
+      description: Create a new product tag
+      tags:
+        - Tags
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+                - name
+      responses:
+        "201":
+          description: Tag created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductTag"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{id}/tags:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get Tags for a Product
+      description: Get all tags associated with a specific product
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: A list of product tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductTag"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Add Tag to Product
+      description: Add a tag to a product
+      tags:
+        - Tags
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tagId:
+                  type: string
+                  format: uuid
+              required:
+                - tagId
+      responses:
+        "200":
+          description: Tag added to product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductTag"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not an Institution Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product or tag not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{id}/tags/{tagId}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tagId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    delete:
+      summary: Remove Tag from Product
+      description: Remove a tag from a product
+      tags:
+        - Tags
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Tag removed from product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not an Institution Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product or tag not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /institutions:
+    get:
+      summary: Get All Institutions
+      description: Retrieve a list of all financial institutions
+      tags:
+        - Institutions
+      parameters:
+        - name: typeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: countryCode
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: A list of institutions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Institution"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Create Institution
+      description: Create a new financial institution
+      tags:
+        - Institutions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstitutionCreate"
+      responses:
+        "201":
+          description: Institution created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Institution"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /institutions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get Institution Details
+      description: Retrieve detailed information about a specific institution
+      tags:
+        - Institutions
+      responses:
+        "200":
+          description: Institution details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Institution"
+        "404":
+          description: Institution not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Update Institution
+      description: Update an existing institution
+      tags:
+        - Institutions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstitutionUpdate"
+      responses:
+        "200":
+          description: Institution updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Institution"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Institution not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Delete Institution
+      description: Delete a specific institution
+      tags:
+        - Institutions
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Institution deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Institution not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /institution-types:
+    get:
+      summary: Get All Institution Types
+      description: Retrieve a list of all institution types
+      tags:
+        - Institutions
+      responses:
+        "200":
+          description: A list of institution types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InstitutionType"
+
+    post:
+      summary: Create Institution Type
+      description: Create a new institution type
+      tags:
+        - Institutions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstitutionTypeCreate"
+      responses:
+        "201":
+          description: Institution type created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstitutionType"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /product-categories:
+    get:
+      summary: Get All Product Categories
+      description: Retrieve a list of all product categories
+      tags:
+        - Product Categories
+      parameters:
+        - name: includeChildren
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: A list of product categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductCategory"
+
+    post:
+      summary: Create Product Category
+      description: Create a new product category
+      tags:
+        - Product Categories
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductCategoryCreate"
+      responses:
+        "201":
+          description: Product category created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductCategory"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /product-categories/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get Product Category by ID
+      description: Retrieve a product category by its ID
+      tags:
+        - Product Categories
+      responses:
+        "200":
+          description: Product category details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductCategory"
+        "404":
+          description: Product category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Update Product Category
+      description: Update an existing product category
+      tags:
+        - Product Categories
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductCategoryCreate"
+      responses:
+        "200":
+          description: Product category updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductCategory"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete Product Category
+      description: Delete a product category by its ID
+      tags:
+        - Product Categories
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Product category deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /product-types:
+    get:
+      summary: Get All Product Types
+      description: Retrieve a list of all product types
+      tags:
+        - Product Types
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A list of product types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductType"
+
+    post:
+      summary: Create Product Type
+      description: Create a new product type
+      tags:
+        - Product Types
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductTypeCreate"
+      responses:
+        "201":
+          description: Product type created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductType"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /product-types/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get Product Type by ID
+      description: Retrieve a product type by its ID
+      tags:
+        - Product Types
+      responses:
+        "200":
+          description: Product type details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductType"
+        "404":
+          description: Product type not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Update Product Type
+      description: Update an existing product type
+      tags:
+        - Product Types
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductTypeCreate"
+      responses:
+        "200":
+          description: Product type updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductType"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product type not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete Product Type
+      description: Delete a product type by its ID
+      tags:
+        - Product Types
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Product type deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden - User is not a System Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product type not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
