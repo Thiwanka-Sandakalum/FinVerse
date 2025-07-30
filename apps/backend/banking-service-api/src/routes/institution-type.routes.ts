@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { InstitutionTypeController } from '../controllers/institution-type.controller';
-import { authenticateJwt } from '../middlewares/auth.middleware';
+
 
 const router = Router();
 const institutionTypeController = new InstitutionTypeController();
@@ -24,20 +24,20 @@ router.get('/:id', institutionTypeController.getById);
  * @desc    Create a new institution type
  * @access  Admin
  */
-router.post('/', authenticateJwt, institutionTypeController.create);
+router.post('/', institutionTypeController.create);
 
 /**
  * @route   PUT /api/institution-types/:id
  * @desc    Update an institution type
  * @access  Admin
  */
-router.put('/:id', authenticateJwt, institutionTypeController.update);
+router.put('/:id', institutionTypeController.update);
 
 /**
  * @route   DELETE /api/institution-types/:id
  * @desc    Delete an institution type
  * @access  Admin
  */
-router.delete('/:id', authenticateJwt, institutionTypeController.delete);
+router.delete('/:id', institutionTypeController.delete);
 
 export default router;

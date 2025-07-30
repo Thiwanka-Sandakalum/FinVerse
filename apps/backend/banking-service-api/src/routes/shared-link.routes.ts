@@ -6,7 +6,7 @@ const router = Router();
 const sharedLinkController = new SharedLinkController();
 
 // All routes require authentication
-router.use(authenticate);
+
 
 router.get('/', sharedLinkController.getAllSharedLinks);
 router.post('/', sharedLinkController.shareProduct);

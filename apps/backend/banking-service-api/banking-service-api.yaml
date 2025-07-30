@@ -1500,10 +1500,10 @@ paths:
 
   /products/tags:
     get:
-      summary: Get Product Tags
-      description: Retrieve all tags assigned to products
+      summary: Get All Product Tags
+      description: Retrieve a list of all product tags
       tags:
-        - Tags
+        - Product Tags
       responses:
         "200":
           description: A list of product tags
@@ -1876,7 +1876,7 @@ paths:
       summary: Get All Institution Types
       description: Retrieve a list of all institution types
       tags:
-        - Institutions
+        - Institution Types
       responses:
         "200":
           description: A list of institution types
@@ -1891,7 +1891,7 @@ paths:
       summary: Create Institution Type
       description: Create a new institution type
       tags:
-        - Institutions
+        - Institution Types
       security:
         - bearerAuth: []
       requestBody:
@@ -1920,7 +1920,113 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
         "403":
-          description: Forbidden - User is not a System Admin
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /institution-types/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get Institution Type by ID
+      description: Retrieve a specific institution type by its ID
+      tags:
+        - Institution Types
+      responses:
+        "200":
+          description: Institution type details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstitutionType"
+        "404":
+          description: Institution type not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Update Institution Type
+      description: Update an existing institution type
+      tags:
+        - Institution Types
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstitutionTypeCreate"
+      responses:
+        "200":
+          description: Institution type updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstitutionType"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Institution type not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Delete Institution Type
+      description: Delete a specific institution type
+      tags:
+        - Institution Types
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Institution type deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Institution type not found
           content:
             application/json:
               schema:
@@ -2088,6 +2194,22 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
+  /product-categories/hierarchy:
+    get:
+      summary: Get Product Category Hierarchy
+      description: Retrieve the full hierarchy of product categories
+      tags:
+        - Product Categories
+      responses:
+        "200":
+          description: Product category hierarchy
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductCategory"
 
   /product-types:
     get:

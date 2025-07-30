@@ -45,18 +45,18 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // API routes
-app.use(`/institutions/types`, institutionTypeRoutes);
-app.use(`/institutions`, institutionRoutes);
-app.use(`/product-categories`, productCategoryRoutes);
-app.use(`/product-types`, productTypeRoutes);
-app.use(`/products`, productRoutes);
-app.use(`/products`, productRateHistoryRoutes);
-app.use(`/products`, productVersionRoutes);
-app.use(`/saved-products`, savedProductRoutes);
-app.use(`/compare-list`, compareListRoutes);
-app.use(`/shared-products`, sharedLinkRoutes);
-app.use(`/reviews`, reviewRoutes);
-app.use(`/products/tags`, tagRoutes);
+app.use('/institution-types', institutionTypeRoutes);
+app.use('/institutions', institutionRoutes);
+app.use('/product-categories', productCategoryRoutes);
+app.use('/product-types', productTypeRoutes);
+app.use('/products', productRoutes);
+app.use('/products/rate-history', productRateHistoryRoutes);
+app.use('/products/versions', productVersionRoutes);
+app.use('/saved-products', savedProductRoutes);
+app.use('/compare-list', compareListRoutes);
+app.use('/shared-products', sharedLinkRoutes);
+app.use('/reviews', reviewRoutes);
+app.use('/products/tags', tagRoutes);
 
 // Error handling middleware
 app.use(notFoundHandler);

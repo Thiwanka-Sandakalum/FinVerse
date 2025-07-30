@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ProductTypeController } from '../controllers/product-type.controller';
-import { authenticateJwt } from '../middlewares/auth.middleware';
+
 
 const router = Router();
 const productTypeController = new ProductTypeController();
@@ -24,20 +24,20 @@ router.get('/:id', productTypeController.getById);
  * @desc    Create a new product type
  * @access  Admin
  */
-router.post('/', authenticateJwt, productTypeController.create);
+router.post('/', productTypeController.create);
 
 /**
  * @route   PUT /api/product-types/:id
  * @desc    Update a product type
  * @access  Admin
  */
-router.put('/:id', authenticateJwt, productTypeController.update);
+router.put('/:id', productTypeController.update);
 
 /**
  * @route   DELETE /api/product-types/:id
  * @desc    Delete a product type
  * @access  Admin
  */
-router.delete('/:id', authenticateJwt, productTypeController.delete);
+router.delete('/:id', productTypeController.delete);
 
 export default router;

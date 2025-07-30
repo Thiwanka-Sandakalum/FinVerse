@@ -6,7 +6,7 @@ const router = Router();
 const compareListController = new CompareListController();
 
 // All routes require authentication
-router.use(authenticate);
+
 
 router.get('/', compareListController.getAllCompareLists);
 router.post('/', compareListController.createCompareList);

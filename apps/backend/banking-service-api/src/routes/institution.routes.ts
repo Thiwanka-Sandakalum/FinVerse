@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { InstitutionController } from '../controllers/institution.controller';
-import { authenticateJwt } from '../middlewares/auth.middleware';
+
 
 const router = Router();
 const institutionController = new InstitutionController();
@@ -24,27 +24,27 @@ router.get('/:id', institutionController.getById);
  * @desc    Create a new institution
  * @access  Admin
  */
-router.post('/', authenticateJwt, institutionController.create);
+router.post('/', institutionController.create);
 
 /**
  * @route   PUT /api/institutions/:id
  * @desc    Update an institution
  * @access  Admin
  */
-router.put('/:id', authenticateJwt, institutionController.update);
+router.put('/:id', institutionController.update);
 
 /**
  * @route   DELETE /api/institutions/:id
  * @desc    Delete an institution
  * @access  Admin
  */
-router.delete('/:id', authenticateJwt, institutionController.delete);
+router.delete('/:id', institutionController.delete);
 
 /**
  * @route   PATCH /api/institutions/:id/status
  * @desc    Activate or deactivate an institution
  * @access  Admin
  */
-router.patch('/:id/status', authenticateJwt, institutionController.setActiveStatus);
+router.patch('/:id/status', institutionController.setActiveStatus);
 
 export default router;

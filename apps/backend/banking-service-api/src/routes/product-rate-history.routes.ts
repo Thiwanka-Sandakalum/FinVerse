@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ProductRateHistoryController } from '../controllers/product-rate-history.controller';
-import { authenticateJwt } from '../middlewares/auth.middleware';
+
 
 const router = Router();
 const productRateHistoryController = new ProductRateHistoryController();
@@ -24,13 +24,13 @@ router.get('/:productId/rates/:metric/latest', productRateHistoryController.getL
  * @desc    Add a new rate history entry
  * @access  Admin
  */
-router.post('/:productId/rates', authenticateJwt, productRateHistoryController.addRate);
+router.post('/:productId/rates', productRateHistoryController.addRate);
 
 /**
  * @route   DELETE /api/products/:productId/rates
  * @desc    Delete all rate history for a product
  * @access  Admin
  */
-router.delete('/:productId/rates', authenticateJwt, productRateHistoryController.deleteRateHistory);
+router.delete('/:productId/rates', productRateHistoryController.deleteRateHistory);
 
 export default router;

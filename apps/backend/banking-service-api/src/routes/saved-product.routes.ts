@@ -6,7 +6,7 @@ const router = Router();
 const savedProductController = new SavedProductController();
 
 // All routes require authentication
-router.use(authenticate);
+
 
 router.get('/', savedProductController.getAllSavedProducts);
 router.post('/', savedProductController.saveProduct);

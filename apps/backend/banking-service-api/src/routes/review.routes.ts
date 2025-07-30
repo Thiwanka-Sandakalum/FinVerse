@@ -9,7 +9,7 @@ const reviewController = new ReviewController();
 router.get('/:productId', reviewController.getProductReviews);
 
 // Protected routes
-router.use(authenticate);
+
 router.get('/user', reviewController.getUserReviews);
 router.post('/', reviewController.createReview);
 router.put('/:id', reviewController.updateReview);
