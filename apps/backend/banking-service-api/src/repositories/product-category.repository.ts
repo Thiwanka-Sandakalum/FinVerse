@@ -54,7 +54,11 @@ export class ProductCategoryRepository {
         const rootCategories = await prisma.productCategory.findMany({
             where: { parentId: null },
             include: {
-                children: true,
+                children: {
+                    include: {
+                        productTypes: true
+                    }
+                },
                 productTypes: true
             },
             orderBy: { name: 'asc' }
