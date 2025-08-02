@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { TagController } from '../controllers/tag.controller';
-import { authenticate, isInstitutionAdmin } from '../middlewares/auth.middleware';
 
 const router = Router();
 const tagController = new TagController();
@@ -18,8 +17,6 @@ router.get('/', tagController.getAllTags);
  * @access Private (Institution Admin)
  */
 router.post('/:id/tags',
-    authenticate,
-    isInstitutionAdmin,
     tagController.addTagToProduct
 );
 
@@ -29,8 +26,6 @@ router.post('/:id/tags',
  * @access Private (Institution Admin)
  */
 router.delete('/:id/tags/:tagId',
-    authenticate,
-    isInstitutionAdmin,
     tagController.removeTagFromProduct
 );
 
