@@ -629,14 +629,6 @@ paths:
           in: query
           schema:
             type: boolean
-        - name: minRate
-          in: query
-          schema:
-            type: number
-        - name: maxRate
-          in: query
-          schema:
-            type: number
         - name: limit
           in: query
           schema:
@@ -647,6 +639,12 @@ paths:
           schema:
             type: integer
             default: 0
+        - name: search
+          in: query
+          description: Search term for product name, type, institution, or tag
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: A list of products
@@ -676,7 +674,7 @@ paths:
       security:
         - bearerAuth: []
       requestBody:
-        required: true
+        # required: true removed (should be inside requestBody, not content)
         content:
           application/json:
             schema:
@@ -1215,6 +1213,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        "404":
+          description: Compare list not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    get:
+      summary: Get Compare List Details
+      description: Retrieve details of a specific comparison list
+      tags:
+        - Compare Lists
+      responses:
+        "200":
+          description: Comparison list details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompareList"
         "404":
           description: Compare list not found
           content:

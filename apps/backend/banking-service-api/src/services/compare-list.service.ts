@@ -19,6 +19,12 @@ export class CompareListService {
     }
 
     /**
+     * Get a compare list by ID for a user
+     */
+    async getCompareList(id: string, clerkUserId: string) {
+        return this.compareListRepository.findByIdAndUser(id, clerkUserId);
+    }
+    /**
      * Create a compare list for a user
      */
     async createCompareList(clerkUserId: string, productIds: string[]) {

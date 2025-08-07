@@ -34,6 +34,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Import auth middleware from module
+import { authMiddleware } from './middlewares/auth.middleware';
+
+// Use auth middleware before API routes
+app.use(authMiddleware);
+
 // Request logging
 if (process.env.ENABLE_REQUEST_LOGGING !== 'false') {
     app.use(morgan('combined', { stream }));
@@ -95,3 +101,4 @@ process.on('SIGTERM', () => {
 });
 
 export default app;
+

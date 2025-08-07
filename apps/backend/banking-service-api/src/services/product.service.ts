@@ -18,10 +18,9 @@ export class ProductService {
         productTypeId?: string;
         isActive?: boolean;
         isFeatured?: boolean;
-        minRate?: number;
-        maxRate?: number;
         limit?: number;
         offset?: number;
+        search?: string;
     }) {
         return this.productRepository.findAll(filters);
     }

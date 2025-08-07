@@ -1,14 +1,11 @@
 import { Router } from 'express';
 import { CompareListController } from '../controllers/compare-list.controller';
-import { authenticate } from '../middlewares/auth.middleware';
 
 const router = Router();
 const compareListController = new CompareListController();
 
-// All routes require authentication
-
-
 router.get('/', compareListController.getAllCompareLists);
+router.get('/:id', compareListController.getCompareList);
 router.post('/', compareListController.createCompareList);
 router.delete('/:id', compareListController.deleteCompareList);
 

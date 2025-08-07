@@ -13,10 +13,9 @@ export class ProductRepository {
         productTypeId?: string;
         isActive?: boolean;
         isFeatured?: boolean;
-        minRate?: number;
-        maxRate?: number;
         limit?: number;
         offset?: number;
+        search?: string;
     }) {
         const {
             categoryId,
@@ -24,10 +23,9 @@ export class ProductRepository {
             productTypeId,
             isActive,
             isFeatured,
-            minRate,
-            maxRate,
             limit = 20,
-            offset = 0
+            offset = 0,
+            search
         } = filters;
 
         // Build where condition
@@ -45,16 +43,15 @@ export class ProductRepository {
             };
         }
 
-        // Handle rate filtering by looking at rate history
-        if (minRate !== undefined || maxRate !== undefined) {
-            where.rateHistory = {
-                some: {
-                    AND: [
-                        minRate !== undefined ? { value: { gte: minRate } } : {},
-                        maxRate !== undefined ? { value: { lte: maxRate } } : {}
-                    ]
-                }
-            };
+        // Add search filter (optimized for trigram index)
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { slug: { contains: search, mode: 'insensitive' } },
+                { institution: { name: { contains: search, mode: 'insensitive' } } },
+                { productType: { name: { contains: search, mode: 'insensitive' } } },
+                { tags: { some: { tag: { name: { contains: search, mode: 'insensitive' } } } } }
+            ];
         }
 
         // First get total count

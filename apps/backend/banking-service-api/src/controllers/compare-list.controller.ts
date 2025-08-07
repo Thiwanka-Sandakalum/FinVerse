@@ -21,6 +21,19 @@ export class CompareListController {
     });
 
     /**
+     * Get a compare list by ID
+     */
+    getCompareList = asyncHandler(async (req: Request, res: Response) => {
+        const authReq = req as AuthRequest;
+        const clerkUserId = authReq.user?.userId as string;
+        const { id } = req.params;
+        const compareList = await this.compareListService.getCompareList(id, clerkUserId);
+        if (!compareList) {
+            return res.status(404).json({ message: 'Compare list not found' });
+        }
+        res.status(200).json(compareList);
+    });
+    /**
      * Create a compare list for the authenticated user
      */
     createCompareList = asyncHandler(async (req: Request, res: Response) => {

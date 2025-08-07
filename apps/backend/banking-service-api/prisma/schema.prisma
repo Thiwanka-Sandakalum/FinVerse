@@ -80,6 +80,10 @@ model Product {
     savedProducts SavedProduct[]
     sharedLinks   SharedLink[]
     reviews       Review[]
+
+    @@index([name])
+    @@index([slug])
+    @@index([details])
 }
 
 model ProductTag {

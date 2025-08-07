@@ -21,10 +21,9 @@ export class ProductController {
             productTypeId,
             isFeatured,
             isActive,
-            minRate,
-            maxRate,
             limit,
-            offset
+            offset,
+            search
         } = req.query;
 
         // Convert query parameters to appropriate types
@@ -34,10 +33,9 @@ export class ProductController {
             productTypeId: productTypeId as string | undefined,
             isFeatured: isFeatured !== undefined ? isFeatured === 'true' : undefined,
             isActive: isActive !== undefined ? isActive === 'true' : undefined,
-            minRate: minRate !== undefined ? parseFloat(minRate as string) : undefined,
-            maxRate: maxRate !== undefined ? parseFloat(maxRate as string) : undefined,
             limit: limit !== undefined ? parseInt(limit as string, 10) : undefined,
-            offset: offset !== undefined ? parseInt(offset as string, 10) : undefined
+            offset: offset !== undefined ? parseInt(offset as string, 10) : undefined,
+            search: search ? String(search) : undefined
         };
 
         // Get products with filters
