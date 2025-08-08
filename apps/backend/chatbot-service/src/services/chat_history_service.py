@@ -5,24 +5,27 @@ SQLite service for persisting chat history.
 import sqlite3
 import json
 import logging
-import os
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from datetime import datetime, timedelta
 from src.models.api_models import Message
+from src.utils.paths import path_manager
 
 logger = logging.getLogger(__name__)
 
 class ChatHistoryService:
     """Service to manage chat history in SQLite database."""
     
-    def __init__(self, db_path: str = "data/chat_history.sqlite"):
+    def __init__(self, db_path: Optional[str] = None):
         """Initialize the chat history service with database path."""
+        if db_path is None:
+            db_path = path_manager.chat_history_db_str
         self.db_path = db_path
         self.initialize_db()
     
     def initialize_db(self):
         """Create database and tables if they don't exist."""
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        # Ensure data directory exists using path manager
+        path_manager.ensure_data_directories()
         
         try:
             conn = sqlite3.connect(self.db_path)

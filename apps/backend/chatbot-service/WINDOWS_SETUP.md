@@ -1,25 +1,63 @@
-# FinVerse Chatbot Service - Windows Setup
+# FinVerse Chatbot Service - Windows Setup Guide
 
-## Prerequisites
+## 🚀 Quick Start
 
-1. **Python 3.8+** - Download from [python.org](https://python.org)
-   - Make sure to check "Add Python to PATH" during installation
-2. **PostgreSQL** - Download from [postgresql.org](https://postgresql.org)
-   - Default credentials: username=`postgres`, password=`postgres`
-   - Create a database named `finverse`
+### Prerequisites
+- **Python 3.10+** - Download from [python.org](https://python.org) 
+  - ✅ Make sure to check "Add Python to PATH" during installation
+- **PostgreSQL** - Download from [postgresql.org](https://postgresql.org)
+  - Default setup: Create database named `finverse`
+- **Google AI API Key** - Get from [Google AI Studio](https://aistudio.google.com/)
 
-## Quick Start
+### Automated Setup (Recommended)
 
-### Option 1: PowerShell (Recommended)
+**Option 1: PowerShell Script**
 ```powershell
-# Open PowerShell as Administrator and run:
-PowerShell -ExecutionPolicy Bypass -File start.ps1
+# Set your environment variables
+$env:DATABASE_URL = "postgresql://user:password@localhost:5432/finverse"
+$env:GOOGLE_API_KEY = "your-google-api-key-here"
+
+# Run the automated setup script
+.\start_windows.ps1
 ```
 
-### Option 2: Command Prompt
+**Option 2: Command Prompt Script**  
 ```cmd
-# Open Command Prompt and run:
-start.bat
+REM Set your environment variables
+set DATABASE_URL=postgresql://user:password@localhost:5432/finverse
+set GOOGLE_API_KEY=your-google-api-key-here
+
+REM Run the automated setup script
+start_windows.bat
+```
+
+## ✨ Windows-Specific Improvements
+
+This version includes major improvements for Windows compatibility:
+
+### 🛠️ Cross-Platform Path Management
+- **New path utility system** handles Windows vs. Unix path differences automatically
+- **No more path separator issues** - all paths work on both Windows and Linux
+- **Automatic directory creation** using Windows-compatible methods
+
+### 📦 Enhanced Startup Scripts
+- **`start_windows.ps1`** - PowerShell script with error handling and status messages
+- **`start_windows.bat`** - Command Prompt batch script for simpler environments  
+- **Automatic virtual environment setup** and dependency installation
+- **Environment validation** to catch common configuration issues
+
+## 📁 File Structure
+
+The application now uses this cross-platform directory structure:
+```
+FinVerse\apps\backend\chatbot-service\
+├── data\                          # Auto-created data storage
+│   ├── chat_history.sqlite        # Chat history database  
+│   └── vectordb\                  # Vector database files
+├── src\utils\paths.py             # 🆕 Cross-platform path management
+├── start_windows.bat              # 🆕 Windows Command Prompt script
+├── start_windows.ps1              # 🆕 Windows PowerShell script  
+└── WINDOWS_SETUP_DETAILED.md      # 🆕 Comprehensive setup guide
 ```
 
 ## Manual Setup

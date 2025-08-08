@@ -12,10 +12,11 @@ This script tests:
 import json
 import asyncio
 import sys
-import os
+from pathlib import Path
 
-# Add the src directory to the path
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+# Add the src directory to the path using cross-platform approach
+src_dir = Path(__file__).parent / 'src'
+sys.path.insert(0, str(src_dir))
 
 from services.product_comparison_service import ProductComparisonService
 from services.product_chat_service import ProductChatService

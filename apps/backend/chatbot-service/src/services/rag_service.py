@@ -4,9 +4,9 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain.schema import Document
 from typing import List, Dict, Any
-import os
 from src.config.settings import Settings
 from src.utils.json_utils import process_value
+from src.utils.paths import path_manager
 
 settings = Settings()
 genai.configure(api_key=settings.GOOGLE_API_KEY)
@@ -23,9 +23,9 @@ class RAGService:
     
     def initialize_vector_store(self):
         """Initialize or load the vector store."""
-        persist_directory = "data/vectordb"
-        if not os.path.exists(persist_directory):
-            os.makedirs(persist_directory)
+        # Use cross-platform path management
+        persist_directory = path_manager.vectordb_dir_str
+        path_manager.ensure_data_directories()  # Ensure directory exists
         
         self.vector_store = Chroma(
             persist_directory=persist_directory,

@@ -4,8 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any, Optional
 import logging
 import os
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from src.utils.json_utils import CustomJSONEncoder, process_value
+from src.utils.paths import path_manager, ensure_directories
 import json
 
 from src.services.database_service import get_db, DatabaseService
@@ -37,16 +38,17 @@ app = FastAPI(title="FinVerse Chatbot API",
             default_response_class=CustomJSONResponse)
 logger = logging.getLogger(__name__)
 
-# Mount static files
-static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+# Ensure directories exist
+ensure_directories()
+
+# Mount static files using cross-platform paths
+static_dir = path_manager.static_dir_str
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Add route for the root path to serve index.html
-from fastapi.responses import FileResponse
-
 @app.get("/")
 async def read_root():
-    return FileResponse(os.path.join(static_dir, "index.html"))
+    return FileResponse(path_manager.index_html_str)
 
 # Add CORS middleware
 app.add_middleware(
