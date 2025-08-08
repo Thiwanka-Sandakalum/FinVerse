@@ -1,21 +1,43 @@
 # FinVerse Chatbot Service
 
-Financial Product Chatbot Service with Retrieval-Augmented Generation (RAG)
+A sophisticated Financial Product RAG (Retrieval-Augmented Generation) Chatbot service built with FastAPI, PostgreSQL, and advanced AI capabilities. This service provides intelligent financial product recommendations, comparisons, and personalized chat experiences for Sri Lankan financial services.
 
-## Overview
+## 🚀 Features
 
-This service provides a conversational interface for querying information about financial products in Sri Lanka. It uses a hybrid approach combining structured data from a PostgreSQL database with unstructured data from a vector store, providing accurate and contextual responses to user queries.
+### Core Chat Functionality
+- **Multi-turn Conversations**: Persistent chat history with SQLite storage
+- **Query Classification**: Intelligent routing between SQL, Vector, and Hybrid queries
+- **RAG Integration**: Combines structured database queries with vector search
+- **JSON Serialization**: Custom handling for PostgreSQL Decimal types
 
-## Features
+### Product Comparison Engine
+- **Multi-Product Comparison**: Compare up to 10 financial products simultaneously
+- **Structured Analysis**: Automatically identify best options across different criteria
+- **Smart Recommendations**: AI-powered suggestions based on user needs
+- **Comparison History**: Cache and retrieve previous comparisons for follow-up questions
 
-- Automatic query classification (SQL, Vector, Hybrid)
-- Structured data retrieval from PostgreSQL
-- Semantic search with vector database (ChromaDB)
-- Multi-turn conversations with chat history
-- JSON response formatting
-- Simple web interface for testing
+### Product-Specific Chat
+- **Focused Conversations**: Deep-dive discussions about individual products
+- **Related Products**: Automatic discovery and inclusion of similar options
+- **Contextual Responses**: Product details integrated into every response
+- **Comparison Integration**: Seamlessly transition from product chat to comparisons
 
-## API Endpoints
+### Advanced Search & Discovery
+- **Flexible Search**: Text search across product names and descriptions
+- **Multi-Criteria Filtering**: Filter by type, institution, amounts, and interest rates
+- **Similar Products**: Find products of the same type for easy comparison
+- **Smart Categorization**: Automatic grouping by product type and institution
+
+## 🛠️ Technology Stack
+
+- **Backend**: FastAPI with Python 3.10+
+- **Database**: PostgreSQL with Prisma ORM
+- **Chat History**: SQLite for conversation persistence  
+- **Vector Store**: ChromaDB for document embeddings
+- **AI/ML**: OpenAI GPT for response generation
+- **Search**: Hybrid approach combining SQL and vector similarity
+
+## 📋 API Endpoints
 
 ### Chat
 
