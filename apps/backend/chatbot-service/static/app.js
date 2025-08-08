@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendButton = document.getElementById('send-btn');
     let conversationId = `user_${Date.now()}`;
 
+    // Mock JWT token for demonstration purposes
+    // In a real app, this would come from your authentication system
+    const mockAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+
     // Configure marked.js for markdown parsing with enhanced options
     marked.use({
         gfm: true,                // GitHub Flavored Markdown
@@ -69,6 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case "hybrid":
                     tooltipText = "Hybrid Query: Combined SQL and vector search";
                     break;
+                case "product_specific":
+                    tooltipText = "Product-Specific: Information about a specific product";
+                    break;
                 case "unsupported":
                     tooltipText = "Unsupported: Outside the system's knowledge domain";
                     break;
@@ -83,11 +90,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const sourcesDiv = document.createElement('div');
             sourcesDiv.className = 'sources';
             sourcesDiv.innerHTML = '<strong>Sources:</strong><br>' +
-                sources.map(source => `${source.name} (${source.institution})`).join('<br>');
+                sources.map(source => {
+                    if (source.product_name) {
+                        return `${source.product_name}`;
+                    } else {
+                        return source.text.substring(0, 30) + '...';
+                    }
+                }).join('<br>');
             messageDiv.appendChild(sourcesDiv);
         }
 
         return messageDiv;
+    }
+
+    // Function to get default headers including authentication
+    function getHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${mockAuthToken}`
+        };
     }
 
     // Function to handle sending messages
@@ -110,26 +131,20 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
         try {
-            // Send message to API
-            const response = await fetch('http://localhost:8085/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: message,
-                    conversation_id: conversationId
-                })
-            });
-
-            const data = await response.json();
-
-            // Remove loading message
-            loadingMessage.remove();
-
-            // Add bot response to chat
-            chatMessages.appendChild(createMessageElement(data.answer, false, data.sources, data.query_type));
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            // Check for product comparison command
+            if (message.toLowerCase().includes('compare products') || message.toLowerCase().includes('compare product')) {
+                // Handle product comparison
+                await handleProductComparison(message, loadingMessage);
+            }
+            // Check for product-specific chat command
+            else if (message.toLowerCase().includes('about product') || message.toLowerCase().includes('tell me about product')) {
+                // Handle product-specific chat
+                await handleProductChat(message, loadingMessage);
+            }
+            else {
+                // Regular chat
+                await handleRegularChat(message, loadingMessage);
+            }
         } catch (error) {
             // Remove loading message
             loadingMessage.remove();
@@ -146,6 +161,92 @@ document.addEventListener('DOMContentLoaded', () => {
         userInput.disabled = false;
         sendButton.disabled = false;
         userInput.focus();
+    }
+
+    // Function to handle regular chat
+    async function handleRegularChat(message, loadingMessage) {
+        // Send message to API
+        const response = await fetch('http://localhost:8085/chat', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({
+                query: message,
+                conversation_id: conversationId
+            })
+        });
+
+        const data = await response.json();
+
+        // Update conversation ID
+        if (data.conversation_id) {
+            conversationId = data.conversation_id;
+        }
+
+        // Remove loading message
+        loadingMessage.remove();
+
+        // Add bot response to chat
+        chatMessages.appendChild(createMessageElement(data.answer, false, data.sources, data.query_type));
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Function to handle product-specific chat
+    async function handleProductChat(message, loadingMessage) {
+        // For demo purposes, using a placeholder product ID
+        // In a real implementation, you'd extract the product ID from the message
+        const productId = "sample-product-123";
+
+        const query = message.replace(/about product|tell me about product/i, "").trim();
+
+        // Send message to API
+        const response = await fetch('http://localhost:8085/product-chat', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({
+                query: query,
+                product_id: productId,
+                conversation_id: conversationId
+            })
+        });
+
+        const data = await response.json();
+
+        // Update conversation ID
+        if (data.conversation_id) {
+            conversationId = data.conversation_id;
+        }
+
+        // Remove loading message
+        loadingMessage.remove();
+
+        // Add bot response to chat
+        chatMessages.appendChild(createMessageElement(data.answer, false, data.sources, data.query_type));
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Function to handle product comparison
+    async function handleProductComparison(message, loadingMessage) {
+        // For demo purposes, using placeholder product IDs
+        // In a real implementation, you'd extract the product IDs from the message
+        const productIds = ["sample-product-123", "sample-product-456", "sample-product-789"];
+
+        // Send message to API
+        const response = await fetch('http://localhost:8085/compare-products', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({
+                product_ids: productIds
+            })
+        });
+
+        const data = await response.json();
+
+        // Remove loading message
+        loadingMessage.remove();
+
+        // Add bot response to chat
+        chatMessages.appendChild(createMessageElement(data.summary, false, [], "product_comparison"));
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     // Stats functionality
@@ -167,7 +268,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             statsContent.innerHTML = '<div class="stats-loading">Loading statistics...</div>';
 
-            const response = await fetch('http://localhost:8085/stats');
+            const response = await fetch('http://localhost:8085/stats', {
+                headers: getHeaders()
+            });
             const data = await response.json();
 
             if (data.status === 'success') {
@@ -183,8 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { label: 'SQL Queries', value: stats.sql_queries },
                     { label: 'Vector Queries', value: stats.vector_queries },
                     { label: 'Hybrid Queries', value: stats.hybrid_queries },
-                    { label: 'Unsupported', value: stats.unsupported_queries },
-                    { label: 'Errors', value: stats.errors }
+                    { label: 'Unsupported', value: stats.unsupported_queries }
                 ];
 
                 statCards.forEach(stat => {

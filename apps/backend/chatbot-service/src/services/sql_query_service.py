@@ -5,6 +5,7 @@ import re
 from src.config.settings import Settings
 from src.services.prisma_client import PrismaClient
 from src.utils.json_utils import process_value, json_dumps, CustomJSONEncoder
+from src.models.api_models import Source
 
 settings = Settings()
 genai.configure(api_key=settings.GOOGLE_API_KEY)
@@ -193,7 +194,7 @@ class SQLQueryService:
         response = await self.model.generate_content_async(prompt)
         return response.text.strip()
     
-    async def process_data_query(self, query: str) -> Tuple[str, List[Dict[str, Any]]]:
+    async def process_data_query(self, query: str) -> Tuple[str, List[Source]]:
         """
         Process a data-oriented query end-to-end:
         1. Generate SQL from natural language
@@ -222,10 +223,11 @@ class SQLQueryService:
             sources = []
             for result in results[:5]:  # Limit to top 5 sources
                 if 'name' in result and 'institution_name' in result:
-                    sources.append({
-                        "name": result['name'],
-                        "institution": result.get('institution_name', 'Unknown Institution')
-                    })
+                    sources.append(Source(
+                        text=str(result.get('description', 'No description')),
+                        product_id=str(result.get('id', '')),
+                        product_name=str(result.get('name', 'Unknown Product'))
+                    ))
             
             return formatted_response, sources
         

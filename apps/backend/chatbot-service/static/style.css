@@ -280,6 +280,22 @@ body {
     content: "Unsupported: Outside the system's knowledge domain";
 }
 
+.query-type.product_specific {
+    background-color: #ff9800;
+}
+
+.query-type.product_specific:hover::after {
+    content: "Product-Specific: Information about a specific product";
+}
+
+.query-type.product_comparison {
+    background-color: #795548;
+}
+
+.query-type.product_comparison:hover::after {
+    content: "Product Comparison: Side-by-side analysis of multiple products";
+}
+
 .chat-input {
     display: flex;
     padding: 1rem;
