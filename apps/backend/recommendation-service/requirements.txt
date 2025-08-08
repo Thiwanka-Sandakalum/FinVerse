@@ -1,0 +1,23 @@
+# Web framework
+fastapi==0.95.0
+uvicorn==0.21.1
+
+# Data processing
+numpy==1.24.2
+scipy==1.10.1
+pandas==1.5.3
+scikit-learn==1.2.2
+
+# Recommendation engine
+lightfm==1.17
+
+# MongoDB client
+motor==3.1.1
+pymongo==4.3.3
+
+# HTTP client
+aiohttp==3.8.4
+
+# Utilities
+pydantic==1.10.7
+python-dotenv==1.0.0

@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  recommendation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finverse-recommendation-service
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+    ports:
+      - "4003:4003"
+    environment:
+      - DEBUG=true
+      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_DB=finverse_interactions
+      - BANKING_SERVICE_URL=http://host.docker.internal:4001/api/v1
+      - MODEL_REFRESH_INTERVAL=3600 # 1 hour
+    depends_on:
+      - mongo
+    networks:
+      - finverse-network
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "4003", "--reload"]
+
+  mongo:
+    image: mongo:6
+    container_name: finverse-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - finverse-network
+
+networks:
+  finverse-network:
+    name: finverse-network
+    driver: bridge
+
+volumes:
+  mongo-data:
+    name: finverse-mongo-data
