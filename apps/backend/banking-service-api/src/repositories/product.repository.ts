@@ -39,7 +39,24 @@ export class ProductRepository {
         // Handle category ID by joining with product type
         if (categoryId) {
             where.productType = {
-                categoryId
+                OR: [
+                    // Direct match - product's category is exactly the provided categoryId
+                    { categoryId: categoryId },
+                    // Parent match - product's category has the provided categoryId as parent
+                    {
+                        category: {
+                            parentId: categoryId
+                        }
+                    },
+                    // Ancestor match - product's category is a descendant of the provided categoryId
+                    {
+                        category: {
+                            parent: {
+                                id: categoryId
+                            }
+                        }
+                    }
+                ]
             };
         }
 
