@@ -1,0 +1,41 @@
+# Version control
+.git
+.gitignore
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.pytest_cache/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Data directories - these will be mounted as volumes
+data/
+
+# Development files
+*.log
+*.md
+LICENSE
+tests/
+docs/
