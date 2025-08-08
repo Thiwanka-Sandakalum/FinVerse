@@ -40,22 +40,14 @@ export class ProductRepository {
         if (categoryId) {
             where.productType = {
                 OR: [
-                    // Direct match - product's category is exactly the provided categoryId
-                    { categoryId: categoryId },
-                    // Parent match - product's category has the provided categoryId as parent
-                    {
-                        category: {
-                            parentId: categoryId
-                        }
-                    },
-                    // Ancestor match - product's category is a descendant of the provided categoryId
                     {
                         category: {
                             parent: {
                                 id: categoryId
                             }
                         }
-                    }
+                    },
+                    { categoryId: categoryId }
                 ]
             };
         }
