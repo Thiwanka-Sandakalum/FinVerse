@@ -39,7 +39,16 @@ export class ProductRepository {
         // Handle category ID by joining with product type
         if (categoryId) {
             where.productType = {
-                categoryId
+                OR: [
+                    {
+                        category: {
+                            parent: {
+                                id: categoryId
+                            }
+                        }
+                    },
+                    { categoryId: categoryId }
+                ]
             };
         }
 

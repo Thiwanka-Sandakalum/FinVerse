@@ -38,7 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 import { authMiddleware } from './middlewares/auth.middleware';
 
 // Use auth middleware before API routes
-app.use(authMiddleware);
+// app.use(authMiddleware);
 
 // Request logging
 if (process.env.ENABLE_REQUEST_LOGGING !== 'false') {
