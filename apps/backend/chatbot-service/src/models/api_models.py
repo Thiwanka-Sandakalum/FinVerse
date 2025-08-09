@@ -33,11 +33,13 @@ class ProductChatRequest(BaseModel):
 
 class ProductComparisonRequest(BaseModel):
     product_ids: List[str]
+    conversation_id: Optional[str] = None
 
 class ProductComparisonResponse(BaseModel):
     summary: str
     comparison: Dict[str, Any]
     products: List[Dict[str, Any]]
+    conversation_id: str
 
 class IngestResponse(BaseModel):
     status: str

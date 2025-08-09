@@ -11,6 +11,10 @@ from src.services.query_classifier import QueryClassifier, QueryType
 from src.services.sql_query_service import SQLQueryService
 from src.services.rag_service import RAGService
 from src.services.chat_history_service import ChatHistoryService
+from src.services.product_comparison_service import ProductComparisonService
+from src.services.product_chat_service import ProductChatService
+from src.services.database_service import DatabaseService
+from src.services.prisma_client import PrismaClient
 from src.models.api_models import Message, Source
 
 logger = logging.getLogger(__name__)
@@ -27,6 +31,16 @@ class QueryOrchestrator:
         self.sql_query_service = SQLQueryService()
         self.rag_service = RAGService()
         self.chat_history_service = chat_history_service or ChatHistoryService()
+        
+        # Initialize additional services with database
+        prisma_client = PrismaClient()
+        db_service = DatabaseService(prisma_client)
+        self.product_comparison_service = ProductComparisonService(db_service)
+        self.product_chat_service = ProductChatService(
+            rag_service=self.rag_service,
+            chat_history_service=self.chat_history_service,
+            db_service=db_service
+        )
         
         # Basic tracking of query stats
         self.query_stats = {
@@ -139,6 +153,66 @@ class QueryOrchestrator:
             logger.error(traceback.format_exc())
             return "I'm sorry, but an error occurred while processing your query. Please try again.", [], QueryType.UNSUPPORTED, conversation_id or str(uuid.uuid4()), None
     
+    async def handle_product_comparison(self, product_ids: List[str], conversation_id: str, user_id: Optional[str] = None) -> str:
+        """
+        Handle a product comparison request.
+        
+        Args:
+            product_ids: List of product IDs to compare
+            conversation_id: The conversation ID
+            user_id: Optional user ID
+            
+        Returns:
+            A formatted comparison summary
+        """
+        try:
+            # Log the comparison request
+            product_list = ", ".join(product_ids)
+            logger.info(f"Handling product comparison for products: {product_list}")
+            
+            # Ensure we have a valid conversation ID
+            if not conversation_id:
+                conversation_id = str(uuid.uuid4())
+                logger.info(f"Created new conversation ID: {conversation_id}")
+                # Create the conversation in the database
+                if self.chat_history_service:
+                    self.chat_history_service.create_conversation(conversation_id, user_id)
+            
+            # Generate the comparison
+            comparison = self.product_comparison_service.compare_products(product_ids)
+            
+            # Generate the formatted summary using LLM
+            summary = await self.product_comparison_service.generate_comparison_summary(comparison)
+            
+            # Save the comparison message to the chat history
+            if self.chat_history_service:
+                self.chat_history_service.add_message(
+                    conversation_id=conversation_id,
+                    text=summary,
+                    role="assistant",
+                    user_id=user_id
+                )
+            
+            return summary
+            
+        except Exception as e:
+            error_msg = f"Error handling product comparison: {str(e)}"
+            logger.error(error_msg)
+            logger.error(traceback.format_exc())
+            return f"I encountered an error while comparing the products: {str(e)}"
+            
     def get_query_stats(self) -> Dict[str, Any]:
-        """Get statistics about processed queries."""
+        """Get the current query statistics."""
         return self.query_stats
+        
+    def reset_query_stats(self) -> None:
+        """Reset the query statistics."""
+        self.query_stats = {
+            "total_queries": 0,
+            "sql_queries": 0,
+            "vector_queries": 0,
+            "hybrid_queries": 0,
+            "unsupported_queries": 0,
+            "avg_response_time_ms": 0,
+            "last_10_response_times_ms": []
+        }

@@ -127,7 +127,7 @@ async def product_chat(request: ProductChatRequest, request_obj: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/compare-products", response_model=ProductComparisonResponse)
-async def compare_products(request: ProductComparisonRequest):
+async def compare_products(request: ProductComparisonRequest, request_obj: Request):
     """
     Compare multiple financial products by their IDs.
     Returns a structured comparison highlighting differences across key attributes.
@@ -139,17 +139,29 @@ async def compare_products(request: ProductComparisonRequest):
                 detail="Please provide at least 2 product IDs for comparison"
             )
         
-        # Generate the comparison
-        comparison = product_comparison_service.compare_products(request.product_ids)
+        # Get user ID from request if available
+        user_id = get_user_id_from_request(request_obj)
         
-        # Generate a summary
-        summary = await product_comparison_service.generate_comparison_summary(comparison)
+        # Ensure we have a valid conversation_id (empty string as fallback)
+        conversation_id = request.conversation_id or ""
+        
+        # Generate the comparison using the orchestrator
+        # This will handle both the comparison and saving to chat history
+        summary = await query_orchestrator.handle_product_comparison(
+            product_ids=request.product_ids, 
+            conversation_id=conversation_id,
+            user_id=user_id
+        )
+        
+        # Generate the basic comparison structure for the response
+        comparison = product_comparison_service.compare_products(request.product_ids)
         
         # Format response
         return ProductComparisonResponse(
             summary=summary,
             comparison=comparison,
-            products=comparison.get("products", [])
+            products=comparison.get("products", []),
+            conversation_id=conversation_id
         )
     except HTTPException:
         raise
