@@ -17,8 +17,8 @@ motor==3.1.1
 pymongo==4.3.3
 
 # HTTP clients
-httpx==0.25.0
-httpcore==0.17.3  # Pinned to version compatible with h11 and httpx
+httpx==0.24.1  # Downgraded to be compatible with httpcore and h11
+httpcore==0.17.3  # Compatible with h11 < 0.15.0
 aiohttp==3.8.4
 
 # Utilities
