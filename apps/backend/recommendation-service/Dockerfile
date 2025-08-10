@@ -1,16 +1,20 @@
 # Use multi-stage build for smaller final image
-FROM python:3.9-slim-bullseye AS builder
+FROM python:3.10-alpine AS builder
 
 # Set work directory for build
 WORKDIR /build
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+RUN apk add --no-cache \
     gcc \
     g++ \
-    libomp-dev \
-    && rm -rf /var/lib/apt/lists/*
+    musl-dev \
+    python3-dev \
+    openmp-dev \
+    openblas-dev \
+    linux-headers \
+    make \
+    curl-dev
 
 # Copy requirements file
 COPY requirements.txt .
@@ -19,7 +23,7 @@ COPY requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /build/wheels -r requirements.txt
 
 # Start final stage
-FROM python:3.9-slim-bullseye
+FROM python:3.10-alpine
 
 # Set Python to run in unbuffered mode
 ENV PYTHONUNBUFFERED=1
@@ -28,19 +32,15 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Set timezone
 ENV TZ=UTC
 
-# Set working directory
-WORKDIR /app
+# Install runtime dependencies
+RUN apk add --no-cache \
+    libgomp \
+    curl \
+    tzdata
 
 # Create non-root user with specific UID as required by Choreo (must be between 10000-20000)
-RUN groupadd -r finverse -g 10001 && \
-    useradd -r -g finverse -u 10001 -s /bin/false -d /app finverse
-
-# Install only required runtime dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libomp-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN addgroup -g 10001 -S finverse && \
+    adduser -u 10001 -S finverse -G finverse -h /app -s /sbin/nologin
 
 # Set working directory and create necessary directories
 WORKDIR /app
@@ -59,15 +59,6 @@ RUN pip install --no-cache-dir /wheels/* && \
     rm -rf /wheels && \
     rm -rf /root/.cache/pip/*
 
-# Copy application code
-COPY --chown=finverse:finverse src/ /app/src/
-COPY --chown=finverse:finverse data/ /app/data/
-
-# Create directories with proper permissions
-RUN mkdir -p /app/data /app/logs && \
-    chown -R finverse:finverse /app/data /app/logs && \
-    chmod 755 /app/logs
-
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV API_HOST=0.0.0.0
@@ -78,9 +69,6 @@ ENV BANKING_SERVICE_URL=http://banking-service:4001/api/v1
 
 # Expose port
 EXPOSE 4003
-
-# Switch to non-root user
-USER finverse
 
 # Add healthcheck for the API endpoint
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
