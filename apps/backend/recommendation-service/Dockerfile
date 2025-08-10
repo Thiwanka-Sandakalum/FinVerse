@@ -1,26 +1,49 @@
-# Use official Python image as base
-FROM python:3.9-slim
+# Use multi-stage build for smaller final image
+FROM python:3.9-slim-bullseye AS builder
+
+# Set work directory for build
+WORKDIR /build
+
+# Copy requirements file
+COPY requirements.txt .
+
+# Install build dependencies and create wheel packages
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /build/wheels -r requirements.txt
+
+# Start final stage
+FROM python:3.9-slim-bullseye
+
+# Set Python to run in unbuffered mode
+ENV PYTHONUNBUFFERED=1
+# Prevent Python from writing pyc files
+ENV PYTHONDONTWRITEBYTECODE=1
+# Set timezone
+ENV TZ=UTC
 
 # Set working directory
 WORKDIR /app
 
-# Create non-root user
-RUN groupadd -r finverse && \
-    useradd -r -g finverse -s /bin/false -d /app finverse && \
-    chown -R finverse:finverse /app
+# Create non-root user with specific UID as required by Choreo (must be between 10000-20000)
+RUN groupadd -r finverse -g 10001 && \
+    useradd -r -g finverse -u 10001 -s /bin/false -d /app finverse
 
-# Copy requirements file
-COPY --chown=finverse:finverse requirements.txt .
-
-# Install system dependencies required for building lightfm
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    gcc \
+# Install only required runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     libomp-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Set working directory and create necessary directories
+WORKDIR /app
+RUN mkdir -p /app/data /app/logs && \
+    chown -R finverse:finverse /app
+
+# Copy wheels from builder stage
+COPY --from=builder /build/wheels /wheels
+
+# Install Python packages from wheels
+RUN pip install --no-cache-dir /wheels/*
 
 # Copy application code
 COPY --chown=finverse:finverse src/ /app/src/
@@ -45,5 +68,12 @@ EXPOSE 4003
 # Switch to non-root user
 USER finverse
 
-# Set the default command
-CMD ["python", "src/main.py"]
+# Add healthcheck for the API endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${API_PORT}/api/v1/health || exit 1
+
+# Switch to non-root user as required by Choreo
+USER 10001
+
+# Set the default command with explicit Python path
+CMD ["/usr/local/bin/python", "src/main.py"]
