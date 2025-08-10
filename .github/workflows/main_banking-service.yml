@@ -34,11 +34,6 @@ jobs:
         run: |
           npm ci
 
-      - name: Generate Prisma Client
-        working-directory: ./apps/backend/banking-service-api
-        run: |
-          npm run prisma:generate
-
       - name: Build banking service
         working-directory: ./apps/backend/banking-service-api
         run: |
@@ -67,8 +62,7 @@ jobs:
             version: pkg.version,
             main: 'dist/index.js',
             scripts: {
-              start: 'node dist/index.js',
-              'prisma:generate': 'prisma generate'
+              start: 'node dist/index.js'
             },
             dependencies: pkg.dependencies || {},
             prisma: pkg.prisma || {}
@@ -112,5 +106,5 @@ jobs:
           app-name: 'banking-service'
           slot-name: 'Production'
           package: .
-          startup-command: 'npm run prisma:generate && npm start'
+          startup-command: 'npm start'
           
