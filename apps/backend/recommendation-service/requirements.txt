@@ -1,6 +1,6 @@
 # Web framework
 fastapi==0.100.0
-uvicorn[standard]==0.23.0
+uvicorn[standard]==0.24.0  # Updated to support newer h11
 h11>=0.16.0  # Explicitly set h11 version to fix CVE-2025-43859
 
 # Data processing
@@ -17,7 +17,8 @@ motor==3.1.1
 pymongo==4.3.3
 
 # HTTP clients
-httpx==0.24.0
+httpx==0.25.0  # Updated to support newer h11
+httpcore>=0.18.0  # Added to ensure compatibility with newer h11
 aiohttp==3.8.4
 
 # Utilities
