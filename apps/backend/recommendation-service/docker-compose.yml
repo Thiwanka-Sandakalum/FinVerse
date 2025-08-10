@@ -17,11 +17,21 @@ services:
       - MONGO_DB=finverse_interactions
       - BANKING_SERVICE_URL=http://host.docker.internal:4001/api/v1
       - MODEL_REFRESH_INTERVAL=3600 # 1 hour
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq/
     depends_on:
       - mongo
+      - rabbitmq
     networks:
       - finverse-network
     command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "4003", "--reload"]
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: finverse-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - finverse-network
 
   mongo:
     image: mongo:6

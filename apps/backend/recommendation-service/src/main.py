@@ -15,6 +15,7 @@ from api.routers import recommendations, health
 from services.db_service import init_db_connection, close_db_connection
 from services.scheduler import ModelRefreshScheduler
 from services.recommendation_service import get_recommendation_service
+from services.queue_consumer import start_queue_consumer
 from config import settings
 
 # Configure logging
@@ -59,15 +60,19 @@ async def startup_event():
     """Initialize services on startup"""
     # Connect to database
     await init_db_connection(app)
-    
+
     # Get recommendation service (initializes model)
     recommendation_service = get_recommendation_service(app)
-    
+
     # Initialize and start model refresh scheduler
     scheduler = ModelRefreshScheduler(recommendation_service)
     app.state.scheduler = scheduler
     await scheduler.start()
-    
+
+    # Start RabbitMQ queue consumer for user interactions
+    logger.info("Starting RabbitMQ queue consumer...")
+    start_queue_consumer()
+
     logger.info("Recommendation service started")
 
 @app.on_event("shutdown")

@@ -7,12 +7,23 @@ based on collaborative filtering and content-based filtering.
 import logging
 import numpy as np
 import scipy.sparse as sp
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, TypedDict, Tuple
 import asyncio
 from datetime import datetime, timedelta
-from fastapi import Depends, FastAPI
+from fastapi import Request
 import pickle
 import os
+from lightfm.data import Dataset
+from lightfm import LightFM
+
+class ModelRefreshResult(TypedDict, total=False):
+    """Type definition for model refresh result"""
+    success: bool
+    duration_seconds: float
+    timestamp: str
+    num_users: int
+    num_products: int
+    error: str
 
 from services.db_service import DBService, get_db_service
 from services.banking_service import BankingServiceClient
@@ -146,11 +157,12 @@ class RecommendationService:
         # Create dataset
         self.dataset = Dataset()
         
-        # Extract unique user IDs and product IDs
+                # Extract unique user IDs and product IDs
         users = set()
-        products = set()
+        products = set()  # Changed from items to products to match the variable name used later
         user_features_dict = {}
         product_features_dict = {}
+        interaction_weights = {}  # To store weights for user-item interactions
         
         for interaction in user_product_interactions:
             user_id = interaction.get("user_id")
@@ -178,18 +190,61 @@ class RecommendationService:
                 if product_id not in product_features_dict:
                     product_features_dict[product_id] = set()
                     
-                # Add product category as a feature if available
-                if "category" in interaction["data"]:
-                    product_features_dict[product_id].add(f"category:{interaction['data']['category']}")
+                # Add product features
+                if "data" in interaction:
+                    # Add category as feature
+                    if "category" in interaction["data"]:
+                        product_features_dict[product_id].add(f"category:{interaction['data']['category']}")
+                    
+                    # Add institution as feature
+                    if "institution" in interaction["data"]:
+                        product_features_dict[product_id].add(f"institution:{interaction['data']['institution']}")
             
             # Extract user features
             if user_id not in user_features_dict:
                 user_features_dict[user_id] = set()
             
-            # Add interaction type as a user feature
+            # Add interaction features with weights
             interaction_type = interaction.get("type")
             if interaction_type:
                 user_features_dict[user_id].add(f"action:{interaction_type}")
+                
+                # Set interaction weight based on type
+                weight = 1.0
+                if interaction_type == "product_view":
+                    weight = 1.0
+                    if "data" in interaction and "viewDuration" in interaction["data"]:
+                        view_duration = interaction["data"]["viewDuration"]
+                        if view_duration > 120:  # More than 2 minutes
+                            weight = 2.0
+                        elif view_duration > 60:  # More than 1 minute
+                            weight = 1.5
+                elif interaction_type == "product_application":
+                    weight = 3.0  # Highest weight for applications
+                elif interaction_type == "product_inquiry":
+                    weight = 1.5
+                elif interaction_type == "product_bookmark":
+                    weight = 2.0
+                
+                if product_id:
+                    key = (user_id, product_id)
+                    interaction_weights[key] = max(weight, interaction_weights.get(key, 0))
+            
+            # Add user demographic features
+            if "data" in interaction and "userDemographics" in interaction["data"]:
+                demographics = interaction["data"]["userDemographics"]
+                
+                if "age_group" in demographics:
+                    user_features_dict[user_id].add(f"age_group:{demographics['age_group']}")
+                
+                if "income_range" in demographics:
+                    user_features_dict[user_id].add(f"income_range:{demographics['income_range']}")
+                    
+                if "occupation" in demographics:
+                    user_features_dict[user_id].add(f"occupation:{demographics['occupation']}")
+                    
+                if "location" in demographics:
+                    user_features_dict[user_id].add(f"location:{demographics['location']}")
             
             users.add(user_id)
         
@@ -256,12 +311,20 @@ class RecommendationService:
                                 weight
                             ))
         
-        # Create sparse interaction matrix
+        # Create sparse interaction matrix with weighted interactions
+        data = []
+        rows = []
+        cols = []
+        
+        # Process interactions with weights from interaction_weights
+        for user_id, product_id in interaction_weights:
+            if user_id in self.user_mapping and product_id in self.item_mapping:
+                data.append(interaction_weights[(user_id, product_id)])
+                rows.append(self.user_mapping[user_id])
+                cols.append(self.item_mapping[product_id])
+        
         interaction_matrix = sp.coo_matrix(
-            (
-                [i[2] for i in interactions],
-                ([i[0] for i in interactions], [i[1] for i in interactions])
-            ),
+            (data, (rows, cols)),
             shape=(len(self.user_mapping), len(self.item_mapping))
         )
         
@@ -289,13 +352,14 @@ class RecommendationService:
         # Prepare data
         interactions, user_features, item_features = await self._prepare_data()
         
-        # Initialize model
+        # Initialize model with optimized hyperparameters
         model = LightFM(
-            no_components=NUM_COMPONENTS,
-            learning_rate=LEARNING_RATE,
-            loss=LOSS,
-            user_alpha=USER_ALPHA,
-            item_alpha=ITEM_ALPHA
+            no_components=50,  # Increased from 30 for better representation
+            learning_rate=0.05,
+            loss='warp',  # Better for ranking tasks
+            user_alpha=1e-5,  # L2 penalty for user features
+            item_alpha=1e-5,  # L2 penalty for item features
+            max_sampled=30  # Increased negative sampling for better discrimination
         )
         
         # Train model
@@ -316,7 +380,7 @@ class RecommendationService:
         logger.info("Model training complete")
         return model
     
-    async def refresh_model(self):
+    async def refresh_model(self) -> ModelRefreshResult:
         """
         Refresh the recommendation model with the latest data.
         
@@ -331,20 +395,20 @@ class RecommendationService:
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds()
             
-            return {
-                "success": True,
-                "duration_seconds": duration,
-                "timestamp": datetime.now().isoformat(),
-                "num_users": len(self.user_mapping),
-                "num_products": len(self.item_mapping)
-            }
+            return ModelRefreshResult(
+                success=True,
+                duration_seconds=duration,
+                timestamp=datetime.now().isoformat(),
+                num_users=len(self.user_mapping),
+                num_products=len(self.item_mapping)
+            )
         except Exception as e:
             logger.error(f"Error refreshing model: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
+            return ModelRefreshResult(
+                success=False,
+                error=str(e),
+                timestamp=datetime.now().isoformat()
+            )
     
     async def _get_product_details(self, product_ids: List[str]) -> Dict[str, Dict[str, Any]]:
         """
@@ -395,10 +459,14 @@ class RecommendationService:
             # Get user index
             user_idx = self.user_mapping[user_id]
             
+            # Create repeated user IDs for each item
+            all_items = list(range(len(self.item_mapping)))
+            user_ids = np.repeat(user_idx, len(all_items))
+            
             # Predict scores for all items
             scores = self.model.predict(
-                user_ids=[user_idx],
-                item_ids=list(range(len(self.item_mapping))),
+                user_ids=user_ids,
+                item_ids=all_items,
                 user_features=self.user_features,
                 item_features=self.item_features
             )
@@ -596,34 +664,25 @@ class RecommendationService:
             
             return dummy_products
 
+from fastapi import Request
+
 # Dependency injection function for FastAPI
-async def get_recommendation_service(app: FastAPI = None) -> RecommendationService:
+async def get_recommendation_service(request: Request) -> RecommendationService:
     """
     Dependency injection for RecommendationService.
-    
-    Args:
-        app: FastAPI application instance
-        
-    Returns:
-        Instance of RecommendationService
+    Uses FastAPI Request to access app state.
     """
-    # Get DB service
-    db_service = app.state.db_service if hasattr(app.state, 'db_service') else None
-    
+    app = request.app
+    db_service = getattr(app.state, 'db_service', None)
     if db_service is None:
-        # Create DB service if not available
         from services.db_service import get_db_service
         db_service = get_db_service(app)
         app.state.db_service = db_service
-    
-    # Create recommendation service
-    recommendation_service = app.state.recommendation_service if hasattr(app.state, 'recommendation_service') else None
-    
+
+    recommendation_service = getattr(app.state, 'recommendation_service', None)
     if recommendation_service is None:
         recommendation_service = RecommendationService(db_service)
         app.state.recommendation_service = recommendation_service
-        
-        # Schedule model refresh in background
         asyncio.create_task(recommendation_service.refresh_model())
-    
+
     return recommendation_service

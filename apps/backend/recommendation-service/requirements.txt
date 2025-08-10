@@ -21,3 +21,6 @@ aiohttp==3.8.4
 # Utilities
 pydantic==1.10.7
 python-dotenv==1.0.0
+
+# RabbitMQ client
+aio_pika==8.3.0

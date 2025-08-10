@@ -188,10 +188,14 @@ class HybridRecommendationModel:
         # Get internal user index
         user_idx = self.user_mapping[user_id]
         
+        # Get all item IDs
+        item_ids = list(range(len(self.item_mapping)))
+        # Create repeated user IDs for each item
+        user_ids = np.repeat(user_idx, len(item_ids))
         # Predict scores for all items
         scores = self.model.predict(
-            user_ids=[user_idx],
-            item_ids=list(range(len(self.item_mapping))),
+            user_ids=user_ids,
+            item_ids=item_ids,
             user_features=self.user_features,
             item_features=self.item_features
         )

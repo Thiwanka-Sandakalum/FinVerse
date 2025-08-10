@@ -41,6 +41,14 @@ class DataPipeline:
         # Retrieve data
         user_product_interactions = await db_service.get_user_product_interactions(limit=50000)
         
+        # Handle empty dataset
+        if not user_product_interactions:
+            # Create empty matrices with minimum dimensions (1,1) to avoid normalization errors
+            empty_matrix = sp.coo_matrix((1, 1))
+            empty_features = sp.csr_matrix((1, 1))
+            empty_mapping = {"default": 0}
+            return empty_matrix, empty_features, empty_features, empty_mapping, empty_mapping
+
         logger.info(f"Retrieved {len(user_product_interactions)} interactions")
         
         # Create dataset

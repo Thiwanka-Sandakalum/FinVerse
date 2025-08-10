@@ -40,6 +40,22 @@ async def close_db_connection(app: FastAPI):
     logger.info("Closed MongoDB connection")
 
 class DBService:
+    async def get_most_viewed_products(self, count: int = 5):
+        """
+        Get the most viewed products based on product_view events.
+        Args:
+            count: Number of products to return
+        Returns:
+            List of dicts with productId and count
+        """
+        pipeline = [
+            {"$match": {"type": "product_view", "data.productId": {"$exists": True, "$ne": None}}},
+            {"$group": {"_id": "$data.productId", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+            {"$limit": count}
+        ]
+        cursor = self.db.interactions.aggregate(pipeline)
+        return [{"productId": doc["_id"], "count": doc["count"]} async for doc in cursor]
     """Service for interacting with the database"""
     
     def __init__(self, db):

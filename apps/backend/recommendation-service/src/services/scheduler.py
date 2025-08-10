@@ -3,17 +3,26 @@ Scheduler for periodic model refreshing.
 """
 import asyncio
 import logging
-import time
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import TypedDict
 
 from services.recommendation_service import RecommendationService
 from config import settings
 
 logger = logging.getLogger("recommendation-service")
 
+class ModelRefreshResult(TypedDict, total=False):
+    """Type definition for model refresh result"""
+    success: bool
+    duration_seconds: float
+    timestamp: str
+    num_users: int
+    num_products: int
+    error: str
+
 class ModelRefreshScheduler:
     """Scheduler for periodically refreshing the recommendation model"""
+    task: asyncio.Task[None] | None
     
     def __init__(self, recommendation_service: RecommendationService):
         """
@@ -56,7 +65,7 @@ class ModelRefreshScheduler:
             
         logger.info("Model refresh scheduler stopped")
     
-    async def refresh_now(self) -> Dict[str, Any]:
+    async def refresh_now(self) -> ModelRefreshResult:
         """
         Trigger an immediate model refresh.
         
@@ -69,7 +78,7 @@ class ModelRefreshScheduler:
         if result.get("success", False):
             self.last_refresh = datetime.now()
         
-        return result
+        return result  # type: ignore
     
     async def _periodic_refresh(self):
         """Periodically refresh the model at the configured interval"""
@@ -81,9 +90,10 @@ class ModelRefreshScheduler:
             if not self.last_refresh:
                 logger.info("Performing initial model refresh")
                 result = await self.recommendation_service.refresh_model()
-                
-                if result.get("success", False):
+                if isinstance(result, dict) and result.get("success", False):
                     self.last_refresh = datetime.now()
+                else:
+                    logger.error(f"Initial model refresh failed: {result}")
             
             # Then refresh periodically
             while self.is_running:
