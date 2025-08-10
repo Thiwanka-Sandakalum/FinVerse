@@ -26,42 +26,58 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
+          cache: 'npm'
+          cache-dependency-path: 'apps/backend/banking-service-api/package-lock.json'
 
       - name: Install dependencies
+        working-directory: ./apps/backend/banking-service-api
         run: |
-          pnpm install --frozen-lockfile
+          npm ci
+
+      - name: Generate Prisma Client
+        working-directory: ./apps/backend/banking-service-api
+        run: |
+          npm run prisma:generate
 
       - name: Build banking service
         working-directory: ./apps/backend/banking-service-api
         run: |
-          pnpm build
+          npm run build
 
       - name: Prepare deployment package
         run: |
           mkdir -p deployment-package
-          cp -r apps/backend/banking-service-api/dist deployment-package/
-          cp -r apps/backend/banking-service-api/node_modules deployment-package/ || echo "node_modules not found, will be installed on Azure"
-          cp apps/backend/banking-service-api/package.json deployment-package/
-          cp apps/backend/banking-service-api/prisma deployment-package/ -r || echo "prisma folder not found"
           
-          # Create a simple package.json for production
-          cat > deployment-package/package.json << EOF
-          {
-            "name": "banking-service-api",
-            "version": "1.0.0",
-            "main": "dist/index.js",
-            "scripts": {
-              "start": "node dist/index.js",
-              "prisma:generate": "prisma generate"
+          # Copy built application
+          cp -r apps/backend/banking-service-api/dist deployment-package/
+          
+          # Copy package.json and create production version
+          cp apps/backend/banking-service-api/package.json deployment-package/package.json.orig
+          
+          # Copy prisma schema
+          mkdir -p deployment-package/prisma
+          cp apps/backend/banking-service-api/prisma/schema.prisma deployment-package/prisma/ || echo "schema.prisma not found"
+          
+          # Create production package.json with only necessary dependencies
+          node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('apps/backend/banking-service-api/package.json', 'utf8'));
+          const prodPkg = {
+            name: pkg.name,
+            version: pkg.version,
+            main: 'dist/index.js',
+            scripts: {
+              start: 'node dist/index.js',
+              'prisma:generate': 'prisma generate'
             },
-            "dependencies": $(cat apps/backend/banking-service-api/package.json | jq '.dependencies')
-          }
-          EOF
+            dependencies: pkg.dependencies || {},
+            prisma: pkg.prisma || {}
+          };
+          fs.writeFileSync('deployment-package/package.json', JSON.stringify(prodPkg, null, 2));
+          "
+          
+          echo 'Deployment package contents:'
+          find deployment-package -type f -name '*.js' -o -name '*.json' -o -name '*.prisma' | head -20
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
