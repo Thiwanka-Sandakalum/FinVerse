@@ -4,6 +4,14 @@ FROM python:3.9-slim-bullseye AS builder
 # Set work directory for build
 WORKDIR /build
 
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    libomp-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy requirements file
 COPY requirements.txt .
 
@@ -39,11 +47,17 @@ WORKDIR /app
 RUN mkdir -p /app/data /app/logs && \
     chown -R finverse:finverse /app
 
+# Copy application code
+COPY --chown=finverse:finverse src/ /app/src/
+COPY --chown=finverse:finverse data/ /app/data/
+
 # Copy wheels from builder stage
 COPY --from=builder /build/wheels /wheels
 
 # Install Python packages from wheels
-RUN pip install --no-cache-dir /wheels/*
+RUN pip install --no-cache-dir /wheels/* && \
+    rm -rf /wheels && \
+    rm -rf /root/.cache/pip/*
 
 # Copy application code
 COPY --chown=finverse:finverse src/ /app/src/
