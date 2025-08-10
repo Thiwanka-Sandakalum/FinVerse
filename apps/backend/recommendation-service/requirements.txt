@@ -1,6 +1,7 @@
 # Web framework
 fastapi==0.100.0
 uvicorn[standard]==0.23.0
+h11>=0.16.0  # Explicitly set h11 version to fix CVE-2025-43859
 
 # Data processing
 numpy==1.24.2
