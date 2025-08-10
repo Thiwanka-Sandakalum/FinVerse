@@ -1,44 +1,37 @@
 """
-Main entry point for the recommendation service FastAPI application.
-
-This module initializes and configures the FastAPI application,
-including routers, middleware, and database connections.
+Main application module.
 """
+import uvicorn
 import logging
-import asyncio
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import uvicorn
 
-from api.routers import recommendations, health
-from services.db_service import init_db_connection, close_db_connection
-from services.scheduler import ModelRefreshScheduler
-from services.recommendation_service import get_recommendation_service
-from services.queue_consumer import start_queue_consumer
-from config import settings
+from src.core.logging import setup_logging
+from src.core.config import settings
+from src.api.routers import recommendations, health
+from src.core.db.mongodb import init_db_connection, close_db_connection
+from src.services.recommendation import get_recommendation_service
+from src.services.scheduler import ModelRefreshScheduler
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger("recommendation-service")
+setup_logging()
+logger = logging.getLogger(__name__)
 
 # Create FastAPI application
 app = FastAPI(
     title="FinVerse Recommendation API",
     description="API for generating personalized product recommendations based on user interactions",
-    version="1.0.0",
+    version="1.0.0"
 )
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace with specific origins in production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
+    allow_methods=settings.CORS_ALLOW_METHODS,
+    allow_headers=settings.CORS_ALLOW_HEADERS
 )
 
 # Exception handler
@@ -47,7 +40,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception: {str(exc)}")
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error", "success": False},
+        content={"detail": "Internal server error", "success": False}
     )
 
 # Include routers
@@ -61,17 +54,19 @@ async def startup_event():
     # Connect to database
     await init_db_connection(app)
 
+    # Create fake request with app scope
+    fake_request = Request(scope={
+        "type": "http",
+        "app": app
+    })
+
     # Get recommendation service (initializes model)
-    recommendation_service = get_recommendation_service(app)
+    recommendation_service = await get_recommendation_service(fake_request)
 
     # Initialize and start model refresh scheduler
     scheduler = ModelRefreshScheduler(recommendation_service)
     app.state.scheduler = scheduler
     await scheduler.start()
-
-    # Start RabbitMQ queue consumer for user interactions
-    logger.info("Starting RabbitMQ queue consumer...")
-    start_queue_consumer()
 
     logger.info("Recommendation service started")
 
@@ -87,4 +82,12 @@ async def shutdown_event():
     logger.info("Recommendation service stopped")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=4003, reload=True)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=settings.PORT,
+        reload=settings.DEBUG,
+        workers=1,
+        log_level="info",
+        access_log=True
+    )

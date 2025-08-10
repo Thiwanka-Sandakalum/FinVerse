@@ -5,7 +5,7 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, Query, Path
 from pydantic import BaseModel
 
-from services.recommendation_service import RecommendationService, get_recommendation_service
+from src.services.recommendation_service import RecommendationService, get_recommendation_service
 
 router = APIRouter(
     prefix="/recommendations",

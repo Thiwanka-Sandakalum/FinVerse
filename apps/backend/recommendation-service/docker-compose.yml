@@ -7,8 +7,15 @@ services:
       dockerfile: Dockerfile
     container_name: finverse-recommendation-service
     volumes:
-      - ./src:/app/src
-      - ./data:/app/data
+      - type: bind
+        source: ./src
+        target: /app/src
+      - type: bind
+        source: ./data
+        target: /app/data
+      - type: bind
+        source: ./logs
+        target: /app/logs
     ports:
       - "4003:4003"
     environment:
@@ -50,4 +57,4 @@ networks:
 
 volumes:
   mongo-data:
-    name: finverse-mongo-data
+    driver: local

@@ -7,7 +7,14 @@ WORKDIR /app
 # Copy requirements file
 COPY requirements.txt .
 
-# Install dependencies
+# Install system dependencies required for building lightfm
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    libomp-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
@@ -15,7 +22,8 @@ COPY src/ /app/src/
 COPY data/ /app/data/
 
 # Create directories
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data /app/logs && \
+    chmod 777 /app/logs
 
 # Set environment variables
 ENV PYTHONPATH=/app

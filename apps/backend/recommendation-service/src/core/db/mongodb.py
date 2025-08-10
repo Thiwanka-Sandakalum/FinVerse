@@ -2,10 +2,11 @@
 Database service for connecting to MongoDB and retrieving interaction data.
 """
 import logging
-import motor.motor_asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi import FastAPI
 from typing import List, Dict, Any
 
+from src.core.config import settings
 logger = logging.getLogger("recommendation-service")
 
 async def init_db_connection(app: FastAPI):
@@ -15,10 +16,8 @@ async def init_db_connection(app: FastAPI):
     Args:
         app: FastAPI application instance
     """
-    from src.core.config import settings
-    
     # Create MongoDB client
-    client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
+    client = AsyncIOMotorClient(settings.MONGODB_URL)
     db = client[settings.MONGODB_DB]
     
     # Store DB connection on app state
@@ -37,7 +36,18 @@ async def close_db_connection(app: FastAPI):
     app.state.mongo_client.close()
     logger.info("Closed MongoDB connection")
 
-class DBService:
+class MongoDBService:
+    """Service for interacting with MongoDB"""
+    
+    def __init__(self, db):
+        """
+        Initialize the database service.
+        
+        Args:
+            db: MongoDB database connection
+        """
+        self.db = db
+    
     async def get_most_viewed_products(self, count: int = 5):
         """
         Get the most viewed products based on product_view events.
@@ -54,17 +64,7 @@ class DBService:
         ]
         cursor = self.db.interactions.aggregate(pipeline)
         return [{"productId": doc["_id"], "count": doc["count"]} async for doc in cursor]
-    """Service for interacting with the database"""
-    
-    def __init__(self, db):
-        """
-        Initialize the database service.
-        
-        Args:
-            db: MongoDB database connection
-        """
-        self.db = db
-    
+
     async def get_user_interactions(self, user_id: str, limit: int = 100) -> List[Dict[str, Any]]:
         """
         Get interactions for a specific user.
@@ -185,14 +185,14 @@ class DBService:
             {"type": "preference", "user_id": user_id}
         )
 
-def get_db_service(app: FastAPI) -> DBService:
+def get_mongodb_service(app: FastAPI) -> MongoDBService:
     """
-    Dependency injection for DBService.
+    Dependency injection for MongoDBService.
     
     Args:
         app: FastAPI application instance
         
     Returns:
-        Instance of DBService
+        Instance of MongoDBService
     """
-    return DBService(app.state.mongo_db)
+    return MongoDBService(app.state.mongo_db)

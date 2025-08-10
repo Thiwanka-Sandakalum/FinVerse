@@ -1,20 +1,31 @@
 """
-Recommendation service implementation using LightFM.
-
-This module handles building and using a hybrid recommendation model
-based on collaborative filtering and content-based filtering.
+Main recommendation service module.
 """
+import asyncio
 import logging
+import os
+from datetime import datetime, timedelta
+from typing import List, Dict, Any, TypedDict, Tuple
+
 import numpy as np
 import scipy.sparse as sp
-from typing import List, Dict, Any, TypedDict, Tuple
-import asyncio
-from datetime import datetime, timedelta
-from fastapi import Request
 import pickle
-import os
 from lightfm.data import Dataset
 from lightfm import LightFM
+
+from src.core.config import settings
+from src.core.banking.client import BankingServiceClient
+from src.core.db.mongodb import MongoDBService
+
+logger = logging.getLogger("recommendation-service")
+
+# Model hyperparameters
+NUM_COMPONENTS = 30
+LEARNING_RATE = 0.05
+LOSS = 'warp'  # Weighted Approximate-Rank Pairwise
+EPOCHS = 20
+USER_ALPHA = 1e-6
+ITEM_ALPHA = 1e-6
 
 class ModelRefreshResult(TypedDict, total=False):
     """Type definition for model refresh result"""
@@ -25,35 +36,10 @@ class ModelRefreshResult(TypedDict, total=False):
     num_products: int
     error: str
 
-from src.services.db_service import DBService
-from src.services.banking_service import BankingServiceClient
-from src.models.hybrid_model import HybridRecommendationModel
-from src.models.data_pipeline import DataPipeline
-from src.core.config import settings
-
-# Configure logging
-logger = logging.getLogger("recommendation-service")
-
-# Constants
-MODEL_PATH = "../data/recommendation_model.pkl"
-USER_FEATURES_PATH = "../data/user_features.npz"
-ITEM_FEATURES_PATH = "../data/item_features.npz"
-USER_MAPPING_PATH = "../data/user_mapping.pkl"
-ITEM_MAPPING_PATH = "../data/item_mapping.pkl"
-FEATURE_MAPPING_PATH = "../data/feature_mapping.pkl"
-
-# Model hyperparameters
-NUM_COMPONENTS = 30
-LEARNING_RATE = 0.05
-LOSS = 'warp'  # Weighted Approximate-Rank Pairwise
-EPOCHS = 20
-USER_ALPHA = 1e-6
-ITEM_ALPHA = 1e-6
-
 class RecommendationService:
     """Service for generating product recommendations"""
     
-    def __init__(self, db_service: DBService):
+    def __init__(self, db_service: MongoDBService):
         """
         Initialize the recommendation service.
         
@@ -74,7 +60,7 @@ class RecommendationService:
         self.last_refresh = None
         
         # Create data directory if it doesn't exist
-        os.makedirs("../data", exist_ok=True)
+        os.makedirs(settings.DATA_DIR, exist_ok=True)
         
         # Try to load existing model and mappings
         self._load_model_and_mappings()
@@ -82,33 +68,40 @@ class RecommendationService:
     def _load_model_and_mappings(self):
         """Load existing model and mappings from files if they exist"""
         try:
-            if os.path.exists(MODEL_PATH):
-                with open(MODEL_PATH, 'rb') as f:
+            model_path = os.path.join(settings.DATA_DIR, "recommendation_model.pkl")
+            user_features_path = os.path.join(settings.DATA_DIR, "user_features.npz")
+            item_features_path = os.path.join(settings.DATA_DIR, "item_features.npz")
+            user_mapping_path = os.path.join(settings.DATA_DIR, "user_mapping.pkl")
+            item_mapping_path = os.path.join(settings.DATA_DIR, "item_mapping.pkl")
+            feature_mapping_path = os.path.join(settings.DATA_DIR, "feature_mapping.pkl")
+
+            if os.path.exists(model_path):
+                with open(model_path, 'rb') as f:
                     self.model = pickle.load(f)
                 logger.info("Loaded recommendation model from file")
             
-            if os.path.exists(USER_FEATURES_PATH):
-                self.user_features = sp.load_npz(USER_FEATURES_PATH)
+            if os.path.exists(user_features_path):
+                self.user_features = sp.load_npz(user_features_path)
                 logger.info("Loaded user features from file")
             
-            if os.path.exists(ITEM_FEATURES_PATH):
-                self.item_features = sp.load_npz(ITEM_FEATURES_PATH)
+            if os.path.exists(item_features_path):
+                self.item_features = sp.load_npz(item_features_path)
                 logger.info("Loaded item features from file")
             
-            if os.path.exists(USER_MAPPING_PATH):
-                with open(USER_MAPPING_PATH, 'rb') as f:
+            if os.path.exists(user_mapping_path):
+                with open(user_mapping_path, 'rb') as f:
                     self.user_mapping = pickle.load(f)
                 self.reverse_user_mapping = {v: k for k, v in self.user_mapping.items()}
                 logger.info(f"Loaded user mapping from file ({len(self.user_mapping)} users)")
             
-            if os.path.exists(ITEM_MAPPING_PATH):
-                with open(ITEM_MAPPING_PATH, 'rb') as f:
+            if os.path.exists(item_mapping_path):
+                with open(item_mapping_path, 'rb') as f:
                     self.item_mapping = pickle.load(f)
                 self.reverse_item_mapping = {v: k for k, v in self.item_mapping.items()}
                 logger.info(f"Loaded item mapping from file ({len(self.item_mapping)} products)")
             
-            if os.path.exists(FEATURE_MAPPING_PATH):
-                with open(FEATURE_MAPPING_PATH, 'rb') as f:
+            if os.path.exists(feature_mapping_path):
+                with open(feature_mapping_path, 'rb') as f:
                     self.feature_mapping = pickle.load(f)
                 logger.info(f"Loaded feature mapping from file ({len(self.feature_mapping)} features)")
                 
@@ -118,26 +111,33 @@ class RecommendationService:
     async def _save_model_and_mappings(self):
         """Save current model and mappings to files"""
         try:
+            model_path = os.path.join(settings.DATA_DIR, "recommendation_model.pkl")
+            user_features_path = os.path.join(settings.DATA_DIR, "user_features.npz")
+            item_features_path = os.path.join(settings.DATA_DIR, "item_features.npz")
+            user_mapping_path = os.path.join(settings.DATA_DIR, "user_mapping.pkl")
+            item_mapping_path = os.path.join(settings.DATA_DIR, "item_mapping.pkl")
+            feature_mapping_path = os.path.join(settings.DATA_DIR, "feature_mapping.pkl")
+
             if self.model is not None:
-                with open(MODEL_PATH, 'wb') as f:
+                with open(model_path, 'wb') as f:
                     pickle.dump(self.model, f)
             
             if self.user_features is not None:
-                sp.save_npz(USER_FEATURES_PATH, self.user_features)
+                sp.save_npz(user_features_path, self.user_features)
             
             if self.item_features is not None:
-                sp.save_npz(ITEM_FEATURES_PATH, self.item_features)
+                sp.save_npz(item_features_path, self.item_features)
             
             if self.user_mapping:
-                with open(USER_MAPPING_PATH, 'wb') as f:
+                with open(user_mapping_path, 'wb') as f:
                     pickle.dump(self.user_mapping, f)
             
             if self.item_mapping:
-                with open(ITEM_MAPPING_PATH, 'wb') as f:
+                with open(item_mapping_path, 'wb') as f:
                     pickle.dump(self.item_mapping, f)
             
             if self.feature_mapping:
-                with open(FEATURE_MAPPING_PATH, 'wb') as f:
+                with open(feature_mapping_path, 'wb') as f:
                     pickle.dump(self.feature_mapping, f)
             
             logger.info("Saved model and mappings to files")
@@ -158,7 +158,7 @@ class RecommendationService:
         # Create dataset
         self.dataset = Dataset()
         
-                # Extract unique user IDs and product IDs
+        # Extract unique user IDs and product IDs
         users = set()
         products = set()  # Changed from items to products to match the variable name used later
         user_features_dict = {}
@@ -265,54 +265,7 @@ class RecommendationService:
         self.reverse_user_mapping = {v: k for k, v in self.user_mapping.items()}
         self.reverse_item_mapping = {v: k for k, v in self.item_mapping.items()}
         
-        # Build interaction matrix
-        logger.info(f"Building interaction matrix with {len(users)} users and {len(products)} products")
-        interactions = []
-        
-        for interaction in user_product_interactions:
-            user_id = interaction.get("user_id")
-            if not user_id or user_id not in self.user_mapping:
-                continue
-                
-            # Get interaction weight based on type
-            weight = 1.0
-            if interaction["type"] == "product_view":
-                weight = 1.0
-            elif interaction["type"] == "comparison":
-                weight = 0.8
-            elif interaction["type"] == "interaction":
-                # For generic interactions, check the action
-                if "data" in interaction and "action" in interaction["data"]:
-                    action = interaction["data"]["action"]
-                    if action == "click":
-                        weight = 0.5
-                    elif action == "favorite" or action == "save":
-                        weight = 1.5
-                    elif action == "apply" or action == "purchase":
-                        weight = 2.0
-                    else:
-                        weight = 0.3
-            
-            # Extract product ID(s)
-            if "data" in interaction:
-                if "productId" in interaction["data"]:
-                    product_id = interaction["data"]["productId"]
-                    if product_id in self.item_mapping:
-                        interactions.append((
-                            self.user_mapping[user_id],
-                            self.item_mapping[product_id],
-                            weight
-                        ))
-                elif "productIDs" in interaction["data"] and interaction["data"]["productIDs"]:
-                    for pid in interaction["data"]["productIDs"]:
-                        if pid in self.item_mapping:
-                            interactions.append((
-                                self.user_mapping[user_id],
-                                self.item_mapping[pid],
-                                weight
-                            ))
-        
-        # Create sparse interaction matrix with weighted interactions
+        # Create sparse interaction matrix
         data = []
         rows = []
         cols = []
@@ -679,8 +632,8 @@ async def get_recommendation_service(request: Request) -> RecommendationService:
     app = request.app
     db_service = getattr(app.state, 'db_service', None)
     if db_service is None:
-        from src.services.db_service import get_db_service
-        db_service = get_db_service(app)
+        from src.core.db.mongodb import get_mongodb_service
+        db_service = get_mongodb_service(app)
         app.state.db_service = db_service
 
     recommendation_service = getattr(app.state, 'recommendation_service', None)

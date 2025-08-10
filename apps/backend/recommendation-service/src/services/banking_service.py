@@ -5,7 +5,7 @@ import aiohttp
 import logging
 from typing import Dict, Any, List, Optional
 
-from config import settings
+from src.core.config import settings
 
 logger = logging.getLogger("recommendation-service")
 

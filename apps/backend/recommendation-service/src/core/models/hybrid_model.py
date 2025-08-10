@@ -4,7 +4,6 @@ Hybrid recommendation model implementation using LightFM.
 This module contains the implementation of the hybrid recommendation model
 that combines collaborative filtering with content-based filtering using LightFM.
 """
-import logging
 import numpy as np
 import scipy.sparse as sp
 from typing import List, Dict, Any, Optional, Tuple
@@ -14,8 +13,9 @@ import os
 from lightfm import LightFM
 
 from src.core.config import settings
+from src.core.logging import get_logger
 
-logger = logging.getLogger("recommendation-service")
+logger = get_logger(__name__)
 
 class HybridRecommendationModel:
     """Hybrid recommendation model using LightFM"""
@@ -43,31 +43,38 @@ class HybridRecommendationModel:
             True if model was loaded successfully, False otherwise
         """
         try:
-            if not os.path.exists(settings.MODEL_PATH):
+            model_path = os.path.join(settings.DATA_DIR, "recommendation_model.pkl")
+            user_features_path = os.path.join(settings.DATA_DIR, "user_features.npz")
+            item_features_path = os.path.join(settings.DATA_DIR, "item_features.npz")
+            user_mapping_path = os.path.join(settings.DATA_DIR, "user_mapping.pkl")
+            item_mapping_path = os.path.join(settings.DATA_DIR, "item_mapping.pkl")
+            feature_mapping_path = os.path.join(settings.DATA_DIR, "feature_mapping.pkl")
+
+            if not os.path.exists(model_path):
                 logger.warning("No existing model found")
                 return False
             
-            with open(settings.MODEL_PATH, 'rb') as f:
+            with open(model_path, 'rb') as f:
                 self.model = pickle.load(f)
             
-            if os.path.exists(settings.USER_FEATURES_PATH):
-                self.user_features = sp.load_npz(settings.USER_FEATURES_PATH)
+            if os.path.exists(user_features_path):
+                self.user_features = sp.load_npz(user_features_path)
             
-            if os.path.exists(settings.ITEM_FEATURES_PATH):
-                self.item_features = sp.load_npz(settings.ITEM_FEATURES_PATH)
+            if os.path.exists(item_features_path):
+                self.item_features = sp.load_npz(item_features_path)
             
-            if os.path.exists(settings.USER_MAPPING_PATH):
-                with open(settings.USER_MAPPING_PATH, 'rb') as f:
+            if os.path.exists(user_mapping_path):
+                with open(user_mapping_path, 'rb') as f:
                     self.user_mapping = pickle.load(f)
                 self.reverse_user_mapping = {v: k for k, v in self.user_mapping.items()}
             
-            if os.path.exists(settings.ITEM_MAPPING_PATH):
-                with open(settings.ITEM_MAPPING_PATH, 'rb') as f:
+            if os.path.exists(item_mapping_path):
+                with open(item_mapping_path, 'rb') as f:
                     self.item_mapping = pickle.load(f)
                 self.reverse_item_mapping = {v: k for k, v in self.item_mapping.items()}
             
-            if os.path.exists(settings.FEATURE_MAPPING_PATH):
-                with open(settings.FEATURE_MAPPING_PATH, 'rb') as f:
+            if os.path.exists(feature_mapping_path):
+                with open(feature_mapping_path, 'rb') as f:
                     self.feature_mapping = pickle.load(f)
             
             logger.info(f"Loaded model with {len(self.user_mapping)} users and {len(self.item_mapping)} items")
@@ -84,27 +91,34 @@ class HybridRecommendationModel:
             True if model was saved successfully, False otherwise
         """
         try:
-            os.makedirs(os.path.dirname(settings.MODEL_PATH), exist_ok=True)
+            model_path = os.path.join(settings.DATA_DIR, "recommendation_model.pkl")
+            user_features_path = os.path.join(settings.DATA_DIR, "user_features.npz")
+            item_features_path = os.path.join(settings.DATA_DIR, "item_features.npz")
+            user_mapping_path = os.path.join(settings.DATA_DIR, "user_mapping.pkl")
+            item_mapping_path = os.path.join(settings.DATA_DIR, "item_mapping.pkl")
+            feature_mapping_path = os.path.join(settings.DATA_DIR, "feature_mapping.pkl")
+
+            os.makedirs(os.path.dirname(model_path), exist_ok=True)
             
-            with open(settings.MODEL_PATH, 'wb') as f:
+            with open(model_path, 'wb') as f:
                 pickle.dump(self.model, f)
             
             if self.user_features is not None:
-                sp.save_npz(settings.USER_FEATURES_PATH, self.user_features)
+                sp.save_npz(user_features_path, self.user_features)
             
             if self.item_features is not None:
-                sp.save_npz(settings.ITEM_FEATURES_PATH, self.item_features)
+                sp.save_npz(item_features_path, self.item_features)
             
             if self.user_mapping:
-                with open(settings.USER_MAPPING_PATH, 'wb') as f:
+                with open(user_mapping_path, 'wb') as f:
                     pickle.dump(self.user_mapping, f)
             
             if self.item_mapping:
-                with open(settings.ITEM_MAPPING_PATH, 'wb') as f:
+                with open(item_mapping_path, 'wb') as f:
                     pickle.dump(self.item_mapping, f)
             
             if self.feature_mapping:
-                with open(settings.FEATURE_MAPPING_PATH, 'wb') as f:
+                with open(feature_mapping_path, 'wb') as f:
                     pickle.dump(self.feature_mapping, f)
             
             logger.info("Model saved to disk")

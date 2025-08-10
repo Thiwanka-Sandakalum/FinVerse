@@ -4,10 +4,10 @@ Scheduler for periodic model refreshing.
 import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import TypedDict
+from typing import TypedDict, Union
 
-from services.recommendation_service import RecommendationService
-from config import settings
+from src.core.config import settings
+from src.services.recommendation import RecommendationService
 
 logger = logging.getLogger("recommendation-service")
 
@@ -22,7 +22,7 @@ class ModelRefreshResult(TypedDict, total=False):
 
 class ModelRefreshScheduler:
     """Scheduler for periodically refreshing the recommendation model"""
-    task: asyncio.Task[None] | None
+    task: Union[asyncio.Task[None], None]
     
     def __init__(self, recommendation_service: RecommendationService):
         """
