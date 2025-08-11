@@ -84,6 +84,50 @@ A comprehensive RESTful API for banking services, financial products management,
    npm run dev
    ```
 
+### Docker Deployment
+
+#### Using Docker Compose (Recommended)
+
+1. Copy the environment file:
+   ```
+   cp .env.example .env
+   ```
+
+2. Update the `.env` file with your configuration
+
+3. Run with Docker Compose:
+   ```bash
+   # For production
+   docker-compose up -d
+   
+   # For development
+   docker-compose -f docker-compose.dev.yml up -d
+   ```
+
+4. Run database migrations:
+   ```bash
+   # Access the container and run migrations
+   docker-compose exec banking-service npx prisma migrate deploy
+   
+   # Seed the database (optional)
+   docker-compose exec banking-service npm run prisma:seed
+   ```
+
+#### Using Docker Only
+
+1. Build the Docker image:
+   ```bash
+   docker build -t banking-service-api .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -p 3000:3000 \
+     -e DATABASE_URL="your_database_url" \
+     -e NODE_ENV=production \
+     banking-service-api
+   ```
+
 ### Production Deployment
 
 1. Build the application:
