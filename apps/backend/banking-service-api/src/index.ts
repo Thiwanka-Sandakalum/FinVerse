@@ -4,6 +4,7 @@ import morgan from 'morgan';
 
 import { logger, stream } from './config/logger';
 import prisma from './config/database';
+import { queueService } from './services/queue.service';
 
 // Import middlewares
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
@@ -63,6 +64,18 @@ app.get('/health', async (req: Request, res: Response) => {
         } catch (dbError) {
             logger.error('Database health check failed:', dbError);
             healthStatus.database = 'Disconnected';
+            healthStatus.status = 'WARNING';
+        }
+
+        // Test RabbitMQ connection
+        try {
+            healthStatus.messageQueue = queueService.isQueueConnected() ? 'Connected' : 'Disconnected';
+            if (!queueService.isQueueConnected()) {
+                healthStatus.status = 'WARNING';
+            }
+        } catch (queueError) {
+            logger.error('Queue health check failed:', queueError);
+            healthStatus.messageQueue = 'Error';
             healthStatus.status = 'WARNING';
         }
 
@@ -132,6 +145,15 @@ const startServer = async () => {
             logger.info('SIGTERM signal received: closing HTTP server');
             server.close(() => {
                 logger.info('HTTP server closed');
+
+                // Close queue connection
+                queueService.close().then(() => {
+                    logger.info('Queue connection closed');
+                }).catch(err => {
+                    logger.error('Error closing queue connection:', err);
+                });
+
+                // Close database connection
                 prisma.$disconnect().then(() => {
                     logger.info('Database connection closed');
                     process.exit(0);

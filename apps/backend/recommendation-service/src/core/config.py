@@ -27,9 +27,9 @@ class Config(BaseSettings):
     CORS_ALLOW_HEADERS: List[str] = ["*"]
     
     # MongoDB configuration
-    MONGODB_URL: str = "mongodb://mongo:27017"
+    MONGODB_URL: str = "mongodb://localhost:27017"
     MONGODB_DB: str = "finverse_interactions"
-    MONGO_URI: str = "mongodb://mongo:27017"
+    MONGO_URI: str = "mongodb://localhost:27017"
     MONGO_DB: str = "finverse_interactions"
     
     # Model paths
@@ -49,7 +49,7 @@ class Config(BaseSettings):
     BANKING_SERVICE_URL: str = "http://banking-service:4001"
     
     # RabbitMQ configuration
-    RABBITMQ_URL: str = "amqp://guest:guest@rabbitmq:5672/"
+    RABBITMQ_URL: str = "amqp://guest:guest@localhost:5672/"
     
     # Model configuration
     MODEL_REFRESH_INTERVAL: int = 3600  # 1 hour

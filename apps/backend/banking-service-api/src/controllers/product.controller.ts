@@ -3,6 +3,7 @@ import { ProductService } from '../services/product.service';
 import { asyncHandler } from '../middlewares/error.middleware';
 import { ProductCreateDto, ProductUpdateDto } from '../types/api.types';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { interactionTracker } from '../services/interaction-tracking.service';
 
 export class ProductController {
     private productService: ProductService;
@@ -42,6 +43,13 @@ export class ProductController {
         // Get products with filters and user context for saved indicator
         const result = await this.productService.getAllProducts(filters, req.user?.userId, req.user?.institutionId);
 
+        // Track search interaction if there's a search query or filters
+        if (search || categoryId || institutionId || productTypeId) {
+            this.trackSearchInteraction(req, filters, result.meta.total).catch(error => {
+                console.error('Failed to track search interaction:', error);
+            });
+        }
+
         // Return products with pagination metadata
         res.status(200).json({
             data: result.products,
@@ -50,16 +58,70 @@ export class ProductController {
     });
 
     /**
+     * Track search interaction
+     */
+    private async trackSearchInteraction(req: AuthRequest, filters: any, resultCount: number): Promise<void> {
+        try {
+            console.log('🚀 CONTROLLER - Starting search tracking for:', {
+                query: filters.search || '',
+                filters: {
+                    categoryId: filters.categoryId,
+                    institutionId: filters.institutionId,
+                    productTypeId: filters.productTypeId
+                },
+                resultCount,
+                userId: req.user?.userId || 'anonymous'
+            });
+
+            await interactionTracker.trackSearch(req, filters.search || '', resultCount, {
+                categoryId: filters.categoryId,
+                institutionId: filters.institutionId,
+                productTypeId: filters.productTypeId,
+                isFeatured: filters.isFeatured,
+                isActive: filters.isActive
+            });
+
+            console.log('✅ CONTROLLER - Search tracking completed');
+        } catch (error) {
+            console.error('❌ CONTROLLER - Error in trackSearchInteraction:', error);
+        }
+    }    /**
      * Get product by ID
      */
     getProductById = asyncHandler(async (req: AuthRequest, res: Response) => {
         const { id } = req.params;
         const userInstitutionId = req.user?.institutionId;
         const product = await this.productService.getProductById(id, req.user?.userId, userInstitutionId);
+
+        // Track product view interaction asynchronously
+        // This should not block the response
+        this.trackProductViewInteraction(req, product).catch(error => {
+            // Log error but don't fail the request
+            console.error('Failed to track product view:', error);
+        });
+
         res.status(200).json(product);
     });
 
     /**
+     * Track product view interaction
+     */
+    private async trackProductViewInteraction(req: AuthRequest, product: any): Promise<void> {
+        try {
+            console.log('🚀 CONTROLLER - Starting product view tracking for:', {
+                productId: product.id,
+                productName: product.name,
+                userId: req.user?.userId || 'anonymous'
+            });
+
+            await interactionTracker.trackProductView(req, product);
+
+            console.log('✅ CONTROLLER - Product view tracking completed');
+        } catch (error) {
+            // Log error but don't throw to avoid breaking the main functionality
+            console.error('❌ CONTROLLER - Error in trackProductViewInteraction:', error);
+        }
+    }    /**
      * Create product
      */
     createProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
