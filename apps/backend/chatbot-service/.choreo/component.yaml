@@ -1,0 +1,13 @@
+schemaVersion: 1.2
+
+endpoints:
+  - name: finverse-chatbot
+    displayName: FinVerse Chatbot API
+    service:
+      basePath: /
+      port: 8085
+    type: REST
+    networkVisibilities:
+      - Public
+      - Organization
+    schemaFilePath: openapi.yaml
