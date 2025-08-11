@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ProductService } from '../services/product.service';
 import { asyncHandler } from '../middlewares/error.middleware';
 import { ProductCreateDto, ProductUpdateDto } from '../types/api.types';
+import { AuthRequest } from '../middlewares/auth.middleware';
 
 export class ProductController {
     private productService: ProductService;
@@ -13,7 +14,7 @@ export class ProductController {
     /**
      * Get all products
      */
-    getAllProducts = asyncHandler(async (req: Request, res: Response) => {
+    getAllProducts = asyncHandler(async (req: AuthRequest, res: Response) => {
         // Extract query parameters
         const {
             categoryId,
@@ -38,8 +39,8 @@ export class ProductController {
             search: search ? String(search) : undefined
         };
 
-        // Get products with filters
-        const result = await this.productService.getAllProducts(filters);
+        // Get products with filters and user context for saved indicator
+        const result = await this.productService.getAllProducts(filters, req.user?.userId);
 
         // Return products with pagination metadata
         res.status(200).json({
@@ -51,9 +52,9 @@ export class ProductController {
     /**
      * Get product by ID
      */
-    getProductById = asyncHandler(async (req: Request, res: Response) => {
+    getProductById = asyncHandler(async (req: AuthRequest, res: Response) => {
         const { id } = req.params;
-        const product = await this.productService.getProductById(id);
+        const product = await this.productService.getProductById(id, req.user?.userId);
         res.status(200).json(product);
     });
 

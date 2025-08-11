@@ -16,7 +16,7 @@ export class ProductRepository {
         limit?: number;
         offset?: number;
         search?: string;
-    }) {
+    }, userId?: string) {
         const {
             categoryId,
             institutionId,
@@ -87,8 +87,24 @@ export class ProductRepository {
             orderBy: { createdAt: 'desc' }
         });
 
+        // If userId is provided, get saved products for this user
+        let savedProductIds: string[] = [];
+        if (userId) {
+            const savedProducts = await prisma.savedProduct.findMany({
+                where: { clerkUserId: userId },
+                select: { productId: true }
+            });
+            savedProductIds = savedProducts.map(sp => sp.productId);
+        }
+
+        // Add isSaved indicator to each product
+        const productsWithSavedIndicator = products.map(product => ({
+            ...product,
+            isSaved: userId ? savedProductIds.includes(product.id) : false
+        }));
+
         return {
-            products,
+            products: productsWithSavedIndicator,
             meta: {
                 total,
                 limit,
@@ -100,8 +116,8 @@ export class ProductRepository {
     /**
      * Find a product by ID
      */
-    async findById(id: string) {
-        return prisma.product.findUnique({
+    async findById(id: string, userId?: string) {
+        const product = await prisma.product.findUnique({
             where: { id },
             include: {
                 institution: true,
@@ -123,6 +139,27 @@ export class ProductRepository {
                 }
             }
         });
+
+        if (!product) {
+            return null;
+        }
+
+        // If userId is provided, check if this product is saved by the user
+        let isSaved = false;
+        if (userId) {
+            const savedProduct = await prisma.savedProduct.findFirst({
+                where: {
+                    clerkUserId: userId,
+                    productId: id
+                }
+            });
+            isSaved = !!savedProduct;
+        }
+
+        return {
+            ...product,
+            isSaved
+        };
     }
 
     /**

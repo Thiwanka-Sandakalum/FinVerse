@@ -21,15 +21,15 @@ export class ProductService {
         limit?: number;
         offset?: number;
         search?: string;
-    }) {
-        return this.productRepository.findAll(filters);
+    }, userId?: string) {
+        return this.productRepository.findAll(filters, userId);
     }
 
     /**
      * Get a product by ID
      */
-    async getProductById(id: string) {
-        const product = await this.productRepository.findById(id);
+    async getProductById(id: string, userId?: string) {
+        const product = await this.productRepository.findById(id, userId);
 
         if (!product) {
             throw new ApiError(404, 'Product not found');

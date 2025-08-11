@@ -35,10 +35,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Import auth middleware from module
-import { authMiddleware } from './middlewares/auth.middleware';
+import { authMiddleware, optionalAuthMiddleware } from './middlewares/auth.middleware';
 
-// Use auth middleware before API routes
-// app.use(authMiddleware);
 
 // Request logging
 if (process.env.ENABLE_REQUEST_LOGGING !== 'false') {
@@ -81,18 +79,23 @@ app.get('/health', async (req: Request, res: Response) => {
 });
 
 // API routes
-app.use('/institution-types', institutionTypeRoutes);
-app.use('/institutions', institutionRoutes);
-app.use('/product-categories', productCategoryRoutes);
-app.use('/product-types', productTypeRoutes);
-app.use('/products', productRoutes);
-app.use('/products/rate-history', productRateHistoryRoutes);
-app.use('/products/versions', productVersionRoutes);
-app.use('/saved-products', savedProductRoutes);
-app.use('/compare-list', compareListRoutes);
-app.use('/shared-products', sharedLinkRoutes);
-app.use('/reviews', reviewRoutes);
-app.use('/products/tags', tagRoutes);
+// Public routes with optional auth (for user-specific indicators)
+app.use('/products', optionalAuthMiddleware, productRoutes);
+
+// Public routes (no auth required, but optional auth for user context)
+app.use('/institution-types', optionalAuthMiddleware, institutionTypeRoutes);
+app.use('/institutions', optionalAuthMiddleware, institutionRoutes);
+app.use('/product-categories', optionalAuthMiddleware, productCategoryRoutes);
+app.use('/product-types', optionalAuthMiddleware, productTypeRoutes);
+app.use('/products/tags', optionalAuthMiddleware, tagRoutes);
+
+// Protected routes (auth required)
+app.use('/saved-products', authMiddleware, savedProductRoutes);
+app.use('/compare-list', authMiddleware, compareListRoutes);
+app.use('/shared-products', authMiddleware, sharedLinkRoutes);
+app.use('/reviews', authMiddleware, reviewRoutes);
+app.use('/products/rate-history', authMiddleware, productRateHistoryRoutes);
+app.use('/products/versions', authMiddleware, productVersionRoutes);
 
 // Error handling middleware
 app.use(notFoundHandler);
