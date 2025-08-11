@@ -21,18 +21,29 @@ export class ProductService {
         limit?: number;
         offset?: number;
         search?: string;
-    }, userId?: string) {
+    }, userId?: string, userInstitutionId?: string) {
+        // If user has institutionId and no explicit institutionId filter is provided,
+        // filter by user's institution
+        if (userInstitutionId && !filters.institutionId) {
+            filters.institutionId = userInstitutionId;
+        }
+
         return this.productRepository.findAll(filters, userId);
     }
 
     /**
      * Get a product by ID
      */
-    async getProductById(id: string, userId?: string) {
+    async getProductById(id: string, userId?: string, userInstitutionId?: string) {
         const product = await this.productRepository.findById(id, userId);
 
         if (!product) {
             throw new ApiError(404, 'Product not found');
+        }
+
+        // If user has institutionId, check if product belongs to their institution
+        if (userInstitutionId && product.institutionId !== userInstitutionId) {
+            throw new ApiError(403, 'Access denied: Product does not belong to your institution');
         }
 
         return product;
@@ -41,9 +52,11 @@ export class ProductService {
     /**
      * Create a new product
      */
-    async createProduct(data: ProductCreateDto) {
-        // Additional business logic can be added here
-        // For example, checking if the institution and product type exist
+    async createProduct(data: ProductCreateDto, userInstitutionId?: string) {
+        // If user has institutionId, ensure product is created for their institution
+        if (userInstitutionId && data.institutionId !== userInstitutionId) {
+            throw new ApiError(403, 'Access denied: Cannot create product for different institution');
+        }
 
         return this.productRepository.create(data);
     }
@@ -51,12 +64,17 @@ export class ProductService {
     /**
      * Update a product
      */
-    async updateProduct(id: string, data: ProductUpdateDto) {
-        // First check if product exists
+    async updateProduct(id: string, data: ProductUpdateDto, userInstitutionId?: string) {
+        // First check if product exists and user has access
         const productExists = await this.productRepository.findById(id);
 
         if (!productExists) {
             throw new ApiError(404, 'Product not found');
+        }
+
+        // If user has institutionId, check if product belongs to their institution
+        if (userInstitutionId && productExists.institutionId !== userInstitutionId) {
+            throw new ApiError(403, 'Access denied: Product does not belong to your institution');
         }
 
         return this.productRepository.update(id, data);
@@ -65,12 +83,17 @@ export class ProductService {
     /**
      * Delete a product
      */
-    async deleteProduct(id: string) {
-        // First check if product exists
+    async deleteProduct(id: string, userInstitutionId?: string) {
+        // First check if product exists and user has access
         const productExists = await this.productRepository.findById(id);
 
         if (!productExists) {
             throw new ApiError(404, 'Product not found');
+        }
+
+        // If user has institutionId, check if product belongs to their institution
+        if (userInstitutionId && productExists.institutionId !== userInstitutionId) {
+            throw new ApiError(403, 'Access denied: Product does not belong to your institution');
         }
 
         return this.productRepository.delete(id);
@@ -79,12 +102,17 @@ export class ProductService {
     /**
      * Activate or deactivate a product
      */
-    async setProductActiveStatus(id: string, isActive: boolean) {
-        // First check if product exists
+    async setProductActiveStatus(id: string, isActive: boolean, userInstitutionId?: string) {
+        // First check if product exists and user has access
         const productExists = await this.productRepository.findById(id);
 
         if (!productExists) {
             throw new ApiError(404, 'Product not found');
+        }
+
+        // If user has institutionId, check if product belongs to their institution
+        if (userInstitutionId && productExists.institutionId !== userInstitutionId) {
+            throw new ApiError(403, 'Access denied: Product does not belong to your institution');
         }
 
         return this.productRepository.setActiveStatus(id, isActive);

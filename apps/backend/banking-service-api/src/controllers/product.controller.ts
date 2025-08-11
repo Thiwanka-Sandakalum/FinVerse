@@ -40,7 +40,7 @@ export class ProductController {
         };
 
         // Get products with filters and user context for saved indicator
-        const result = await this.productService.getAllProducts(filters, req.user?.userId);
+        const result = await this.productService.getAllProducts(filters, req.user?.userId, req.user?.institutionId);
 
         // Return products with pagination metadata
         res.status(200).json({
@@ -54,45 +54,59 @@ export class ProductController {
      */
     getProductById = asyncHandler(async (req: AuthRequest, res: Response) => {
         const { id } = req.params;
-        const product = await this.productService.getProductById(id, req.user?.userId);
+        const userInstitutionId = req.user?.institutionId;
+        const product = await this.productService.getProductById(id, req.user?.userId, userInstitutionId);
         res.status(200).json(product);
     });
 
     /**
      * Create product
      */
-    createProduct = asyncHandler(async (req: Request, res: Response) => {
+    createProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
         const productData: ProductCreateDto = req.body;
-        const product = await this.productService.createProduct(productData);
+        const userInstitutionId = req.user?.institutionId;
+
+        // If user has institutionId, ensure product is created for their institution only
+        if (userInstitutionId) {
+            productData.institutionId = userInstitutionId;
+        }
+
+        const product = await this.productService.createProduct(productData, userInstitutionId);
         res.status(201).json(product);
     });
 
     /**
      * Update product
      */
-    updateProduct = asyncHandler(async (req: Request, res: Response) => {
+    updateProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
         const { id } = req.params;
         const productData: ProductUpdateDto = req.body;
-        const product = await this.productService.updateProduct(id, productData);
+        const userInstitutionId = req.user?.institutionId;
+
+        const product = await this.productService.updateProduct(id, productData, userInstitutionId);
         res.status(200).json(product);
     });
 
     /**
      * Delete product
      */
-    deleteProduct = asyncHandler(async (req: Request, res: Response) => {
+    deleteProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
         const { id } = req.params;
-        await this.productService.deleteProduct(id);
+        const userInstitutionId = req.user?.institutionId;
+
+        await this.productService.deleteProduct(id, userInstitutionId);
         res.status(200).json({ message: 'Product deleted successfully' });
     });
 
     /**
      * Activate/deactivate product
      */
-    activateProduct = asyncHandler(async (req: Request, res: Response) => {
+    activateProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
         const { id } = req.params;
         const { isActive } = req.body;
-        await this.productService.setProductActiveStatus(id, isActive);
+        const userInstitutionId = req.user?.institutionId;
+
+        await this.productService.setProductActiveStatus(id, isActive, userInstitutionId);
         res.status(200).json({
             message: `Product ${isActive ? 'activated' : 'deactivated'} successfully`
         });
