@@ -39,6 +39,11 @@ jobs:
         run: |
           npm run build
 
+      - name: Generate Prisma client
+        working-directory: ./apps/backend/banking-service-api
+        run: |
+          npx prisma generate
+
       - name: Prepare deployment package
         run: |
           mkdir -p deployment-package
@@ -46,14 +51,24 @@ jobs:
           # Copy built application
           cp -r apps/backend/banking-service-api/dist deployment-package/
           
-          # Copy package.json and create production version
-          cp apps/backend/banking-service-api/package.json deployment-package/package.json.orig
+          # Copy production node_modules (only dependencies, not devDependencies)
+          cd apps/backend/banking-service-api
+          npm ci --omit=dev --ignore-scripts
+          cd ../../..
+          cp -r apps/backend/banking-service-api/node_modules deployment-package/
           
-          # Copy prisma schema
+          # Copy prisma schema and generated client
           mkdir -p deployment-package/prisma
           cp apps/backend/banking-service-api/prisma/schema.prisma deployment-package/prisma/ || echo "schema.prisma not found"
           
-          # Create production package.json with only necessary dependencies
+          # Copy entire prisma folder to ensure migrations and client are included
+          cp -r apps/backend/banking-service-api/prisma/* deployment-package/prisma/ || echo "Prisma folder copy failed"
+          
+          # Copy startup script
+          cp apps/backend/banking-service-api/startup.sh deployment-package/ || echo "Startup script not found"
+          chmod +x deployment-package/startup.sh || echo "Could not make startup script executable"
+          
+          # Create production package.json
           node -e "
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('apps/backend/banking-service-api/package.json', 'utf8'));
@@ -62,7 +77,9 @@ jobs:
             version: pkg.version,
             main: 'dist/index.js',
             scripts: {
-              start: 'node dist/index.js'
+              start: 'node dist/index.js',
+              'start:production': 'npm run prisma:generate && npm run start',
+              'prisma:generate': 'prisma generate'
             },
             dependencies: pkg.dependencies || {},
             prisma: pkg.prisma || {}
@@ -70,8 +87,77 @@ jobs:
           fs.writeFileSync('deployment-package/package.json', JSON.stringify(prodPkg, null, 2));
           "
           
+          # Create web.config for Azure Web App
+          cat > deployment-package/web.config << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <handlers>
+                <add name="iisnode" path="dist/index.js" verb="*" modules="iisnode"/>
+              </handlers>
+              <rewrite>
+                <rules>
+                  <rule name="NodeInspector" patternSyntax="ECMAScript" stopProcessing="true">
+                    <match url="^dist/index.js\/debug[\/]?" />
+                  </rule>
+                  <rule name="StaticContent">
+                    <action type="Rewrite" url="public{REQUEST_URI}"/>
+                  </rule>
+                  <rule name="DynamicContent">
+                    <conditions>
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="True"/>
+                    </conditions>
+                    <action type="Rewrite" url="dist/index.js"/>
+                  </rule>
+                </rules>
+              </rewrite>
+              <security>
+                <requestFiltering>
+                  <hiddenSegments>
+                    <remove segment="bin"/>
+                  </hiddenSegments>
+                </requestFiltering>
+              </security>
+              <httpErrors existingResponse="PassThrough" />
+              <iisnode node_env="production" 
+                       nodeProcessCountPerApplication="1"
+                       maxConcurrentRequestsPerProcess="1024"
+                       maxNamedPipeConnectionRetry="3"
+                       namedPipeConnectionRetryDelay="2000"
+                       asyncCompletionThreadCount="0"
+                       initialRequestBufferSize="4096"
+                       maxRequestBufferSize="65536"
+                       watchedFiles="*.js"
+                       uncFileChangesPollingInterval="5000"
+                       gracefulShutdownTimeout="60000"
+                       loggingEnabled="true"
+                       logDirectory="iisnode"
+                       debuggingEnabled="false"
+                       debugHeaderEnabled="false"
+                       debuggerPortRange="5058-6058"
+                       debuggerPathSegment="debug"
+                       maxLogFileSizeInKB="128"
+                       appendToExistingLog="false"
+                       logFileFlushInterval="5000"
+                       devErrorsEnabled="false"
+                       flushResponse="false"
+                       enableXFF="false"
+                       promoteServerVars="" />
+            </system.webServer>
+          </configuration>
+          EOF
+          
           echo 'Deployment package contents:'
-          find deployment-package -type f -name '*.js' -o -name '*.json' -o -name '*.prisma' | head -20
+          find deployment-package -type f -name '*.js' -o -name '*.json' -o -name '*.prisma' -o -name '*.config' | head -20
+          
+          echo 'Package size:'
+          du -sh deployment-package/
+          
+          echo 'Verifying main entry point:'
+          ls -la deployment-package/dist/index.js || echo "WARNING: Main entry point not found!"
+          
+          echo 'Verifying package.json:'
+          cat deployment-package/package.json
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -106,5 +192,5 @@ jobs:
           app-name: 'banking-service'
           slot-name: 'Production'
           package: .
-          startup-command: 'npm start'
+          startup-command: 'npx prisma generate && node dist/index.js'
           
