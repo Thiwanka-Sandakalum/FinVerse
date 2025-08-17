@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      - 'apps/backend/product-service-api/**'
+      - 'apps/backend/banking-service-api/**'
       - 'packages/**'
       - '.github/workflows/main_product-service.yml'
   workflow_dispatch:
@@ -25,22 +25,21 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
           cache: 'npm'
-          cache-dependency-path: 'apps/backend/product-service-api/package-lock.json'
 
       - name: Install dependencies
-        working-directory: ./apps/backend/product-service-api
+        working-directory: ./apps/backend/banking-service-api
         run: |
           npm ci
 
       - name: Build product service
-        working-directory: ./apps/backend/product-service-api
+        working-directory: ./apps/backend/banking-service-api
         run: |
           npm run build
 
       - name: Generate Prisma client
-        working-directory: ./apps/backend/product-service-api
+        working-directory: ./apps/backend/banking-service-api
         run: |
           npx prisma generate
 
@@ -49,16 +48,16 @@ jobs:
           mkdir -p deployment-package
           
           # Copy built application
-          cp -r apps/backend/product-service-api/dist deployment-package/
+          cp -r apps/backend/banking-service-api/dist deployment-package/
           
           # Copy package.json and modify it for production
-          cp apps/backend/product-service-api/package.json deployment-package/
+          cp apps/backend/banking-service-api/package.json deployment-package/
           
           # Copy prisma folder completely
-          cp -r apps/backend/product-service-api/prisma deployment-package/
+          cp -r apps/backend/banking-service-api/prisma deployment-package/
           
           # Copy startup script
-          cp apps/backend/product-service-api/startup.sh deployment-package/ || echo "Startup script not found"
+          cp apps/backend/banking-service-api/startup.sh deployment-package/ || echo "Startup script not found"
           
           # Create a simplified package.json for production
           node -e "
