@@ -1,0 +1,1401 @@
+[
+    {
+        "categoryName": "Banking Products",
+        "subCategoryName": "Savings Accounts",
+        "fields": [
+            {
+                "name": "Interest Rate",
+                "slug": "interestRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0,
+                    "max": 100
+                },
+                "description": "Annual interest rate (p.a.)."
+            },
+            {
+                "name": "Minimum Balance",
+                "slug": "minimumBalance",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum balance required to maintain the account (LKR)."
+            },
+            {
+                "name": "Account Maintenance Fee",
+                "slug": "accountMaintenanceFee",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Monthly or annual fee for account maintenance (LKR)."
+            },
+            {
+                "name": "Withdrawal Limits",
+                "slug": "withdrawalLimits",
+                "dataType": "json",
+                "isRequired": false,
+                "description": "JSON object detailing daily/monthly withdrawal limits, e.g., {\"daily_atm\": 100000, \"monthly_online\": 500000}."
+            },
+            {
+                "name": "Initial Deposit",
+                "slug": "initialDeposit",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The minimum amount required to open the account (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Banking Products",
+        "subCategoryName": "Current Accounts",
+        "fields": [
+            {
+                "name": "Monthly Fee",
+                "slug": "monthlyFee",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Monthly service fee for the account (LKR)."
+            },
+            {
+                "name": "Overdraft Facility",
+                "slug": "overdraftFacility",
+                "dataType": "boolean",
+                "isRequired": true,
+                "description": "Indicates if an overdraft facility is available."
+            },
+            {
+                "name": "Overdraft Limit",
+                "slug": "overdraftLimit",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The maximum overdraft limit available (LKR). Required if overdraftFacility is true."
+            },
+            {
+                "name": "Cheque Book Facility",
+                "slug": "chequeBookFacility",
+                "dataType": "boolean",
+                "isRequired": true,
+                "description": "Indicates if a cheque book is provided."
+            },
+            {
+                "name": "Minimum Initial Deposit",
+                "slug": "minimumInitialDeposit",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum amount required to open the account (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Banking Products",
+        "subCategoryName": "Fixed Deposits",
+        "fields": [
+            {
+                "name": "Interest Rate",
+                "slug": "interestRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0,
+                    "max": 100
+                },
+                "description": "Annual interest rate (p.a.). Can be a tiered structure based on tenure."
+            },
+            {
+                "name": "Tenure",
+                "slug": "tenureMonths",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 1
+                },
+                "description": "The duration of the fixed deposit in months."
+            },
+            {
+                "name": "Minimum Deposit Amount",
+                "slug": "minDepositAmount",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum amount required to open the fixed deposit (LKR)."
+            },
+            {
+                "name": "Premature Withdrawal Penalty",
+                "slug": "prematureWithdrawalPenalty",
+                "dataType": "string",
+                "isRequired": false,
+                "description": "Penalty details for withdrawing the deposit before maturity (e.g., '1% reduction in interest rate')."
+            },
+            {
+                "name": "Interest Payout Frequency",
+                "slug": "interestPayoutFrequency",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "monthly",
+                    "quarterly",
+                    "annually",
+                    "at_maturity"
+                ],
+                "description": "How often the interest is paid out."
+            }
+        ]
+    },
+    {
+        "categoryName": "Loans & Credit",
+        "subCategoryName": "Personal Loans",
+        "fields": [
+            {
+                "name": "Interest Rate",
+                "slug": "interestRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0,
+                    "max": 100
+                },
+                "description": "Annual interest rate (p.a.). Can be fixed or floating."
+            },
+            {
+                "name": "Minimum Loan Amount",
+                "slug": "minAmount",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum loan amount offered (LKR)."
+            },
+            {
+                "name": "Maximum Loan Amount",
+                "slug": "maxAmount",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Maximum loan amount offered (LKR)."
+            },
+            {
+                "name": "Tenure",
+                "slug": "tenureMonths",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 1
+                },
+                "description": "Loan repayment period in months."
+            },
+            {
+                "name": "Processing Fee",
+                "slug": "processingFee",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Fee charged for processing the loan application, can be a flat amount or a percentage of the loan."
+            },
+            {
+                "name": "Eligibility Age",
+                "slug": "eligibilityAge",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "JSON object for minimum and maximum age, e.g., {\"min\": 21, \"max\": 60}."
+            }
+        ]
+    },
+    {
+        "categoryName": "Loans & Credit",
+        "subCategoryName": "Housing Loans",
+        "fields": [
+            {
+                "name": "Interest Rate Type",
+                "slug": "interestRateType",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "fixed",
+                    "floating",
+                    "hybrid"
+                ],
+                "description": "Type of interest rate."
+            },
+            {
+                "name": "Interest Rate",
+                "slug": "interestRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0,
+                    "max": 100
+                },
+                "description": "Annual interest rate (p.a.)."
+            },
+            {
+                "name": "Maximum Loan-to-Value (LTV) Ratio",
+                "slug": "maxLtvRatio",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0,
+                    "max": 100
+                },
+                "description": "The maximum percentage of the property's value that can be financed. Regulated by CBSL."
+            },
+            {
+                "name": "Maximum Repayment Tenure",
+                "slug": "maxRepaymentTenureYears",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 1
+                },
+                "description": "Maximum loan repayment period in years."
+            },
+            {
+                "name": "Grace Period",
+                "slug": "gracePeriodMonths",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Optional period at the start of the loan where only interest is paid (in months)."
+            },
+            {
+                "name": "Property Type",
+                "slug": "propertyType",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "house",
+                    "apartment",
+                    "land",
+                    "construction"
+                ],
+                "description": "The type of property the loan is for."
+            }
+        ]
+    },
+    {
+        "categoryName": "Loans & Credit",
+        "subCategoryName": "Vehicle Loans",
+        "fields": [
+            {
+                "name": "Interest Rate",
+                "slug": "interestRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0,
+                    "max": 100
+                },
+                "description": "Annual interest rate (p.a.)."
+            },
+            {
+                "name": "Vehicle Type",
+                "slug": "vehicleType",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "car",
+                    "van",
+                    "suv",
+                    "motorcycle",
+                    "three_wheeler"
+                ],
+                "description": "Type of vehicle being financed."
+            },
+            {
+                "name": "Vehicle Condition",
+                "slug": "vehicleCondition",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "brand_new",
+                    "reconditioned",
+                    "used"
+                ],
+                "description": "Condition of the vehicle."
+            },
+            {
+                "name": "Maximum Loan Tenure",
+                "slug": "maxLoanTenureYears",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 1
+                },
+                "description": "Maximum repayment period in years."
+            },
+            {
+                "name": "Down Payment Percentage",
+                "slug": "downPaymentPercentage",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0,
+                    "max": 100
+                },
+                "description": "Minimum percentage of the vehicle's value required as a down payment."
+            }
+        ]
+    },
+    {
+        "categoryName": "Loans & Credit",
+        "subCategoryName": "Credit Cards",
+        "fields": [
+            {
+                "name": "Annual Fee",
+                "slug": "annualFee",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The annual fee for the card (LKR)."
+            },
+            {
+                "name": "Interest Rate",
+                "slug": "interestRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0,
+                    "max": 100
+                },
+                "description": "Annual interest rate for outstanding balances (p.a.)."
+            },
+            {
+                "name": "Minimum Credit Limit",
+                "slug": "creditLimitMin",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum credit limit offered (LKR)."
+            },
+            {
+                "name": "Maximum Credit Limit",
+                "slug": "creditLimitMax",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Maximum credit limit offered (LKR)."
+            },
+            {
+                "name": "Rewards Program",
+                "slug": "rewards",
+                "dataType": "json",
+                "isRequired": false,
+                "description": "Details of the rewards program, e.g., {\"type\": \"cashback\", \"rate\": 0.01} or {\"type\": \"points\", \"per_lkr\": 100, \"points\": 1}."
+            },
+            {
+                "name": "Minimum Monthly Income Eligibility",
+                "slug": "eligibilityIncome",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum monthly income required to be eligible for the card (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Cards",
+        "subCategoryName": "Debit Cards",
+        "fields": [
+            {
+                "name": "Issuance Fee",
+                "slug": "issuanceFee",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0
+                },
+                "description": "One-time fee for issuing the card (LKR)."
+            },
+            {
+                "name": "Annual Fee",
+                "slug": "annualFee",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Annual fee for the card (LKR)."
+            },
+            {
+                "name": "Daily ATM Withdrawal Limit",
+                "slug": "dailyAtmWithdrawalLimit",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Maximum amount that can be withdrawn from an ATM per day (LKR)."
+            },
+            {
+                "name": "Daily POS Transaction Limit",
+                "slug": "dailyPosTransactionLimit",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Maximum value of Point-of-Sale transactions per day (LKR)."
+            },
+            {
+                "name": "Card Network",
+                "slug": "cardNetwork",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "Visa",
+                    "Mastercard",
+                    "JCB",
+                    "LankaPay"
+                ],
+                "description": "The payment network the card belongs to."
+            }
+        ]
+    },
+    {
+        "categoryName": "Cards",
+        "subCategoryName": "Prepaid Cards",
+        "fields": [
+            {
+                "name": "Issuance Fee",
+                "slug": "issuanceFee",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "One-time fee for issuing the card (LKR)."
+            },
+            {
+                "name": "Reload Fee",
+                "slug": "reloadFee",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Fee for reloading/topping up the card (LKR)."
+            },
+            {
+                "name": "Minimum Load Amount",
+                "slug": "minLoadAmount",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum amount that can be loaded onto the card at one time (LKR)."
+            },
+            {
+                "name": "Maximum Card Balance",
+                "slug": "maxCardBalance",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Maximum balance that can be held on the card (LKR)."
+            },
+            {
+                "name": "Validity Period",
+                "slug": "validityPeriodMonths",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 1
+                },
+                "description": "The validity period of the card in months from the date of issuance."
+            }
+        ]
+    },
+    {
+        "categoryName": "Insurance Products",
+        "subCategoryName": "Life Insurance",
+        "fields": [
+            {
+                "name": "Sum Assured",
+                "slug": "sumAssured",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The amount of money the insurance company guarantees to pay upon the death of the insured (LKR)."
+            },
+            {
+                "name": "Premium Amount",
+                "slug": "premium",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The amount to be paid for the insurance policy (LKR)."
+            },
+            {
+                "name": "Premium Frequency",
+                "slug": "premiumFrequency",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "monthly",
+                    "quarterly",
+                    "semi_annually",
+                    "annually"
+                ],
+                "description": "How often the premium is paid."
+            },
+            {
+                "name": "Policy Term",
+                "slug": "tenureYears",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 1
+                },
+                "description": "The duration of the policy in years."
+            },
+            {
+                "name": "Age Limits",
+                "slug": "ageLimit",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "JSON object for minimum and maximum entry age, e.g., {\"minEntry\": 18, \"maxEntry\": 60, \"maxMaturity\": 70}."
+            },
+            {
+                "name": "Riders",
+                "slug": "riders",
+                "dataType": "json",
+                "isRequired": false,
+                "description": "Optional additional benefits, e.g., [{\"name\": \"Critical Illness Cover\", \"sumAssured\": 500000}, {\"name\": \"Accidental Death Benefit\"}]."
+            }
+        ]
+    },
+    {
+        "categoryName": "Insurance Products",
+        "subCategoryName": "General Insurance",
+        "fields": [
+            {
+                "name": "Coverage Type",
+                "slug": "coverageType",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "motor",
+                    "health",
+                    "property",
+                    "travel",
+                    "fire"
+                ],
+                "description": "The specific type of general insurance."
+            },
+            {
+                "name": "Coverage Amount",
+                "slug": "coverageAmount",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The maximum amount the insurer will pay for a covered loss (LKR)."
+            },
+            {
+                "name": "Premium",
+                "slug": "premium",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The cost of the insurance policy (LKR)."
+            },
+            {
+                "name": "Deductible",
+                "slug": "deductible",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The amount the policyholder must pay out-of-pocket before the insurer pays a claim (LKR)."
+            },
+            {
+                "name": "Policy Term",
+                "slug": "policyTermMonths",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 1
+                },
+                "description": "The duration of the policy, typically 12 months for general insurance."
+            }
+        ]
+    },
+    {
+        "categoryName": "Insurance Products",
+        "subCategoryName": "Microinsurance",
+        "fields": [
+            {
+                "name": "Coverage Amount",
+                "slug": "coverageAmount",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The amount of coverage provided, tailored for low-income segments (LKR)."
+            },
+            {
+                "name": "Premium",
+                "slug": "premium",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Low-cost premium, often with flexible payment options (LKR)."
+            },
+            {
+                "name": "Eligibility Income",
+                "slug": "eligibilityIncome",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "Income bracket for eligibility, e.g., {\"maxMonthly\": 25000}."
+            },
+            {
+                "name": "Target Segment",
+                "slug": "targetSegment",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Specific low-income group targeted (e.g., farmers, fishermen, small business owners)."
+            },
+            {
+                "name": "Claim Process",
+                "slug": "claimProcess",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Simplified claim process with minimal documentation."
+            }
+        ]
+    },
+    {
+        "categoryName": "Investment Products",
+        "subCategoryName": "Government Securities",
+        "fields": [
+            {
+                "name": "Issuer",
+                "slug": "issuer",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "Central Bank of Sri Lanka"
+                ],
+                "description": "The entity issuing the security."
+            },
+            {
+                "name": "Security Type",
+                "slug": "securityType",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "Treasury Bill",
+                    "Treasury Bond",
+                    "Sri Lanka Development Bond"
+                ],
+                "description": "The type of government security."
+            },
+            {
+                "name": "Maturity Date",
+                "slug": "maturityDate",
+                "dataType": "date",
+                "isRequired": true,
+                "description": "The date when the security matures and the principal is repaid."
+            },
+            {
+                "name": "Interest Rate / Yield",
+                "slug": "interestRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The coupon rate for bonds or the yield for bills."
+            },
+            {
+                "name": "Minimum Investment",
+                "slug": "minimumInvestment",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The minimum face value that can be purchased (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Investment Products",
+        "subCategoryName": "Corporate Bonds",
+        "fields": [
+            {
+                "name": "Issuer",
+                "slug": "issuer",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "The corporation issuing the bond."
+            },
+            {
+                "name": "Credit Rating",
+                "slug": "creditRating",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Credit rating assigned by an agency (e.g., Fitch, ICRA Lanka)."
+            },
+            {
+                "name": "Maturity Date",
+                "slug": "maturityDate",
+                "dataType": "date",
+                "isRequired": true,
+                "description": "The date when the bond matures."
+            },
+            {
+                "name": "Coupon Rate",
+                "slug": "couponRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The annual interest rate paid on the bond."
+            },
+            {
+                "name": "Face Value",
+                "slug": "faceValue",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The nominal value of the bond (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Investment Products",
+        "subCategoryName": "Mutual Funds",
+        "fields": [
+            {
+                "name": "Fund House",
+                "slug": "fundHouse",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "The asset management company managing the fund."
+            },
+            {
+                "name": "Fund Type",
+                "slug": "fundType",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "Equity",
+                    "Debt",
+                    "Hybrid",
+                    "Money Market"
+                ],
+                "description": "The category of the mutual fund based on its investments."
+            },
+            {
+                "name": "Net Asset Value (NAV)",
+                "slug": "nav",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The per-unit market value of the fund (LKR)."
+            },
+            {
+                "name": "Expense Ratio",
+                "slug": "expenseRatio",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The annual fee charged by the fund to manage the assets."
+            },
+            {
+                "name": "Minimum Investment",
+                "slug": "minimumInvestment",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The minimum amount required for a one-time investment (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Investment Products",
+        "subCategoryName": "Unit Trusts",
+        "fields": [
+            {
+                "name": "Trustee",
+                "slug": "trustee",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "The entity that holds the fund's assets in trust."
+            },
+            {
+                "name": "Management Company",
+                "slug": "managementCompany",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "The company managing the unit trust."
+            },
+            {
+                "name": "Fund Type",
+                "slug": "fundType",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "Equity",
+                    "Gilt-edged",
+                    "Income",
+                    "Balanced"
+                ],
+                "description": "The investment focus of the unit trust."
+            },
+            {
+                "name": "Unit Price",
+                "slug": "unitPrice",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The price per unit of the trust (LKR)."
+            },
+            {
+                "name": "Minimum Initial Investment",
+                "slug": "minInitialInvestment",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum amount for the first investment (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Investment Products",
+        "subCategoryName": "Real Estate Investment Trusts (REITs)",
+        "fields": [
+            {
+                "name": "REIT Manager",
+                "slug": "reitManager",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "The company managing the REIT's assets."
+            },
+            {
+                "name": "Property Portfolio",
+                "slug": "propertyPortfolio",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "Details of the real estate assets held, e.g., [{\"type\": \"Commercial\", \"location\": \"Colombo\"}]."
+            },
+            {
+                "name": "Dividend Yield",
+                "slug": "dividendYield",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The annual dividend per share as a percentage of the share price."
+            },
+            {
+                "name": "Market Price per Unit",
+                "slug": "marketPrice",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The trading price of one unit on the Colombo Stock Exchange (LKR)."
+            },
+            {
+                "name": "Net Asset Value (NAV) per Unit",
+                "slug": "navPerUnit",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The underlying value of the assets per unit (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Non-Banking Financial Products",
+        "subCategoryName": "Finance & Leasing",
+        "fields": [
+            {
+                "name": "Asset Type",
+                "slug": "assetType",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "The type of asset being financed or leased (e.g., Vehicle, Machinery, Equipment)."
+            },
+            {
+                "name": "Interest Rate / Rental",
+                "slug": "interestRateOrRental",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The interest rate for finance or the rental amount for leasing."
+            },
+            {
+                "name": "Tenure",
+                "slug": "tenureMonths",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 1
+                },
+                "description": "The period of the finance or lease agreement in months."
+            },
+            {
+                "name": "Down Payment",
+                "slug": "downPayment",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The initial payment made when the agreement starts (LKR)."
+            },
+            {
+                "name": "Residual Value",
+                "slug": "residualValue",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The estimated value of the asset at the end of the lease term (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Non-Banking Financial Products",
+        "subCategoryName": "SME Financing",
+        "fields": [
+            {
+                "name": "Loan Type",
+                "slug": "loanType",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "term_loan",
+                    "working_capital",
+                    "trade_finance",
+                    "project_loan"
+                ],
+                "description": "The specific type of financing for SMEs."
+            },
+            {
+                "name": "Loan Amount",
+                "slug": "loanAmount",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "JSON object for min and max loan amounts, e.g., {\"min\": 100000, \"max\": 50000000}."
+            },
+            {
+                "name": "Interest Rate",
+                "slug": "interestRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Annual interest rate, may be subsidized under government schemes."
+            },
+            {
+                "name": "Collateral Requirement",
+                "slug": "collateralRequirement",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Description of the collateral required (e.g., 'Property mortgage', 'Stock', 'May be waived for certain schemes')."
+            },
+            {
+                "name": "Business Age Requirement",
+                "slug": "businessAgeRequirementYears",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum number of years the business must be in operation."
+            }
+        ]
+    },
+    {
+        "categoryName": "Non-Banking Financial Products",
+        "subCategoryName": "Gold Loans",
+        "fields": [
+            {
+                "name": "Loan-to-Value (LTV) Ratio",
+                "slug": "ltvRatio",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0,
+                    "max": 100
+                },
+                "description": "The percentage of the gold's value that can be given as a loan."
+            },
+            {
+                "name": "Interest Rate",
+                "slug": "interestRate",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Annual interest rate for the loan."
+            },
+            {
+                "name": "Gold Karatage Accepted",
+                "slug": "goldKaratageAccepted",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "22K",
+                    "24K"
+                ],
+                "description": "The purity of gold accepted as collateral."
+            },
+            {
+                "name": "Repayment Term",
+                "slug": "repaymentTermMonths",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 1
+                },
+                "description": "The period within which the loan must be repaid."
+            },
+            {
+                "name": "Valuation Fee",
+                "slug": "valuationFee",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Fee charged for assessing the value of the gold (LKR)."
+            }
+        ]
+    },
+    {
+        "categoryName": "Digital Banking Services",
+        "subCategoryName": "Mobile Banking Apps",
+        "fields": [
+            {
+                "name": "Platform",
+                "slug": "platform",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "iOS",
+                    "Android",
+                    "HarmonyOS"
+                ],
+                "description": "The mobile operating system the app is available on."
+            },
+            {
+                "name": "Features",
+                "slug": "features",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "Key features available in the app, e.g., [\"Fund Transfer\", \"Bill Payments\", \"QR Payments\", \"Biometric Login\"]"
+            },
+            {
+                "name": "App Store Rating",
+                "slug": "appStoreRating",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0,
+                    "max": 5
+                },
+                "description": "The average user rating on the respective app store."
+            },
+            {
+                "name": "Last Updated",
+                "slug": "lastUpdated",
+                "dataType": "date",
+                "isRequired": false,
+                "description": "The date of the last app update."
+            }
+        ]
+    },
+    {
+        "categoryName": "Digital Banking Services",
+        "subCategoryName": "Online Banking Services",
+        "fields": [
+            {
+                "name": "Supported Browsers",
+                "slug": "supportedBrowsers",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "List of supported web browsers, e.g., [\"Chrome\", \"Firefox\", \"Safari\", \"Edge\"]"
+            },
+            {
+                "name": "Security Features",
+                "slug": "securityFeatures",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "Security measures in place, e.g., [\"Two-Factor Authentication\", \"SMS Alerts\", \"Virtual Keyboard\"]"
+            },
+            {
+                "name": "Transaction Limits",
+                "slug": "transactionLimits",
+                "dataType": "json",
+                "isRequired": false,
+                "description": "JSON object for online transaction limits, e.g., {\"daily_transfer_limit\": 1000000, \"per_transaction_limit\": 500000}"
+            },
+            {
+                "name": "Services Offered",
+                "slug": "servicesOffered",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "List of services offered through the online portal, e.g., [\"Account Summary\", \"e-Statements\", \"Loan Applications\", \"Card Management\"]"
+            }
+        ]
+    },
+    {
+        "categoryName": "Payment & Remittance Services",
+        "subCategoryName": "Domestic Payment Solutions",
+        "fields": [
+            {
+                "name": "Payment Gateway",
+                "slug": "paymentGateway",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Name of the payment gateway provider."
+            },
+            {
+                "name": "Transaction Fees",
+                "slug": "transactionFees",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Fee structure for transactions (e.g., '1.5% + LKR 10 per transaction')."
+            },
+            {
+                "name": "Supported Payment Methods",
+                "slug": "supportedPaymentMethods",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "e.g., [\"Credit/Debit Cards\", \"LANKAQR\", \"Mobile Wallets\"]"
+            },
+            {
+                "name": "Settlement Time",
+                "slug": "settlementTime",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Time taken for funds to be settled to the merchant's account (e.g., 'T+1 day')."
+            }
+        ]
+    },
+    {
+        "categoryName": "Payment & Remittance Services",
+        "subCategoryName": "International Remittance Services",
+        "fields": [
+            {
+                "name": "Service Provider",
+                "slug": "serviceProvider",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Name of the remittance service provider (e.g., Western Union, MoneyGram, Bank's own service)."
+            },
+            {
+                "name": "Transfer Fees",
+                "slug": "transferFees",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Fee structure, which may vary by destination country and amount."
+            },
+            {
+                "name": "Exchange Rate Margin",
+                "slug": "exchangeRateMargin",
+                "dataType": "number",
+                "isRequired": true,
+                "validation": {
+                    "min": 0
+                },
+                "description": "The percentage added to the mid-market exchange rate."
+            },
+            {
+                "name": "Transfer Speed",
+                "slug": "transferSpeed",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Estimated time for the recipient to receive the money (e.g., 'Instant', '1-2 business days')."
+            },
+            {
+                "name": "Receiving Countries",
+                "slug": "receivingCountries",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "List of countries where money can be sent."
+            }
+        ]
+    },
+    {
+        "categoryName": "Financial Planning & Advisory Services",
+        "subCategoryName": "Retirement Planning",
+        "fields": [
+            {
+                "name": "Advisory Fee",
+                "slug": "advisoryFee",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Fee structure for the advisory service (e.g., 'Flat fee', 'Percentage of AUM')."
+            },
+            {
+                "name": "Minimum Investable Assets",
+                "slug": "minInvestableAssets",
+                "dataType": "number",
+                "isRequired": false,
+                "validation": {
+                    "min": 0
+                },
+                "description": "Minimum amount of assets required to avail the service (LKR)."
+            },
+            {
+                "name": "Services Included",
+                "slug": "servicesIncluded",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "e.g., [\"Goal-based Investment Planning\", \"Pension Fund Analysis\", \"Risk Assessment\"]"
+            },
+            {
+                "name": "Advisor Certification",
+                "slug": "advisorCertification",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Certifications held by the financial advisors (e.g., 'CFP', 'CFA')."
+            }
+        ]
+    },
+    {
+        "categoryName": "Financial Planning & Advisory Services",
+        "subCategoryName": "Tax Advisory Services",
+        "fields": [
+            {
+                "name": "Service Type",
+                "slug": "serviceType",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "personal_tax",
+                    "corporate_tax",
+                    "indirect_tax_gst_vat"
+                ],
+                "description": "The area of tax advisory."
+            },
+            {
+                "name": "Consultation Fee",
+                "slug": "consultationFee",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Fee for consultation (e.g., 'Per hour', 'Fixed fee per case')."
+            },
+            {
+                "name": "Services Offered",
+                "slug": "servicesOffered",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "e.g., [\"Tax Return Filing\", \"Tax Planning\", \"Representation before IRD\"]"
+            },
+            {
+                "name": "Target Client",
+                "slug": "targetClient",
+                "dataType": "string",
+                "isRequired": true,
+                "options": [
+                    "individuals",
+                    "smes",
+                    "large_corporates"
+                ],
+                "description": "The primary client base for the service."
+            }
+        ]
+    },
+    {
+        "categoryName": "Financial Planning & Advisory Services",
+        "subCategoryName": "Estate Planning",
+        "fields": [
+            {
+                "name": "Service Fee",
+                "slug": "serviceFee",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Fee for creating an estate plan (e.g., 'Fixed fee for will writing', 'Percentage of estate value for trust setup')."
+            },
+            {
+                "name": "Services Offered",
+                "slug": "servicesOffered",
+                "dataType": "json",
+                "isRequired": true,
+                "description": "e.g., [\"Will Writing\", \"Trust Creation\", \"Power of Attorney\", \"Probate Assistance\"]"
+            },
+            {
+                "name": "Legal Expertise",
+                "slug": "legalExpertise",
+                "dataType": "string",
+                "isRequired": true,
+                "description": "Details on the legal professionals involved (e.g., 'In-house lawyers', 'Partnership with law firms')."
+            }
+        ]
+    }
+]

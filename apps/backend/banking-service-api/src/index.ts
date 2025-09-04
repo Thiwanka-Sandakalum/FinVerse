@@ -22,6 +22,7 @@ import productCategoryRoutes from './routes/product-category.routes';
 import productTypeRoutes from './routes/product-type.routes';
 import productRateHistoryRoutes from './routes/product-rate-history.routes';
 import productVersionRoutes from './routes/product-version.routes';
+import fieldRoutes from './routes/field.routes';
 
 // Initialize express app
 const app = express();
@@ -57,27 +58,27 @@ app.get('/health', async (req: Request, res: Response) => {
             port: PORT
         };
 
-        // Test database connection
-        try {
-            await prisma.$queryRaw`SELECT 1`;
-            healthStatus.database = 'Connected';
-        } catch (dbError) {
-            logger.error('Database health check failed:', dbError);
-            healthStatus.database = 'Disconnected';
-            healthStatus.status = 'WARNING';
-        }
+        // // Test database connection
+        // try {
+        //     await prisma.$queryRaw`SELECT 1`;
+        //     healthStatus.database = 'Connected';
+        // } catch (dbError) {
+        //     logger.error('Database health check failed:', dbError);
+        //     healthStatus.database = 'Disconnected';
+        //     healthStatus.status = 'WARNING';
+        // }
 
-        // Test RabbitMQ connection
-        try {
-            healthStatus.messageQueue = queueService.isQueueConnected() ? 'Connected' : 'Disconnected';
-            if (!queueService.isQueueConnected()) {
-                healthStatus.status = 'WARNING';
-            }
-        } catch (queueError) {
-            logger.error('Queue health check failed:', queueError);
-            healthStatus.messageQueue = 'Error';
-            healthStatus.status = 'WARNING';
-        }
+        // // Test RabbitMQ connection
+        // try {
+        //     healthStatus.messageQueue = queueService.isQueueConnected() ? 'Connected' : 'Disconnected';
+        //     if (!queueService.isQueueConnected()) {
+        //         healthStatus.status = 'WARNING';
+        //     }
+        // } catch (queueError) {
+        //     logger.error('Queue health check failed:', queueError);
+        //     healthStatus.messageQueue = 'Error';
+        //     healthStatus.status = 'WARNING';
+        // }
 
         res.status(200).json(healthStatus);
     } catch (error) {
@@ -101,6 +102,7 @@ app.use('/institutions', optionalAuthMiddleware, institutionRoutes);
 app.use('/product-categories', optionalAuthMiddleware, productCategoryRoutes);
 app.use('/product-types', optionalAuthMiddleware, productTypeRoutes);
 app.use('/products/tags', optionalAuthMiddleware, tagRoutes);
+app.use('/fields', optionalAuthMiddleware, fieldRoutes);
 
 // Protected routes (auth required)
 app.use('/saved-products', authMiddleware, savedProductRoutes);

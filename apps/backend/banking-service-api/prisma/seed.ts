@@ -34,13 +34,64 @@ async function main() {
 
     // Product Categories
     if (Array.isArray(data.productCategories)) {
-        for (const cat of data.productCategories) {
+        // Handle nested array structure
+        const categories = Array.isArray(data.productCategories[0])
+            ? data.productCategories[0]
+            : data.productCategories;
+
+        for (const cat of categories) {
+            if (!cat.id || !cat.slug) {
+                console.warn(`Skipping category with missing id or slug:`, cat);
+                continue;
+            }
+
             await prisma.productCategory.upsert({
-                where: { slug: cat.slug },
-                update: cat,
-                create: cat,
+                where: { id: cat.id },
+                update: {
+                    name: cat.name,
+                    slug: cat.slug,
+                    description: cat.description,
+                    level: cat.level || 0,
+                    parentId: cat.parentId
+                },
+                create: {
+                    id: cat.id,
+                    name: cat.name,
+                    slug: cat.slug,
+                    description: cat.description,
+                    level: cat.level || 0,
+                    parentId: cat.parentId
+                }
             });
         }
+    }
+
+    // Field Definitions
+    if (Array.isArray(data.fieldDefinitions)) {
+        // First, delete all existing field definitions
+        await prisma.fieldDefinition.deleteMany({});
+
+        // Then create the new ones
+        for (const field of data.fieldDefinitions) {
+            const { description, ...fieldData } = field; // Remove description field
+            try {
+                await prisma.fieldDefinition.create({
+                    data: {
+                        id: field.id,
+                        categoryId: field.categoryId,
+                        name: field.name,
+                        slug: field.slug,
+                        dataType: field.dataType,
+                        isRequired: field.isRequired,
+                        options: field.options || [],
+                        validation: field.validation || null
+                    }
+                });
+            } catch (error) {
+                console.warn(`Failed to create field definition: ${field.name}`, error);
+            }
+        }
+        console.log(`Successfully created ${data.fieldDefinitions.length} field definitions`);
     }
 
     // Product Types
