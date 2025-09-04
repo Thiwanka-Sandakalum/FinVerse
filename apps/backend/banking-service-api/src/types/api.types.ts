@@ -147,12 +147,12 @@ export interface ErrorResponse {
     message: string;
 }
 
-// Pagination related types
+// Pagination related types - Fix: Properly extend Request
 export interface PaginatedRequest extends Request {
     pagination?: {
         limit: number;
         offset: number;
-    }
+    };
 }
 
 export interface PaginatedResponse<T> {
