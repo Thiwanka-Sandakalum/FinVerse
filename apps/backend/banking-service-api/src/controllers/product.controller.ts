@@ -104,6 +104,19 @@ export class ProductController {
     });
 
     /**
+     * Get product fields by product type ID
+     */
+    getProductFieldsByType = asyncHandler(async (req: Request, res: Response) => {
+        const { productTypeId } = req.params;
+        const fields = await this.productService.getProductFieldsByType(productTypeId);
+
+        res.status(200).json({
+            data: fields,
+            productTypeId
+        });
+    });
+
+    /**
      * Track product view interaction
      */
     private async trackProductViewInteraction(req: AuthRequest, product: any): Promise<void> {

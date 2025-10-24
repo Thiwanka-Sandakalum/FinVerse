@@ -52,14 +52,14 @@ export class ProductRepository {
             };
         }
 
-        // Add search filter (optimized for trigram index)
+        // Add search filter
         if (search) {
             where.OR = [
-                { name: { contains: search, mode: 'insensitive' } },
-                { slug: { contains: search, mode: 'insensitive' } },
-                { institution: { name: { contains: search, mode: 'insensitive' } } },
-                { productType: { name: { contains: search, mode: 'insensitive' } } },
-                { tags: { some: { tag: { name: { contains: search, mode: 'insensitive' } } } } }
+                { name: { contains: search } },
+                { slug: { contains: search } },
+                { institution: { name: { contains: search } } },
+                { productType: { name: { contains: search } } },
+                { tags: { some: { tag: { name: { contains: search } } } } }
             ];
         }
 
@@ -169,11 +169,15 @@ export class ProductRepository {
         // Generate slug from name
         const slug = slugify(data.name);
 
+        // Map customAttributes to details field for Prisma
+        const { customAttributes, ...restData } = data;
+
         // Create product
         const product = await prisma.product.create({
             data: {
-                ...data,
-                slug
+                ...restData,
+                slug,
+                details: customAttributes ? customAttributes as Prisma.InputJsonValue : Prisma.DbNull
             },
             include: {
                 institution: true,
@@ -208,10 +212,16 @@ export class ProductRepository {
             return null;
         }
 
-        // Update with optional slug if name changes
-        const updateData: any = { ...data };
+        // Map customAttributes to details field and handle other updates
+        const { customAttributes, ...restData } = data;
+        const updateData: any = { ...restData };
+
         if (data.name) {
             updateData.slug = slugify(data.name);
+        }
+
+        if (customAttributes !== undefined) {
+            updateData.details = customAttributes ? customAttributes as Prisma.InputJsonValue : Prisma.DbNull;
         }
 
         // Update the product
@@ -262,5 +272,175 @@ export class ProductRepository {
             where: { id },
             data: { isActive }
         });
+    }
+
+    /**
+     * Find product type by ID
+     */
+    async findProductTypeById(id: string) {
+        return prisma.productType.findUnique({
+            where: { id },
+            include: {
+                category: true
+            }
+        });
+    }
+
+    /**
+     * Get distinct fields and their data types from product details by product type
+     */
+    async getProductFieldsByType(productTypeId: string) {
+        // Get all products of this type that have details
+        const products = await prisma.product.findMany({
+            where: {
+                productTypeId: productTypeId,
+                details: {
+                    not: Prisma.DbNull
+                }
+            },
+            select: {
+                details: true
+            }
+        });
+
+        // Extract and analyze all unique fields
+        interface FieldInfo {
+            key: string;
+            type: string;
+            examples: Set<any>;
+            isRequired: boolean;
+            description?: string;
+        }
+
+        const fieldMap = new Map<string, FieldInfo>();
+
+        // Process each product's details
+        for (const product of products) {
+            if (product.details && typeof product.details === 'object') {
+                const details = product.details as Record<string, any>;
+
+                Object.entries(details).forEach(([key, value]) => {
+                    if (!fieldMap.has(key)) {
+                        fieldMap.set(key, {
+                            key,
+                            type: this.inferDataType(value),
+                            examples: new Set(),
+                            isRequired: false,
+                            description: this.generateFieldDescription(key)
+                        });
+                    }
+
+                    const field = fieldMap.get(key)!;
+
+                    // Add example value (limit to prevent too much data)
+                    if (field.examples.size < 5) {
+                        field.examples.add(value);
+                    }
+
+                    // Check if types are consistent, if not, make it 'mixed'
+                    const currentType = this.inferDataType(value);
+                    if (field.type !== currentType && field.type !== 'mixed') {
+                        field.type = 'mixed';
+                    }
+                });
+            }
+        }
+
+        // Calculate field frequency to determine if required
+        const totalProductsWithDetails = products.length;
+
+        // Convert to final format
+        const fields = Array.from(fieldMap.values()).map(field => ({
+            key: field.key,
+            type: field.type,
+            examples: Array.from(field.examples).slice(0, 3), // Limit examples
+            isRequired: false, // You can implement logic to determine this
+            description: field.description,
+            frequency: {
+                count: field.examples.size,
+                percentage: totalProductsWithDetails > 0 ?
+                    Math.round((field.examples.size / totalProductsWithDetails) * 100) : 0
+            }
+        }));
+
+        // Sort by frequency (most common first)
+        fields.sort((a, b) => b.frequency.percentage - a.frequency.percentage);
+
+        return {
+            totalProducts: totalProductsWithDetails,
+            fields: fields
+        };
+    }
+
+    /**
+     * Infer data type from value
+     */
+    private inferDataType(value: any): string {
+        if (value === null || value === undefined) {
+            return 'null';
+        }
+
+        if (typeof value === 'string') {
+            // Check if it's a valid date string
+            if (!isNaN(Date.parse(value))) {
+                return 'date';
+            }
+            // Check if it's a valid number string
+            if (!isNaN(Number(value))) {
+                return 'number';
+            }
+            return 'string';
+        }
+
+        if (typeof value === 'number') {
+            return Number.isInteger(value) ? 'integer' : 'decimal';
+        }
+
+        if (typeof value === 'boolean') {
+            return 'boolean';
+        }
+
+        if (Array.isArray(value)) {
+            if (value.length === 0) {
+                return 'array';
+            }
+            // Check if all elements have the same type
+            const firstType = this.inferDataType(value[0]);
+            const allSameType = value.every(item => this.inferDataType(item) === firstType);
+            return allSameType ? `array<${firstType}>` : 'array<mixed>';
+        }
+
+        if (typeof value === 'object') {
+            return 'object';
+        }
+
+        return 'unknown';
+    }
+
+    /**
+     * Generate human-readable description for common field names
+     */
+    private generateFieldDescription(key: string): string {
+        const descriptions: Record<string, string> = {
+            'interestRate': 'Interest rate percentage',
+            'minimumAmount': 'Minimum amount required',
+            'maximumAmount': 'Maximum amount allowed',
+            'tenure': 'Tenure period',
+            'tenureUnit': 'Unit for tenure (days, months, years)',
+            'currency': 'Currency code (e.g., LKR, USD)',
+            'features': 'List of product features',
+            'penaltyRate': 'Penalty rate percentage',
+            'fees': 'Associated fees',
+            'requirements': 'Product requirements',
+            'benefits': 'Product benefits',
+            'eligibility': 'Eligibility criteria',
+            'terms': 'Terms and conditions',
+            'maturityAmount': 'Amount at maturity',
+            'monthlyPayment': 'Monthly payment amount',
+            'annualFee': 'Annual fee amount',
+            'processingFee': 'Processing fee amount'
+        };
+
+        return descriptions[key] || `${key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').toLowerCase()}`;
     }
 }

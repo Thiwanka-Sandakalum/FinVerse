@@ -1085,7 +1085,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /products/{productTypeId}/fields:
+    parameters:
+      - name: productTypeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
 
+    get:
+      summary: Get Field Definitions for Product Type
+      description: Retrieve field definitions associated with a specific product type
+      tags:
+        - Field Definitions
+      responses:
+        "200":
+          description: List of field definitions
+          content:
+            application/json:
+              schema:
+                type: array
+
+        "404":
+          description: Product type not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /saved-products:
     get:
       summary: Get Saved Products
