@@ -40,14 +40,14 @@ export class ProductRepository {
         if (categoryId) {
             where.productType = {
                 OR: [
+                    { categoryId: categoryId },
                     {
                         category: {
                             parent: {
                                 id: categoryId
                             }
                         }
-                    },
-                    { categoryId: categoryId }
+                    }
                 ]
             };
         }
