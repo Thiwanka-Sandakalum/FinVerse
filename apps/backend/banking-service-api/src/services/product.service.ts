@@ -117,4 +117,23 @@ export class ProductService {
 
         return this.productRepository.setActiveStatus(id, isActive);
     }
+
+    /**
+     * Get distinct fields and their data types from product details by product type
+     */
+    async getProductFieldsByType(productTypeId: string) {
+        // First verify the product type exists
+        const productTypeExists = await this.productRepository.findProductTypeById(productTypeId);
+
+        if (!productTypeExists) {
+            throw new ApiError(404, 'Product type not found');
+        }
+
+        const fields = await this.productRepository.getProductFieldsByType(productTypeId);
+
+        return {
+            productType: productTypeExists,
+            fields: fields
+        };
+    }
 }

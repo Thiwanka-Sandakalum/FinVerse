@@ -10,8 +10,8 @@ RUN apk add --no-cache libc6-compat
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install ALL dependencies (including devDependencies for TypeScript compilation)
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -21,6 +21,9 @@ RUN npx prisma generate
 
 # Build the TypeScript application
 RUN npm run build
+
+# Clean up dev dependencies and reinstall only production dependencies
+RUN rm -rf node_modules && npm ci --only=production && npm cache clean --force
 
 # Production stage
 FROM node:20-alpine AS production
@@ -48,11 +51,11 @@ RUN npx prisma generate
 USER banking-service
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 4001
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+    CMD node -e "require('http').get('http://localhost:4001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]

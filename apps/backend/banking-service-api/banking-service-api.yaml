@@ -16,7 +16,7 @@ servers:
     description: Production server
   - url: https://staging-api.finverse.com/v1
     description: Staging server
-  - url: http://localhost:3000/api/v1
+  - url: http://localhost:4040
     description: Development server
 
 tags:
@@ -40,6 +40,8 @@ tags:
     description: Product category management
   - name: Rate History
     description: Product rate history operations
+  - name: Field Definitions
+    description: Product field definitions management and retrieval
 
 components:
   securitySchemes:
@@ -559,6 +561,94 @@ components:
         - metric
         - value
 
+    FieldDefinition:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Interest Rate"
+        slug:
+          type: string
+          example: "interestRate"
+        dataType:
+          type: string
+          enum: ["string", "number", "date", "boolean", "json"]
+        isRequired:
+          type: boolean
+          default: false
+        options:
+          type: array
+          items:
+            type: string
+        validation:
+          type: object
+          nullable: true
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+            pattern:
+              type: string
+      required:
+        - categoryId
+        - name
+        - slug
+        - dataType
+
+    FieldDefinitionCreate:
+      type: object
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Interest Rate"
+        slug:
+          type: string
+          example: "interestRate"
+        dataType:
+          type: string
+          enum: ["string", "number", "date", "boolean", "json"]
+        isRequired:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: string
+        validation:
+          type: object
+          nullable: true
+      required:
+        - categoryId
+        - name
+        - dataType
+
+    FieldDefinitionUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+          enum: ["string", "number", "date", "boolean", "json"]
+        isRequired:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: string
+        validation:
+          type: object
+          nullable: true
+
     Error:
       type: object
       properties:
@@ -995,7 +1085,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /products/{productTypeId}/fields:
+    parameters:
+      - name: productTypeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
 
+    get:
+      summary: Get Field Definitions for Product Type
+      description: Retrieve field definitions associated with a specific product type
+      tags:
+        - Field Definitions
+      responses:
+        "200":
+          description: List of field definitions
+          content:
+            application/json:
+              schema:
+                type: array
+
+        "404":
+          description: Product type not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /saved-products:
     get:
       summary: Get Saved Products
@@ -1384,6 +1501,183 @@ paths:
                   $ref: "#/components/schemas/Review"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /fields:
+    get:
+      summary: Get All Field Definitions
+      description: Retrieve a list of all field definitions
+      tags:
+        - Field Definitions
+      responses:
+        "200":
+          description: A list of field definitions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FieldDefinition"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Create Field Definition
+      description: Create a new field definition
+      tags:
+        - Field Definitions
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FieldDefinitionCreate"
+      responses:
+        "201":
+          description: Field definition created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldDefinition"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /fields/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get Field Definition
+      description: Get a specific field definition by ID
+      tags:
+        - Field Definitions
+      responses:
+        "200":
+          description: Field definition details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldDefinition"
+        "404":
+          description: Field definition not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Update Field Definition
+      description: Update an existing field definition
+      tags:
+        - Field Definitions
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FieldDefinitionUpdate"
+      responses:
+        "200":
+          description: Field definition updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldDefinition"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Field definition not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Delete Field Definition
+      description: Delete a field definition
+      tags:
+        - Field Definitions
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Field definition deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Field definition not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /fields/category/{categoryId}:
+    parameters:
+      - name: categoryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get Fields by Category
+      description: Get all field definitions for a specific product category
+      tags:
+        - Field Definitions
+      responses:
+        "200":
+          description: List of field definitions for the category
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FieldDefinition"
+        "404":
+          description: Category not found
           content:
             application/json:
               schema:

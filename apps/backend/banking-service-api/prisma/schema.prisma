@@ -2,14 +2,8 @@ generator client {
     provider = "prisma-client-js"
 }
 
-/// This is used when running `npx prisma db seed`
-generator seeder {
-    provider      = "prisma-client-js"
-    binaryTargets = ["native", "debian-openssl-3.0.x"]
-}
-
 datasource db {
-    provider = "postgresql"
+    provider = "mysql"
     url      = env("DATABASE_URL")
 }
 
@@ -30,8 +24,8 @@ model Institution {
     licenseNumber String?
     countryCode   String
     isActive      Boolean  @default(true)
-    createdAt     DateTime @default(now()) @db.Timestamptz(6)
-    updatedAt     DateTime @updatedAt @db.Timestamptz(6)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
 
     type     InstitutionType @relation(fields: [typeId], references: [id], onDelete: Cascade)
     products Product[]
@@ -66,11 +60,11 @@ model Product {
     productTypeId String
     name          String
     slug          String   @unique
-    details       Json?    @db.JsonB // Rich text details about the product (features, benefits, eligibility, etc.)
+    details       Json?
     isFeatured    Boolean  @default(false)
     isActive      Boolean  @default(true)
-    createdAt     DateTime @default(now()) @db.Timestamptz(6)
-    updatedAt     DateTime @updatedAt @db.Timestamptz(6)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
 
     institution Institution          @relation(fields: [institutionId], references: [id], onDelete: Cascade)
     productType ProductType          @relation(fields: [productTypeId], references: [id], onDelete: Cascade)
@@ -84,7 +78,6 @@ model Product {
 
     @@index([name])
     @@index([slug])
-    @@index([details])
 }
 
 // Definitions for dynamic fields associated with a ProductCategory (e.g. "Minimum Interest Rate", "Max LTV Ratio", etc.)
@@ -123,10 +116,10 @@ model ProductVersion {
     id            String   @id @default(uuid())
     productId     String
     versionNumber Int
-    snapshot      Json     @db.JsonB
+    snapshot      Json
     changedBy     String?
     changeNote    String?
-    createdAt     DateTime @default(now()) @db.Timestamptz(6)
+    createdAt     DateTime @default(now())
 
     product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
@@ -137,7 +130,7 @@ model ProductRateHistory {
     metric     String
     value      Decimal
     currency   String?
-    recordedAt DateTime @default(now()) @db.Timestamptz(6)
+    recordedAt DateTime @default(now())
     source     String?
 
     product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -149,7 +142,7 @@ model SavedProduct {
     id          String   @id @default(uuid())
     clerkUserId String // From Clerk JWT
     productId   String
-    createdAt   DateTime @default(now()) @db.Timestamptz(6)
+    createdAt   DateTime @default(now())
 
     product Product @relation(fields: [productId], references: [id])
 }
@@ -157,8 +150,8 @@ model SavedProduct {
 model CompareList {
     id          String   @id @default(uuid())
     clerkUserId String // From Clerk JWT
-    productIds  String[] // Postgres array of UUIDs (for product comparison)
-    createdAt   DateTime @default(now()) @db.Timestamptz(6)
+    productIds  Json // Array of product IDs
+    createdAt   DateTime @default(now())
 }
 
 model SharedLink {
@@ -166,7 +159,7 @@ model SharedLink {
     productId   String
     clerkUserId String? // Optional, to track who shared
     channel     String // "whatsapp", "email", etc.
-    sharedAt    DateTime @default(now()) @db.Timestamptz(6)
+    sharedAt    DateTime @default(now())
 
     product Product @relation(fields: [productId], references: [id])
 }
@@ -177,7 +170,7 @@ model Review {
     productId   String
     rating      Int // Rating between 1 and 5
     comment     String?
-    createdAt   DateTime @default(now()) @db.Timestamptz(6)
+    createdAt   DateTime @default(now())
 
     product Product @relation(fields: [productId], references: [id])
 }
