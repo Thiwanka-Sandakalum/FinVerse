@@ -7,6 +7,7 @@ const productController = new ProductController();
 
 // Public routes (optionalAuthMiddleware is applied at app level for these)
 router.get('/', productController.getAllProducts);
+router.post('/batch', productController.getProductsByIds);
 router.get('/:productTypeId/fields', productController.getProductFieldsByType);
 router.get('/:id', productController.getProductById);
 

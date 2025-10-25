@@ -50,6 +50,20 @@ export class ProductService {
     }
 
     /**
+     * Get products by array of IDs
+     */
+    async getProductsByIds(ids: string[], userId?: string, userInstitutionId?: string) {
+        const products = await this.productRepository.findByIds(ids, userId);
+
+        // If user has institutionId, filter products that belong to their institution
+        if (userInstitutionId) {
+            return products.filter(product => product.institutionId === userInstitutionId);
+        }
+
+        return products;
+    }
+
+    /**
      * Create a new product
      */
     async createProduct(data: ProductCreateDto, userInstitutionId?: string) {

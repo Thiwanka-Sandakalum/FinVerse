@@ -163,6 +163,62 @@ export class ProductRepository {
     }
 
     /**
+     * Find products by array of IDs
+     */
+    async findByIds(ids: string[], userId?: string) {
+        // Get all products with the given IDs
+        const products = await prisma.product.findMany({
+            where: {
+                id: {
+                    in: ids
+                },
+                isActive: true // Only return active products
+            },
+            include: {
+                institution: true,
+                productType: {
+                    include: {
+                        category: true
+                    }
+                },
+                tags: {
+                    include: {
+                        tag: true
+                    }
+                },
+                rateHistory: {
+                    orderBy: {
+                        recordedAt: 'desc'
+                    },
+                    take: 5 // Limit rate history for batch requests
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        // If userId is provided, get saved products for this user
+        let savedProductIds: string[] = [];
+        if (userId && products.length > 0) {
+            const savedProducts = await prisma.savedProduct.findMany({
+                where: {
+                    clerkUserId: userId,
+                    productId: {
+                        in: products.map(p => p.id)
+                    }
+                },
+                select: { productId: true }
+            });
+            savedProductIds = savedProducts.map(sp => sp.productId);
+        }
+
+        // Add isSaved indicator to each product
+        return products.map(product => ({
+            ...product,
+            isSaved: userId ? savedProductIds.includes(product.id) : false
+        }));
+    }
+
+    /**
      * Create a new product
      */
     async create(data: ProductCreateDto) {

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ProductService } from '../services/product.service';
 import { asyncHandler } from '../middlewares/error.middleware';
-import { ProductCreateDto, ProductUpdateDto } from '../types/api.types';
+import { ProductCreateDto, ProductUpdateDto, ProductBatchRequestDto } from '../types/api.types';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { interactionTracker } from '../services/interaction-tracking.service';
 
@@ -104,6 +104,51 @@ export class ProductController {
     });
 
     /**
+     * Get products by array of IDs
+     */
+    getProductsByIds = asyncHandler(async (req: AuthRequest, res: Response) => {
+        const { productIds }: ProductBatchRequestDto = req.body;
+
+        // Validate request body
+        if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+            return res.status(400).json({
+                error: 'productIds array is required and must not be empty'
+            });
+        }
+
+        // Validate array contains only strings
+        if (productIds.some(id => typeof id !== 'string')) {
+            return res.status(400).json({
+                error: 'All product IDs must be strings'
+            });
+        }
+
+        // Limit the number of IDs to prevent abuse
+        if (productIds.length > 100) {
+            return res.status(400).json({
+                error: 'Maximum 100 product IDs allowed per request'
+            });
+        }
+
+        const userInstitutionId = req.user?.institutionId;
+        const products = await this.productService.getProductsByIds(productIds, req.user?.userId, userInstitutionId);
+
+        // Track batch product view interaction asynchronously
+        this.trackBatchProductViewInteraction(req, products).catch((error: any) => {
+            console.error('Failed to track batch product view:', error);
+        });
+
+        res.status(200).json({
+            data: products,
+            meta: {
+                requested: productIds.length,
+                found: products.length,
+                notFound: productIds.length - products.length
+            }
+        });
+    });
+
+    /**
      * Get product fields by product type ID
      */
     getProductFieldsByType = asyncHandler(async (req: Request, res: Response) => {
@@ -133,6 +178,28 @@ export class ProductController {
         } catch (error) {
             // Log error but don't throw to avoid breaking the main functionality
             console.error('❌ CONTROLLER - Error in trackProductViewInteraction:', error);
+        }
+    }
+
+    /**
+     * Track batch product view interaction
+     */
+    private async trackBatchProductViewInteraction(req: AuthRequest, products: any[]): Promise<void> {
+        try {
+            console.log('🚀 CONTROLLER - Starting batch product view tracking for:', {
+                productCount: products.length,
+                userId: req.user?.userId || 'anonymous'
+            });
+
+            // Track each product view individually
+            for (const product of products) {
+                await interactionTracker.trackProductView(req, product);
+            }
+
+            console.log('✅ CONTROLLER - Batch product view tracking completed');
+        } catch (error) {
+            // Log error but don't throw to avoid breaking the main functionality
+            console.error('❌ CONTROLLER - Error in trackBatchProductViewInteraction:', error);
         }
     }    /**
      * Create product
