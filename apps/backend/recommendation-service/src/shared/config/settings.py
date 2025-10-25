@@ -20,8 +20,7 @@ class DatabaseSettings(BaseSettings):
         description="MongoDB database name"
     )
     
-    class Config:
-        env_prefix = "DB_"
+    model_config = {"env_prefix": "DB_", "env_file": ".env", "case_sensitive": False, "extra": "ignore"}
 
 
 class ServiceSettings(BaseSettings):
@@ -34,8 +33,7 @@ class ServiceSettings(BaseSettings):
     debug: bool = Field(default=False)
     log_level: str = Field(default="INFO")
     
-    class Config:
-        env_prefix = "SERVICE_"
+    model_config = {"env_prefix": "SERVICE_", "env_file": ".env", "case_sensitive": False, "extra": "ignore"}
 
 
 class CorsSettings(BaseSettings):
@@ -46,8 +44,8 @@ class CorsSettings(BaseSettings):
     allow_methods: List[str] = Field(default=["*"])
     allow_headers: List[str] = Field(default=["*"])
     
-    class Config:
-        env_prefix = "CORS_"
+    
+    model_config = {"env_prefix": "CORS_", "extra": "ignore"}
 
 
 class ExternalServiceSettings(BaseSettings):
@@ -62,8 +60,8 @@ class ExternalServiceSettings(BaseSettings):
         description="Banking service request timeout in seconds"
     )
     
-    class Config:
-        env_prefix = "EXTERNAL_"
+    
+    model_config = {"env_prefix": "EXTERNAL_", "extra": "ignore"}
 
 
 class ModelSettings(BaseSettings):
@@ -84,8 +82,8 @@ class ModelSettings(BaseSettings):
         description="Model refresh interval in seconds"
     )
     
-    class Config:
-        env_prefix = "MODEL_"
+    
+    model_config = {"env_prefix": "MODEL_", "extra": "ignore"}
 
 
 class StorageSettings(BaseSettings):
@@ -104,9 +102,8 @@ class StorageSettings(BaseSettings):
     item_mapping_filename: str = Field(default="item_mapping.pkl")
     feature_mapping_filename: str = Field(default="feature_mapping.pkl")
     
-    class Config:
-        env_prefix = "STORAGE_"
-        protected_namespaces = ('settings_',)
+    
+    model_config = {"env_prefix": "STORAGE_", "protected_namespaces": ("settings_",), "extra": "ignore"}
     
     def __post_init__(self):
         """Ensure data directory exists."""
