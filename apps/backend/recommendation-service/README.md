@@ -1,126 +1,255 @@
-# FinVerse Recommendation Service
+# 🎯 FinVerse Recommendation Service
 
-A hybrid recommendation system for FinVerse's banking application, built using FastAPI and LightFM.
+A high-performance, production-ready recommendation service that provides personalized product recommendations using advanced machine learning techniques. Built with clean architecture principles and modern Python practices.
 
-## Overview
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
-The recommendation service is designed to generate personalized product recommendations for users of the FinVerse banking application, based on their interactions captured by the interaction tracking service.
+## ✨ Features
 
-The service implements a hybrid recommendation system using the LightFM library, combining:
+- **🔥 Hybrid Recommendations**: Collaborative + Content-based filtering using LightFM
+- **👤 Multi-Mode Support**: User-based, session-based, and product similarity recommendations  
+- **⚡ Real-time Training**: Automatic model updates with latest interaction data
+- **🏗️ Clean Architecture**: Separation of concerns with domain-driven design
+- **🛡️ Production Ready**: Comprehensive error handling, logging, and monitoring
+- **📊 Type Safe**: Full type annotations and mypy compliance
+- **🧪 Well Tested**: High test coverage with unit, integration, and E2E tests
+- **📡 RESTful API**: Fast, documented API with automatic OpenAPI generation
 
-1. **Collaborative filtering** - Recommends products based on user similarities and behaviors
-2. **Content-based filtering** - Leverages product attributes and user preferences
+## 🏛️ Architecture
 
-## Features
+The service follows **Clean Architecture** principles with clear separation of concerns:
 
-- Personalized product recommendations for users
-- Session-based recommendations for anonymous users
-- Similar product recommendations
-- Periodic model retraining for up-to-date recommendations
-- RESTful API for integration with frontend applications
+```
+src/
+├── 🏪 domain/              # Core business logic (entities, rules)
+│   ├── entities/           # Domain models and value objects
+│   ├── repositories/       # Repository interfaces
+│   └── services/           # Domain business logic
+├── 🎯 application/         # Application orchestration layer  
+│   ├── dto/               # Data transfer objects
+│   ├── services/          # Application services
+│   └── use_cases/         # Use case implementations
+├── 🔧 infrastructure/      # External world interactions
+│   ├── database/          # Database implementations
+│   ├── external/          # External service clients
+│   ├── models/            # ML model implementations  
+│   └── persistence/       # Repository implementations
+├── 🌐 presentation/        # User interface layer
+│   └── api/               # FastAPI routes and schemas
+└── 🛠️ shared/             # Cross-cutting concerns
+    ├── config/            # Configuration management
+    ├── constants/         # Application constants
+    ├── exceptions/        # Custom exceptions
+    └── utils/             # Utility functions
+```
 
-## Architecture
+### 🧩 Key Components
 
-The service follows a modular architecture:
+- **Domain Entities**: `UserInteraction`, `ProductRecommendation`, `ModelRefreshResult`
+- **Repository Pattern**: Clean data access abstraction
+- **Dependency Injection**: Loose coupling and testability
+- **Event-Driven**: Background model refresh scheduler
+- **Error Boundaries**: Comprehensive exception handling
 
-- **API Layer**: FastAPI endpoints for serving recommendations
-- **Service Layer**: Core recommendation logic and integration with other services
-- **Model Layer**: Hybrid recommendation model implementation using LightFM
-- **Data Layer**: Data processing pipelines and database interactions
-
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Python 3.9+
-- Docker and Docker Compose
-- MongoDB (used by the interaction service)
+- **Python 3.11+** 
+- **MongoDB 4.4+**
+- **Git**
 
-### Installation
-
-1. Clone the repository:
+### 1️⃣ Clone & Setup
 
 ```bash
-git clone https://github.com/your-org/finverse.git
-cd apps/backend/recommendation-service
-```
+# Clone repository
+git clone <repository-url>
+cd recommendation-service
 
-2. Set up a virtual environment:
-
-```bash
+# Create virtual environment  
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-3. Install dependencies:
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### Running the Service
-
-#### Using Docker
+### 2️⃣ Configuration
 
 ```bash
-docker-compose up -d
+# Copy environment template
+cp .env.example .env
+
+# Edit configuration
+vim .env
 ```
 
-#### Locally
+**Key Environment Variables:**
+```bash
+# Service
+SERVICE_HOST=0.0.0.0
+SERVICE_PORT=4003
+SERVICE_DEBUG=false
+
+# Database  
+DB_MONGODB_URI=mongodb://localhost:27017
+DB_MONGODB_DATABASE=finverse_interactions
+
+# External Services
+EXTERNAL_BANKING_SERVICE_URL=http://banking-service:4001
+
+# Model Settings
+MODEL_NUM_COMPONENTS=50
+MODEL_REFRESH_INTERVAL_SECONDS=3600
+```
+
+### 3️⃣ Start Dependencies
 
 ```bash
-uvicorn src.main:app --host 0.0.0.0 --port 4003 --reload
+# MongoDB with Docker
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+
+# Or use your local MongoDB
+mongod --dbpath /path/to/data
 ```
 
-### API Endpoints
-
-The service exposes the following endpoints:
-
-- `GET /health` - Health check endpoint
-- `GET /api/v1/recommendations/products/{user_id}` - Get personalized product recommendations for a user
-- `GET /api/v1/recommendations/session/{session_id}` - Get recommendations based on the current session
-- `GET /api/v1/recommendations/similar-products/{product_id}` - Find similar products
-- `POST /api/v1/recommendations/refresh-model` - Manually trigger a model refresh
-
-## Usage
-
-### Example: Get Recommendations for a User
+### 4️⃣ Run Service
 
 ```bash
-curl -X GET "http://localhost:4003/api/v1/recommendations/products/user123?count=5"
+# Development mode
+python -m src.main
+
+# Production mode  
+SERVICE_DEBUG=false python -m src.main
 ```
 
-### Example: Get Session-Based Recommendations
+🎉 **Service running at:** `http://localhost:4003`
+
+📚 **API Documentation:** `http://localhost:4003/docs`
+
+## 🛠️ API Reference
+
+### 🏥 Health Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/health` | Basic health check |
+| `GET` | `/health/detailed` | Detailed component status |
+
+### 🎯 Recommendation Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/recommendations/users/{user_id}/products` | User recommendations |
+| `GET` | `/api/v1/recommendations/sessions/{session_id}/products` | Session recommendations |
+| `GET` | `/api/v1/recommendations/products/{product_id}/similar` | Similar products |
+| `POST` | `/api/v1/recommendations/refresh-model` | Trigger model refresh |
+
+### 📝 Example Request/Response
+
+**Request:**
+```bash
+GET /api/v1/recommendations/users/user-123/products?count=5
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "recommendations": [
+    {
+      "id": "savings-premium-001",
+      "name": "Premium Savings Account",
+      "relevanceScore": 0.94,
+      "rank": 1,
+      "category": "Savings",
+      "institution": "FinVerse Bank",
+      "interestRate": "4.2%",
+      "minimumBalance": 1000
+    }
+  ],
+  "user_id": "user-123", 
+  "count": 1
+}
+```
+
+## 🧪 Development
+
+### Code Quality Tools
 
 ```bash
-curl -X GET "http://localhost:4003/api/v1/recommendations/session/session456?count=5"
+# Format code
+black src/ tests/
+isort src/ tests/
+
+# Lint and fix
+ruff check src/ --fix
+ruff format src/
+
+# Type checking
+mypy src/
+
+# Run tests with coverage
+pytest tests/ --cov=src/ --cov-report=html
 ```
 
-### Example: Get Similar Products
+### 🧪 Testing Strategy
 
 ```bash
-curl -X GET "http://localhost:4003/api/v1/recommendations/similar-products/product789?count=5"
+# All tests
+pytest
+
+# Unit tests only
+pytest tests/unit/ -v
+
+# Integration tests
+pytest tests/integration/ -v
+
+# E2E tests
+pytest tests/e2e/ -v
+
+# Coverage report
+pytest --cov=src/ --cov-report=term-missing
 ```
 
-## Model Training
+## 🤝 Contributing
 
-The recommendation model is automatically refreshed at regular intervals (configurable via `MODEL_REFRESH_INTERVAL`). You can also trigger a manual refresh:
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) and [Code Style Guide](CODE_STYLE.md).
+
+**Quick Contribution Steps:**
+
+1. 🍴 Fork the repository
+2. 🌿 Create feature branch: `git checkout -b feature/amazing-feature`  
+3. 📝 Make changes following our style guide
+4. ✅ Add tests and ensure they pass
+5. 📤 Submit pull request with clear description
+
+### Development Setup
 
 ```bash
-curl -X POST "http://localhost:4003/api/v1/recommendations/refresh-model"
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Install pre-commit hooks
+pre-commit install
+
+# Run quality checks
+make lint test
 ```
 
-## Integration with the Interaction Service
+## 📄 License
 
-This service consumes data from the interaction tracking service. The interaction service tracks:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- Product views
-- Comparison events
-- Search queries
-- General user interactions
+---
 
-This data is processed and used to train the recommendation model.
+<div align="center">
 
-## License
+**Built with ❤️ by the FinVerse Team**
 
-[MIT License](LICENSE)
+[📖 Documentation](docs/) • [🐛 Report Bug](../../issues) • [💡 Request Feature](../../issues) • [💬 Discussions](../../discussions)
+
+</div>

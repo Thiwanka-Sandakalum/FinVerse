@@ -1,7 +1,7 @@
 # Web framework
-fastapi==0.100.0
-uvicorn[standard]==0.23.0  # Downgraded to support newer h11
-h11>=0.16.0  # Required version to fix CVE-2025-43859
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+h11>=0.13,<0.15
 
 # Data processing
 numpy==1.24.2
@@ -17,8 +17,8 @@ motor==3.1.1
 pymongo==4.3.3
 
 # HTTP clients
-httpx==0.24.1
-httpcore==0.17.3  # Pin to version compatible with httpx
+httpx==0.25.0
+httpcore==0.18.0
 aiohttp==3.8.4
 
 # Utilities

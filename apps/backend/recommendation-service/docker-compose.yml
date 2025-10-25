@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   recommendation-service:
@@ -20,41 +20,24 @@ services:
       - "4003:4003"
     environment:
       - DEBUG=true
-      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_URI=mongodb+srv://thiwanka2002sandakalum_db_user:z6k1Jcj4reXy2vzh@development.zrcuhrn.mongodb.net/?appName=development
       - MONGO_DB=finverse_interactions
       - BANKING_SERVICE_URL=http://host.docker.internal:4001/api/v1
       - MODEL_REFRESH_INTERVAL=3600 # 1 hour
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq/
-    depends_on:
-      - mongo
-      - rabbitmq
+      - RABBITMQ_URL=amqps://rswxsxlo:KYIM-YxQUD4KAtGV8Pfzk3xIcWtzX-rr@puffin.rmq2.cloudamqp.com/rswxsxlo
     networks:
       - finverse-network
-    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "4003", "--reload"]
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: finverse-rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    networks:
-      - finverse-network
-
-  mongo:
-    image: mongo:6
-    container_name: finverse-mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - finverse-network
-
+    command:
+      [
+        "uvicorn",
+        "src.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "4003",
+        "--reload",
+      ]
 networks:
   finverse-network:
     name: finverse-network
     driver: bridge
-
-volumes:
-  mongo-data:
-    driver: local

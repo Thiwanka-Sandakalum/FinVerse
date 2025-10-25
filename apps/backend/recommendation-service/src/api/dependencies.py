@@ -1,23 +1,19 @@
 """
 FastAPI dependencies for the recommendation service.
 """
-from typing import AsyncGenerator
 from fastapi import Request
 
-from src.services.database import get_database
-from src.services.recommendation import RecommendationService
-from src.core.config import settings
+from src.application.services.app_service import AppService
 
-async def get_recommendation_service(request: Request) -> AsyncGenerator[RecommendationService, None]:
+
+def get_app_service(request: Request) -> AppService:
     """
-    Dependency for getting the recommendation service instance.
+    Get the AppService instance from the request state.
     
     Args:
         request: FastAPI request object
         
-    Yields:
-        RecommendationService instance
+    Returns:
+        AppService instance
     """
-    db = await get_database()
-    recommendation_service = RecommendationService(db)
-    yield recommendation_service
+    return request.app.state.app_service

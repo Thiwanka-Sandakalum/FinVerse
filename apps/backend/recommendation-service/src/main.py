@@ -1,165 +1,183 @@
 """
-Main application module.
+Main FastAPI application for the recommendation service.
+
+This module sets up the FastAPI application with proper dependency injection,
+middleware, exception handling, and lifecycle management.
 """
-import uvicorn
+import asyncio
 import logging
-from fastapi import FastAPI, Request
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+
+import uvicorn
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from src.core.logging import setup_logging
-from src.core.config import settings
-from src.api.routers import recommendations, health
-from src.core.db.mongodb import init_db_connection, close_db_connection
-from src.services.recommendation import get_recommendation_service
-from src.services.scheduler import ModelRefreshScheduler
+from src.application.services.app_service import AppService
+from src.presentation.api.routers import health, recommendations
+from src.shared.config.settings import settings
+from src.shared.exceptions.exceptions import RecommendationServiceError
+from src.shared.utils.logging import setup_logging
 
 # Configure logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
-# Create FastAPI application
-app = FastAPI(
-    title="FinVerse Recommendation API",
-    description="API for generating personalized product recommendations based on user interactions",
-    version="1.0.0"
-)
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
-    allow_methods=settings.CORS_ALLOW_METHODS,
-    allow_headers=settings.CORS_ALLOW_HEADERS
-)
-
-# Exception handler
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled exception: {str(exc)}")
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error", "success": False}
-    )
-
-# Include routers
-app.include_router(health.router)
-app.include_router(recommendations.router, prefix="/api/v1")
-
-"""
-Main application module.
-"""
-import uvicorn
-import logging
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-
-from src.core.logging import setup_logging
-from src.core.config import settings
-from src.api.routers import recommendations, health
-from src.core.db.mongodb import init_db_connection, close_db_connection
-from src.services.recommendation import get_recommendation_service
-from src.services.scheduler import ModelRefreshScheduler
-from src.services.queue_consumer import start_queue_consumer
-
-# Configure logging
-setup_logging()
-logger = logging.getLogger(__name__)
-
-# Create FastAPI application
-app = FastAPI(
-    title="FinVerse Recommendation API",
-    description="API for generating personalized product recommendations based on user interactions",
-    version="1.0.0"
-)
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
-    allow_methods=settings.CORS_ALLOW_METHODS,
-    allow_headers=settings.CORS_ALLOW_HEADERS
-)
-
-# Exception handler
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled exception: {str(exc)}")
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error", "success": False}
-    )
-
-# Include routers
-app.include_router(health.router)
-app.include_router(recommendations.router, prefix="/api/v1")
-
-# Startup and shutdown events
-@app.on_event("startup")
-async def startup_event():
-    """Initialize services on startup"""
-    print("🚀 STARTING RECOMMENDATION SERVICE...")
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """
+    Application lifespan manager for startup and shutdown events.
     
-    # Connect to database
-    await init_db_connection(app)
-    print("✅ DATABASE CONNECTION INITIALIZED")
-
-    # Create fake request with app scope
-    fake_request = Request(scope={
-        "type": "http",
-        "app": app
-    })
-
-    # Get recommendation service (initializes model)
-    recommendation_service = await get_recommendation_service(fake_request)
-    print("✅ RECOMMENDATION MODEL INITIALIZED")
-
-    # Initialize and start model refresh scheduler
-    scheduler = ModelRefreshScheduler(recommendation_service)
-    app.state.scheduler = scheduler
-    await scheduler.start()
-    print("✅ MODEL REFRESH SCHEDULER STARTED")
-
-    # Start RabbitMQ queue consumer
+    Args:
+        app: FastAPI application instance
+        
+    Yields:
+        None during application runtime
+    """
+    # Startup
+    logger.info("🚀 Starting Recommendation Service...")
+    
     try:
-        await start_queue_consumer(settings.MONGO_URI, settings.MONGO_DB)
-        print("✅ RABBITMQ QUEUE CONSUMER STARTED")
-        logger.info("RabbitMQ queue consumer started successfully")
-    except Exception as e:
-        print(f"⚠️ FAILED TO START QUEUE CONSUMER: {str(e)}")
-        logger.warning(f"Failed to start queue consumer: {str(e)}")
-        logger.info("Service will continue without queue consumer")
+        # Initialize application service (handles all dependencies)
+        app_service = AppService()
+        await app_service.initialize()
+        
+        # Store app service in app state for dependency injection
+        app.state.app_service = app_service
+        
+        logger.info("✅ Recommendation Service started successfully")
+        
+        yield
+        
+    finally:
+        # Shutdown
+        logger.info("🛑 Shutting down Recommendation Service...")
+        
+        if hasattr(app.state, 'app_service'):
+            await app.state.app_service.cleanup()
+        
+        logger.info("👋 Recommendation Service stopped")
 
-    print("🎉 RECOMMENDATION SERVICE FULLY STARTED!")
-    logger.info("Recommendation service started")
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Cleanup services on shutdown"""
-    print("🛑 SHUTTING DOWN RECOMMENDATION SERVICE...")
+def create_app() -> FastAPI:
+    """
+    Create and configure the FastAPI application.
     
-    # Stop scheduler
-    if hasattr(app.state, 'scheduler'):
-        await app.state.scheduler.stop()
-        print("✅ MODEL REFRESH SCHEDULER STOPPED")
+    Returns:
+        Configured FastAPI application
+    """
+    app = FastAPI(
+        title="FinVerse Recommendation API",
+        description="API for generating personalized product recommendations",
+        version=settings.service.version,
+        lifespan=lifespan,
+        debug=settings.service.debug
+    )
     
-    # Close database connection
-    await close_db_connection(app)
-    print("✅ DATABASE CONNECTION CLOSED")
+    # Configure CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors.allow_origins,
+        allow_credentials=settings.cors.allow_credentials,
+        allow_methods=settings.cors.allow_methods,
+        allow_headers=settings.cors.allow_headers,
+    )
     
-    print("👋 RECOMMENDATION SERVICE STOPPED!")
-    logger.info("Recommendation service stopped")
+    # Exception handlers
+    configure_exception_handlers(app)
+    
+    # Include routers
+    app.include_router(health.router, tags=["Health"])
+    app.include_router(
+        recommendations.router, 
+        prefix=settings.api_prefix, 
+        tags=["Recommendations"]
+    )
+    
+    return app
+
+
+def configure_exception_handlers(app: FastAPI) -> None:
+    """
+    Configure global exception handlers for the application.
+    
+    Args:
+        app: FastAPI application to configure
+    """
+    
+    @app.exception_handler(RecommendationServiceError)
+    async def recommendation_service_exception_handler(
+        request: Request, 
+        exc: RecommendationServiceError
+    ) -> JSONResponse:
+        """Handle custom recommendation service exceptions."""
+        logger.error(f"Recommendation service error: {exc.message}")
+        return JSONResponse(
+            status_code=400,
+            content={
+                "success": False,
+                "error": exc.message,
+                "details": exc.details
+            }
+        )
+    
+    @app.exception_handler(HTTPException)
+    async def http_exception_handler(
+        request: Request, 
+        exc: HTTPException
+    ) -> JSONResponse:
+        """Handle HTTP exceptions."""
+        logger.warning(f"HTTP exception: {exc.detail}")
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "success": False,
+                "error": exc.detail
+            }
+        )
+    
+    @app.exception_handler(Exception)
+    async def global_exception_handler(
+        request: Request, 
+        exc: Exception
+    ) -> JSONResponse:
+        """Handle all other unhandled exceptions."""
+        logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+        
+        if settings.service.debug:
+            # Include stack trace in debug mode
+            import traceback
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "error": "Internal server error",
+                    "debug_info": traceback.format_exc()
+                }
+            )
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": "Internal server error"
+            }
+        )
+
+
+# Create the application instance
+app = create_app()
+
 
 if __name__ == "__main__":
     uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=settings.PORT,
-        reload=settings.DEBUG,
-        workers=1,
-        log_level="info",
-        access_log=True
+        "src.main:app",
+        host=settings.service.host,
+        port=settings.service.port,
+        reload=settings.service.debug,
+        log_level=settings.service.log_level.lower(),
+        access_log=True,
+        workers=1 if settings.service.debug else 4
     )
