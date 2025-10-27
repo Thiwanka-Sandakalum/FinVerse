@@ -206,14 +206,16 @@ export class ProductController {
      */
     createProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
         const productData: ProductCreateDto = req.body;
-        const userInstitutionId = req.user?.institutionId;
+        let institutionId: string | undefined = undefined;
 
-        // If user has institutionId, ensure product is created for their institution only
-        if (userInstitutionId) {
-            productData.institutionId = userInstitutionId;
+        if (req.user?.role !== 'super_admin') {
+            institutionId = req.user?.institutionId ?? undefined;
+            if (!institutionId) {
+                return res.status(403).json({ error: 'Access denied: No institution associated with user' });
+            }
         }
 
-        const product = await this.productService.createProduct(productData, userInstitutionId);
+        const product = await this.productService.createProduct(productData, institutionId);
         res.status(201).json(product);
     });
 
