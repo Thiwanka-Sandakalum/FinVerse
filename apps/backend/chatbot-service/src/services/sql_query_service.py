@@ -22,48 +22,91 @@ class SQLQueryService:
         """
         Returns the database schema information that will help the LLM generate correct SQL.
         """
-        # This would ideally be generated from your actual database schema
-        # For now, we'll hardcode the schema based on what we know
         return """
-        -- Financial Product Database Schema
+        -- FinVerse Financial Product Database Schema (MySQL)
         
-        CREATE TABLE "Institution" (
-            id UUID PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            slug VARCHAR(255),
-            "logoUrl" VARCHAR(255),
-            "licenseNumber" VARCHAR(100),
-            "countryCode" VARCHAR(10),
-            "isActive" BOOLEAN DEFAULT true
+        CREATE TABLE Institution (
+            id VARCHAR(191) PRIMARY KEY,
+            typeId VARCHAR(191) NOT NULL,
+            name VARCHAR(191) NOT NULL,
+            slug VARCHAR(191) UNIQUE NOT NULL,
+            logoUrl VARCHAR(191),
+            licenseNumber VARCHAR(191),
+            countryCode VARCHAR(191) NOT NULL,
+            isActive TINYINT(1) DEFAULT 1,
+            createdAt DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+            updatedAt DATETIME(3)
         );
         
-        CREATE TABLE "ProductCategory" (
-            id UUID PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            description TEXT
+        CREATE TABLE InstitutionType (
+            id VARCHAR(191) PRIMARY KEY,
+            code VARCHAR(191) UNIQUE NOT NULL,
+            name VARCHAR(191) NOT NULL,
+            description VARCHAR(191)
         );
         
-        CREATE TABLE "ProductType" (
-            id UUID PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            description TEXT,
-            "categoryId" UUID REFERENCES "ProductCategory"(id)
+        CREATE TABLE ProductCategory (
+            id VARCHAR(191) PRIMARY KEY,
+            parentId VARCHAR(191),
+            name VARCHAR(191) NOT NULL,
+            slug VARCHAR(191) UNIQUE NOT NULL,
+            description VARCHAR(191),
+            level INT DEFAULT 0
         );
         
-        CREATE TABLE "Product" (
-            id UUID PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            slug VARCHAR(255),
-            details JSONB,  -- Contains structured data like interestRate, loanAmountMin, loanAmountMax, etc.
-            "isFeatured" BOOLEAN DEFAULT false,
-            "isActive" BOOLEAN DEFAULT true,
-            "createdAt" TIMESTAMP,
-            "updatedAt" TIMESTAMP,
-            "institutionId" UUID REFERENCES "Institution"(id),
-            "productTypeId" UUID REFERENCES "ProductType"(id)
+        CREATE TABLE ProductType (
+            id VARCHAR(191) PRIMARY KEY,
+            categoryId VARCHAR(191) NOT NULL,
+            code VARCHAR(191) UNIQUE NOT NULL,
+            name VARCHAR(191) NOT NULL,
+            description VARCHAR(191)
         );
         
-        -- JSONB Details structure example:
+        CREATE TABLE Product (
+            id VARCHAR(191) PRIMARY KEY,
+            institutionId VARCHAR(191) NOT NULL,
+            productTypeId VARCHAR(191) NOT NULL,
+            name VARCHAR(191) NOT NULL,
+            slug VARCHAR(191) NOT NULL,
+            details JSON,  -- Contains structured data like interestRate, loanAmountMin, loanAmountMax, etc.
+            isFeatured TINYINT(1) DEFAULT 0,
+            isActive TINYINT(1) DEFAULT 1,
+            createdAt DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+            updatedAt DATETIME(3)
+        );
+        
+        CREATE TABLE ProductRateHistory (
+            id VARCHAR(191) PRIMARY KEY,
+            productId VARCHAR(191) NOT NULL,
+            metric VARCHAR(191) NOT NULL,
+            value DECIMAL(65,30) NOT NULL,
+            currency VARCHAR(191),
+            recordedAt DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+            source VARCHAR(191)
+        );
+        
+        CREATE TABLE ProductTag (
+            id VARCHAR(191) PRIMARY KEY,
+            name VARCHAR(191) NOT NULL,
+            slug VARCHAR(191) UNIQUE NOT NULL
+        );
+        
+        CREATE TABLE ProductTagMap (
+            productId VARCHAR(191) NOT NULL,
+            tagId VARCHAR(191) NOT NULL,
+            PRIMARY KEY (productId, tagId)
+        );
+        
+        CREATE TABLE Review (
+            id VARCHAR(191) PRIMARY KEY,
+            clerkUserId VARCHAR(191) NOT NULL,
+            productId VARCHAR(191) NOT NULL,
+            rating INT NOT NULL,
+            comment VARCHAR(191),
+            createdAt DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)
+        );
+        
+        -- JSON Details structure example:
         -- {
         --   "interestRate": 7.99,
         --   "loanAmountMin": 5000,
@@ -80,34 +123,37 @@ class SQLQueryService:
         -- SELECT 
         --   p.id, p.name, p.slug, p.details,
         --   i.name as institution_name,
-        --   pt.name as product_type,
-        --   pc.name as product_category
-        -- FROM "Product" p
-        -- JOIN "Institution" i ON p."institutionId" = i.id
-        -- JOIN "ProductType" pt ON p."productTypeId" = pt.id
-        -- JOIN "ProductCategory" pc ON pt."categoryId" = pc.id
-        -- WHERE (p.details->>'interestRate')::numeric < 8.0
-        -- ORDER BY (p.details->>'interestRate')::numeric ASC;
+        --   pt.name as product_type_name, pt.description as product_type_description,
+        --   pc.name as product_category_name
+        -- FROM Product p
+        -- JOIN Institution i ON p.institutionId = i.id
+        -- JOIN ProductType pt ON p.productTypeId = pt.id
+        -- JOIN ProductCategory pc ON pt.categoryId = pc.id
+        -- WHERE JSON_EXTRACT(p.details, '$.interestRate') < 8.0
+        -- ORDER BY JSON_EXTRACT(p.details, '$.interestRate') ASC;
         """
     
     async def generate_sql(self, query: str) -> str:
         """Generate SQL from a natural language query."""
         
         prompt = f"""
-        You are a SQL query generator for a financial products database. 
+        You are a SQL query generator for a MySQL financial products database. 
         Generate a SQL query that answers the user's question about financial products.
         
         Database Schema:
         {self.table_schema}
         
         Important notes:
-        1. The 'details' column in the Product table is JSONB and contains product details like interest rates.
-        2. To access JSONB fields, use the -> operator for text and ->> operator for numeric values.
-        3. For example: details->>'interestRate' to get the interest rate as a number.
-        4. When doing numeric comparisons, cast JSONB fields like: (details->>'interestRate')::numeric
-        5. Include institution name and product name in results for better context.
-        6. Always join related tables to provide complete information.
-        7. Return ONLY the SQL query without any explanation or markdown.
+        1. This is a MySQL database - use MySQL syntax only
+        2. Table names should NOT be quoted with double quotes - use backticks if needed
+        3. The 'details' column in the Product table is JSON and contains product details like interest rates
+        4. To access JSON fields, use JSON_EXTRACT(column, '$.field') function
+        5. For example: JSON_EXTRACT(details, '$.interestRate') to get the interest rate
+        6. When doing numeric comparisons: CAST(JSON_EXTRACT(details, '$.interestRate') AS DECIMAL(10,2)) < 8.0
+        7. Include institution name and product name in results for better context
+        8. Always join related tables to provide complete information
+        9. Use MySQL functions and syntax only (no PostgreSQL ::casting or JSONB operators)
+        10. Return ONLY the SQL query without any explanation or markdown
         
         User Question: {query}
         
@@ -137,7 +183,7 @@ class SQLQueryService:
             
             # Execute the query using our database connection
             conn = self.db_client.get_connection()
-            cursor = conn.cursor()
+            cursor = conn.cursor(dictionary=True)  # Return results as dictionaries
             cursor.execute(sql_query)
             results = cursor.fetchall()
             cursor.close()
