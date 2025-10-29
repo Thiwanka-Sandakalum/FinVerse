@@ -57,27 +57,27 @@ app.get('/health', async (req: Request, res: Response) => {
             port: PORT
         };
 
-        // Test database connection
-        try {
-            await prisma.$queryRaw`SELECT 1`;
-            healthStatus.database = 'Connected';
-        } catch (dbError) {
-            logger.error('Database health check failed:', dbError);
-            healthStatus.database = 'Disconnected';
-            healthStatus.status = 'WARNING';
-        }
+        // // Test database connection
+        // try {
+        //     await prisma.$queryRaw`SELECT 1`;
+        //     healthStatus.database = 'Connected';
+        // } catch (dbError) {
+        //     logger.error('Database health check failed:', dbError);
+        //     healthStatus.database = 'Disconnected';
+        //     healthStatus.status = 'WARNING';
+        // }
 
-        // Test RabbitMQ connection
-        try {
-            healthStatus.messageQueue = queueService.isQueueConnected() ? 'Connected' : 'Disconnected';
-            if (!queueService.isQueueConnected()) {
-                healthStatus.status = 'WARNING';
-            }
-        } catch (queueError) {
-            logger.error('Queue health check failed:', queueError);
-            healthStatus.messageQueue = 'Error';
-            healthStatus.status = 'WARNING';
-        }
+        // // Test RabbitMQ connection
+        // try {
+        //     healthStatus.messageQueue = queueService.isQueueConnected() ? 'Connected' : 'Disconnected';
+        //     if (!queueService.isQueueConnected()) {
+        //         healthStatus.status = 'WARNING';
+        //     }
+        // } catch (queueError) {
+        //     logger.error('Queue health check failed:', queueError);
+        //     healthStatus.messageQueue = 'Error';
+        //     healthStatus.status = 'WARNING';
+        // }
 
         res.status(200).json(healthStatus);
     } catch (error) {

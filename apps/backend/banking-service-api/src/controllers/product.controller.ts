@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import { ProductService } from '../services/product.service';
 import { asyncHandler } from '../middlewares/error.middleware';
-import { ProductCreateDto, ProductUpdateDto, ProductBatchRequestDto } from '../types/api.types';
-import { AuthRequest } from '../middlewares/auth.middleware';
+import { ProductCreateDto, ProductUpdateDto, AuthRequest } from '../types/api.types';
 import { interactionTracker } from '../services/interaction-tracking.service';
 
 export class ProductController {

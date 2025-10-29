@@ -32,15 +32,16 @@ model Institution {
 }
 
 model ProductCategory {
-    id           String            @id @default(uuid())
-    parentId     String?
-    name         String
-    slug         String            @unique
-    description  String?
-    level        Int               @default(0)
-    parent       ProductCategory?  @relation("CategoryParent", fields: [parentId], references: [id], onDelete: SetNull)
-    children     ProductCategory[] @relation("CategoryParent")
-    productTypes ProductType[]
+    id              String            @id @default(uuid())
+    parentId        String?
+    name            String
+    slug            String            @unique
+    description     String?
+    level           Int               @default(0)
+    parent          ProductCategory?  @relation("CategoryParent", fields: [parentId], references: [id], onDelete: SetNull)
+    children        ProductCategory[] @relation("CategoryParent")
+    productTypes    ProductType[]
+    FieldDefinition FieldDefinition[]
 }
 
 model ProductType {
@@ -77,6 +78,20 @@ model Product {
 
     @@index([name])
     @@index([slug])
+}
+
+// Definitions for dynamic fields associated with a ProductCategory (e.g. "Minimum Interest Rate", "Max LTV Ratio", etc.)
+model FieldDefinition {
+    id         String   @id @default(uuid())
+    categoryId String
+    name       String // Display label e.g. "Minimum Interest Rate"
+    slug       String   @unique // Key used inside Product.details JSON
+    dataType   String // "string", "number", "date", "boolean", "json"
+    isRequired Boolean  @default(false)
+    options    String[] @default([]) // For dropdowns, radio buttons, etc.
+    validation Json?    @db.JsonB // Validation rules (e.g., min, max, pattern)
+
+    category ProductCategory @relation(fields: [categoryId], references: [id])
 }
 
 model ProductTag {
