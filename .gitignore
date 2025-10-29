@@ -5,7 +5,7 @@ node_modules
 
 # testing
 coverage
-
+awsdb
 # build
 dist
 build
