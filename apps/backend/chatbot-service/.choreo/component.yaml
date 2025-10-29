@@ -5,7 +5,7 @@ endpoints:
     displayName: FinVerse Chatbot API
     service:
       basePath: /
-      port: 8085
+      port: 8080
     type: REST
     networkVisibilities:
       - Public

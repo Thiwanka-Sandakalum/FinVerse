@@ -14,9 +14,9 @@ info:
 servers:
   - url: https://api.finverse.com/v1
     description: Production server
-  - url: https://staging-api.finverse.com/v1
+  - url: https://d4e3a250-e4e4-451e-876d-6e93bd08d9b0-dev.e1-us-east-azure.choreoapis.dev/bankguru/banking-service-api/v1.0
     description: Staging server
-  - url: http://localhost:3000/api/v1
+  - url: http://localhost:4040
     description: Development server
 
 tags:
@@ -40,6 +40,8 @@ tags:
     description: Product category management
   - name: Rate History
     description: Product rate history operations
+  - name: Field Definitions
+    description: Product field definitions management and retrieval
 
 components:
   securitySchemes:
@@ -559,6 +561,94 @@ components:
         - metric
         - value
 
+    FieldDefinition:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Interest Rate"
+        slug:
+          type: string
+          example: "interestRate"
+        dataType:
+          type: string
+          enum: ["string", "number", "date", "boolean", "json"]
+        isRequired:
+          type: boolean
+          default: false
+        options:
+          type: array
+          items:
+            type: string
+        validation:
+          type: object
+          nullable: true
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+            pattern:
+              type: string
+      required:
+        - categoryId
+        - name
+        - slug
+        - dataType
+
+    FieldDefinitionCreate:
+      type: object
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Interest Rate"
+        slug:
+          type: string
+          example: "interestRate"
+        dataType:
+          type: string
+          enum: ["string", "number", "date", "boolean", "json"]
+        isRequired:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: string
+        validation:
+          type: object
+          nullable: true
+      required:
+        - categoryId
+        - name
+        - dataType
+
+    FieldDefinitionUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+          enum: ["string", "number", "date", "boolean", "json"]
+        isRequired:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: string
+        validation:
+          type: object
+          nullable: true
+
     Error:
       type: object
       properties:
@@ -700,6 +790,71 @@ paths:
                 $ref: "#/components/schemas/Error"
         "403":
           description: Forbidden - User is not an Institution Admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/batch:
+    post:
+      summary: Get Products by IDs
+      description: Retrieve multiple products by their IDs in a single request
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  minItems: 1
+                  maxItems: 100
+                  example:
+                    [
+                      "550e8400-e29b-41d4-a716-446655440000",
+                      "550e8400-e29b-41d4-a716-446655440001",
+                    ]
+              required:
+                - productIds
+      responses:
+        "200":
+          description: List of products found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Product"
+                  meta:
+                    type: object
+                    properties:
+                      requested:
+                        type: integer
+                        description: Number of product IDs requested
+                      found:
+                        type: integer
+                        description: Number of products found
+                      notFound:
+                        type: integer
+                        description: Number of products not found
+                    required:
+                      - requested
+                      - found
+                      - notFound
+                required:
+                  - data
+                  - meta
+        "400":
+          description: Bad request - invalid product IDs array
           content:
             application/json:
               schema:
@@ -995,7 +1150,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /products/{productTypeId}/fields:
+    parameters:
+      - name: productTypeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
 
+    get:
+      summary: Get Field Definitions for Product Type
+      description: Retrieve field definitions associated with a specific product type
+      tags:
+        - Field Definitions
+      responses:
+        "200":
+          description: List of field definitions
+
+        "404":
+          description: Product type not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /saved-products:
     get:
       summary: Get Saved Products
