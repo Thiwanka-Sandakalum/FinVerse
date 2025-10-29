@@ -108,6 +108,20 @@ export interface ProductRateHistoryCreateDto {
     source?: string;
 }
 
+// Product Batch related types
+export interface ProductBatchRequestDto {
+    productIds: string[];
+}
+
+export interface ProductBatchResponseDto {
+    data: any[];
+    meta: {
+        requested: number;
+        found: number;
+        notFound: number;
+    };
+}
+
 // Saved Product related types
 export interface SavedProductCreateDto {
     productId: string;

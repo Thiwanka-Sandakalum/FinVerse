@@ -59,7 +59,7 @@ model Product {
     institutionId String
     productTypeId String
     name          String
-    slug          String   @unique
+    slug          String
     details       Json?
     isFeatured    Boolean  @default(false)
     isActive      Boolean  @default(true)
