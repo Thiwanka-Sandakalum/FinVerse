@@ -30,13 +30,13 @@ export class QueueService {
                 this.connection.on('error', (err: Error) => {
                     logger.error('RabbitMQ connection error:', err);
                     this.isConnected = false;
-                    this.scheduleReconnect();
+                    // this.scheduleReconnect();
                 });
 
                 this.connection.on('close', () => {
                     logger.warn('RabbitMQ connection closed');
                     this.isConnected = false;
-                    this.scheduleReconnect();
+                    // this.scheduleReconnect();
                 });
             }
 
@@ -45,13 +45,13 @@ export class QueueService {
                 this.channel.on('error', (err) => {
                     logger.error('RabbitMQ channel error:', err);
                     this.isConnected = false;
-                    this.scheduleReconnect();
+                    // this.scheduleReconnect();
                 });
 
                 this.channel.on('close', () => {
                     logger.warn('RabbitMQ channel closed');
                     this.isConnected = false;
-                    this.scheduleReconnect();
+                    // this.scheduleReconnect();
                 });
 
                 // Declare exchange
@@ -79,23 +79,23 @@ export class QueueService {
         } catch (error) {
             logger.error('Failed to connect to RabbitMQ:', error);
             this.isConnected = false;
-            this.scheduleReconnect();
+            // this.scheduleReconnect();
         }
     }
 
     /**
      * Schedule reconnection attempt
      */
-    private scheduleReconnect(): void {
-        if (this.reconnectTimer) {
-            clearTimeout(this.reconnectTimer);
-        }
+    // private scheduleReconnect(): void {
+    //     if (this.reconnectTimer) {
+    //         clearTimeout(this.reconnectTimer);
+    //     }
 
-        this.reconnectTimer = setTimeout(() => {
-            logger.info('Attempting to reconnect to RabbitMQ...');
-            this.connect();
-        }, queueConfig.reconnectDelay);
-    }
+    //     this.reconnectTimer = setTimeout(() => {
+    //         logger.info('Attempting to reconnect to RabbitMQ...');
+    //         this.connect();
+    //     }, queueConfig.reconnectDelay);
+    // }
 
     /**
      * Publish an interaction event to the queue

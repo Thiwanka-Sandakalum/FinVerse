@@ -2231,5 +2231,291 @@
             "options": [],
             "validation": null
         }
+    ],
+    "productTagMappings": [
+        {
+            "productId": "prod-001",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-001",
+            "tagId": "tag-004"
+        },
+        {
+            "productId": "prod-001",
+            "tagId": "tag-005"
+        },
+        {
+            "productId": "prod-002",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-002",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-002",
+            "tagId": "tag-004"
+        },
+        {
+            "productId": "prod-003",
+            "tagId": "tag-012"
+        },
+        {
+            "productId": "prod-003",
+            "tagId": "tag-002"
+        },
+        {
+            "productId": "prod-006",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-008",
+            "tagId": "tag-006"
+        },
+        {
+            "productId": "prod-008",
+            "tagId": "tag-008"
+        },
+        {
+            "productId": "prod-009",
+            "tagId": "tag-007"
+        },
+        {
+            "productId": "prod-009",
+            "tagId": "tag-008"
+        },
+        {
+            "productId": "prod-012",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-012",
+            "tagId": "tag-004"
+        },
+        {
+            "productId": "prod-013",
+            "tagId": "tag-002"
+        },
+        {
+            "productId": "prod-013",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-013",
+            "tagId": "tag-005"
+        },
+        {
+            "productId": "prod-015",
+            "tagId": "tag-012"
+        },
+        {
+            "productId": "prod-016",
+            "tagId": "tag-007"
+        },
+        {
+            "productId": "prod-016",
+            "tagId": "tag-008"
+        },
+        {
+            "productId": "prod-018",
+            "tagId": "tag-006"
+        },
+        {
+            "productId": "prod-019",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-019",
+            "tagId": "tag-004"
+        },
+        {
+            "productId": "prod-020",
+            "tagId": "tag-006"
+        },
+        {
+            "productId": "prod-020",
+            "tagId": "tag-008"
+        },
+        {
+            "productId": "prod-021",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-022",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-022",
+            "tagId": "tag-004"
+        },
+        {
+            "productId": "prod-023",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-023",
+            "tagId": "tag-005"
+        },
+        {
+            "productId": "prod-024",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-025",
+            "tagId": "tag-006"
+        },
+        {
+            "productId": "prod-026",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-026",
+            "tagId": "tag-004"
+        },
+        {
+            "productId": "prod-027",
+            "tagId": "tag-008"
+        },
+        {
+            "productId": "prod-028",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-028",
+            "tagId": "tag-004"
+        },
+        {
+            "productId": "prod-029",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-030",
+            "tagId": "tag-006"
+        },
+        {
+            "productId": "prod-030",
+            "tagId": "tag-008"
+        },
+        {
+            "productId": "prod-031",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-031",
+            "tagId": "tag-004"
+        },
+        {
+            "productId": "prod-032",
+            "tagId": "tag-006"
+        },
+        {
+            "productId": "prod-033",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-034",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-034",
+            "tagId": "tag-004"
+        },
+        {
+            "productId": "prod-035",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-036",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-037",
+            "tagId": "tag-008"
+        },
+        {
+            "productId": "prod-038",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-039",
+            "tagId": "tag-006"
+        },
+        {
+            "productId": "prod-040",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-041",
+            "tagId": "tag-002"
+        },
+        {
+            "productId": "prod-042",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-043",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-044",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-045",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-046",
+            "tagId": "tag-006"
+        },
+        {
+            "productId": "prod-047",
+            "tagId": "tag-002"
+        },
+        {
+            "productId": "prod-047",
+            "tagId": "tag-011"
+        },
+        {
+            "productId": "prod-048",
+            "tagId": "tag-012"
+        },
+        {
+            "productId": "prod-049",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-049",
+            "tagId": "tag-011"
+        },
+        {
+            "productId": "prod-050",
+            "tagId": "tag-002"
+        },
+        {
+            "productId": "prod-051",
+            "tagId": "tag-008"
+        },
+        {
+            "productId": "prod-051",
+            "tagId": "tag-015"
+        },
+        {
+            "productId": "prod-004",
+            "tagId": "tag-003"
+        },
+        {
+            "productId": "prod-004",
+            "tagId": "tag-015"
+        },
+        {
+            "productId": "prod-005",
+            "tagId": "tag-001"
+        },
+        {
+            "productId": "prod-005",
+            "tagId": "tag-015"
+        }
     ]
 }

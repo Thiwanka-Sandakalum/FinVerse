@@ -1,0 +1,55 @@
+# Production Dockerfile for FinVerse Chatbot Service
+FROM python:3.11-slim as production
+
+# Set environment variables for production
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH=/app \
+    ENVIRONMENT=production \
+    LOG_LEVEL=WARNING
+
+# Install system dependencies (minimal for production)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    python3-dev \
+    default-libmysqlclient-dev \
+    pkg-config \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /usr/share/doc /usr/share/man /usr/share/locale
+
+# Create non-root user for security
+RUN groupadd -r app && useradd -r -g app -d /app -s /sbin/nologin app
+
+# Set working directory
+WORKDIR /app
+
+# Copy and install requirements
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip cache purge
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/data/vectordb /app/logs /app/static /app/src && \
+    chown -R app:app /app
+
+# Copy application files
+COPY --chown=app:app src/ ./src/
+COPY --chown=app:app static/ ./static/
+
+# Switch to non-root user
+USER app
+
+# Health check
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8085/stats || exit 1
+
+# Expose port
+EXPOSE 8085
+
+# Production command with multiple workers
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8085", "--workers", "4", "--access-log", "--log-level", "warning"]

@@ -22,7 +22,6 @@ import productCategoryRoutes from './routes/product-category.routes';
 import productTypeRoutes from './routes/product-type.routes';
 import productRateHistoryRoutes from './routes/product-rate-history.routes';
 import productVersionRoutes from './routes/product-version.routes';
-import fieldRoutes from './routes/field.routes';
 
 // Initialize express app
 const app = express();
@@ -102,7 +101,6 @@ app.use('/institutions', optionalAuthMiddleware, institutionRoutes);
 app.use('/product-categories', optionalAuthMiddleware, productCategoryRoutes);
 app.use('/product-types', optionalAuthMiddleware, productTypeRoutes);
 app.use('/products/tags', optionalAuthMiddleware, tagRoutes);
-app.use('/fields', optionalAuthMiddleware, fieldRoutes);
 
 // Protected routes (auth required)
 app.use('/saved-products', authMiddleware, savedProductRoutes);

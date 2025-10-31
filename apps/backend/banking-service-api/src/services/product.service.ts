@@ -50,6 +50,20 @@ export class ProductService {
     }
 
     /**
+     * Get products by array of IDs
+     */
+    async getProductsByIds(ids: string[], userId?: string, userInstitutionId?: string) {
+        const products = await this.productRepository.findByIds(ids, userId);
+
+        // If user has institutionId, filter products that belong to their institution
+        if (userInstitutionId) {
+            return products.filter(product => product.institutionId === userInstitutionId);
+        }
+
+        return products;
+    }
+
+    /**
      * Create a new product
      */
     async createProduct(data: ProductCreateDto, userInstitutionId?: string) {
@@ -116,5 +130,24 @@ export class ProductService {
         }
 
         return this.productRepository.setActiveStatus(id, isActive);
+    }
+
+    /**
+     * Get distinct fields and their data types from product details by product type
+     */
+    async getProductFieldsByType(productTypeId: string) {
+        // First verify the product type exists
+        const productTypeExists = await this.productRepository.findProductTypeById(productTypeId);
+
+        if (!productTypeExists) {
+            throw new ApiError(404, 'Product type not found');
+        }
+
+        const fields = await this.productRepository.getProductFieldsByType(productTypeId);
+
+        return {
+            productType: productTypeExists,
+            fields: fields
+        };
     }
 }

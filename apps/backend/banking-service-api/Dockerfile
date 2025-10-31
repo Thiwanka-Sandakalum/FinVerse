@@ -1,61 +1,52 @@
-# Use Node.js official image with Alpine for smaller size
+# Build stage
 FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Install dependencies for native modules (needed for Prisma)
-RUN apk add --no-cache libc6-compat
+# Install python and build dependencies required for node-gyp
+RUN apk add --no-cache python3 make g++ 
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package*.json ./
+COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install dependencies including 'prisma' for the build
+RUN npm ci --no-audit --no-optional && \
+    npx prisma generate
 
 # Copy source code
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
-
-# Build the TypeScript application
-RUN npm run build
+# Build TypeScript code
+RUN npm run build && \
+    npm prune --production
 
 # Production stage
 FROM node:20-alpine AS production
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
-
-# Create app directory
+# Set working directory
 WORKDIR /app
 
-# Create a non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S banking-service -u 1001
+# Install runtime dependencies only
+RUN apk add --no-cache libc6-compat
 
-# Copy built application and necessary files from builder stage
-COPY --from=builder --chown=banking-service:nodejs /app/dist ./dist
-COPY --from=builder --chown=banking-service:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=banking-service:nodejs /app/package.json ./
-COPY --from=builder --chown=banking-service:nodejs /app/prisma ./prisma
+# Copy package files and built assets from builder
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
 
-# Ensure Prisma client is properly generated in production
-RUN npx prisma generate
+# Set environment variables
+ENV NODE_ENV=production \
+    PORT=3000
 
-# Switch to non-root user
-USER banking-service
+# Clean npm cache
+RUN npm cache clean --force && \
+    rm -rf /root/.npm /root/.node-gyp
 
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
-
-# Use dumb-init to handle signals properly
-ENTRYPOINT ["dumb-init", "--"]
-
 # Start the application
-CMD ["node", "dist/index.js"]
+CMD ["npm", "start"]
