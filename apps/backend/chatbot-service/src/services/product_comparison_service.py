@@ -121,103 +121,12 @@ class ProductComparisonService:
             
             # If we didn't get a good response, fall back to basic formatting
             if not summary or len(summary) < 100:
-                logger.warning("LLM generated a short or empty response, falling back to basic formatting")
-                return self._generate_basic_comparison(comparison)
-                
+                logger.warning("LLM generated a short or empty response")
+                return "No valid comparison summary available."
+
             return summary
             
         except Exception as e:
             logger.error(f"Error generating comparison summary with LLM: {str(e)}")
-            # Fall back to basic formatting if LLM fails
-            return self._generate_basic_comparison(comparison)
     
-    def _generate_basic_comparison(self, comparison: Dict[str, Any]) -> str:
-        """
-        Generate a basic comparison summary without using LLM.
-        This is a fallback method in case the LLM fails.
-        
-        Args:
-            comparison: The comparison dictionary with raw product data
-            
-        Returns:
-            A formatted string summarizing the comparison
-        """
-        products = comparison.get("products", [])
-        product_type = comparison.get("product_type", "Financial Products")
-        
-        # Generate a basic summary
-        summary = f"# Comparison of {len(products)} {product_type}s\n\n"
-        
-        # Add product names
-        summary += "## Products Being Compared\n\n"
-        for idx, product in enumerate(products, 1):
-            summary += f"{idx}. **{product.get('name', 'Unknown Product')}** by {product.get('institution', 'Unknown Institution')}\n"
-        
-        summary += "\n## Detailed Comparison\n\n"
-        
-        # Create a comparison table for numerical attributes
-        # Dynamically collect numeric attributes from all products
-        numeric_attrs = set()
-        for product in products:
-            for key, value in product.items():
-                # Identify numeric fields and important string fields
-                if (isinstance(value, (int, float)) or 
-                    (isinstance(value, str) and any(x in key.lower() for x in 
-                    ["rate", "amount", "fee", "term", "price", "cost", "minimum", "maximum"]))):
-                    numeric_attrs.add(key)
-        
-        # Remove non-financial attributes
-        exclude_from_numeric = {"id", "updatedAt", "createdAt", "description"}
-        numeric_attrs = numeric_attrs - exclude_from_numeric
-                
-        # Only proceed if we have numeric attributes to compare
-        if numeric_attrs:
-            # Create header
-            summary += "### Key Financial Terms\n\n"
-            summary += "| Attribute | " + " | ".join([p.get("name", f"Product {i+1}") for i, p in enumerate(products)]) + " |\n"
-            summary += "|" + "-|"*len(products) + "-|\n"
-            
-            # Add rows for each attribute
-            for attr in sorted(numeric_attrs):
-                # Create a display name for the attribute
-                display_name = attr.replace("_", " ").title() if isinstance(attr, str) else str(attr)
-                values = []
-                for product in products:
-                    val = product.get(attr, "N/A")
-                    values.append(str(val))
-                
-                summary += f"| {display_name} | " + " | ".join(values) + " |\n"
-        
-        # Add features section if any product has features
-        has_features = any(product.get("features") for product in products)
-        if has_features:
-            summary += "\n### Features\n\n"
-            for product in products:
-                name = product.get("name", "Unknown Product")
-                features = product.get("features", [])
-                
-                summary += f"**{name}**:\n"
-                if features:
-                    for feature in features:
-                        summary += f"- {feature}\n"
-                else:
-                    summary += "- No specific features listed\n"
-                summary += "\n"
-        
-        # Add requirements section if any product has requirements
-        has_requirements = any(product.get("requirements") for product in products)
-        if has_requirements:
-            summary += "\n### Requirements\n\n"
-            for product in products:
-                name = product.get("name", "Unknown Product")
-                requirements = product.get("requirements", [])
-                
-                summary += f"**{name}**:\n"
-                if requirements:
-                    for req in requirements:
-                        summary += f"- {req}\n"
-                else:
-                    summary += "- No specific requirements listed\n"
-                summary += "\n"
-        
-        return summary
+    

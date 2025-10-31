@@ -69,5 +69,5 @@ class QueryClassifier:
         if result in ["sql", "vector", "hybrid", "unsupported"]:
             return QueryType(result)
         else:
-            # Default to vector if classification is unclear
-            return QueryType.VECTOR
+            # Default to SQL if classification is unclear
+            return QueryType.SQL
