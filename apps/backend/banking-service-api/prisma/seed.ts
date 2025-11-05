@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
@@ -7,127 +8,80 @@ const prisma = new PrismaClient();
 async function main() {
     console.log('Starting seed operation from seed.json...');
     const seedPath = path.join(__dirname, 'seed.json');
-    const raw = fs.readFileSync(seedPath, 'utf-8');
+    const raw = fs.readFileSync(seedPath, 'utf8');
     const data = JSON.parse(raw);
 
-    // Institution Types
-    if (Array.isArray(data.institutionTypes)) {
-        for (const type of data.institutionTypes) {
-            await prisma.institutionType.upsert({
-                where: { code: type.code }, // code is unique
-                update: type,
-                create: type,
-            });
-        }
-    }
-
-    // Institutions
-    if (Array.isArray(data.institutions)) {
-        for (const inst of data.institutions) {
-            await prisma.institution.upsert({
-                where: { slug: inst.slug }, // slug is unique
-                update: inst,
-                create: inst,
-            });
-        }
-    }
+    // Remove all data in correct order to avoid FK constraint errors
+    console.log('Deleting all data...');
+    await prisma.savedProduct.deleteMany();
+    await prisma.product.deleteMany();
+    await prisma.fieldDefinition.deleteMany();
+    await prisma.productCategory.deleteMany();
+    console.log('All data deleted. Seeding fresh data...');
 
     // Product Categories
     if (Array.isArray(data.productCategories)) {
-        // Handle nested array structure
         const categories = Array.isArray(data.productCategories[0])
             ? data.productCategories[0]
             : data.productCategories;
-
         for (const cat of categories) {
-            if (!cat.id || !cat.slug) {
-                console.warn(`Skipping category with missing id or slug:`, cat);
+            const { id, parentId, name, description, level } = cat;
+            if (!name) {
+                console.warn(`Skipping category with missing name:`, cat);
                 continue;
             }
-
-            await prisma.productCategory.upsert({
-                where: { slug: cat.slug }, // slug is unique
-                update: cat,
-                create: cat,
+            await prisma.productCategory.create({
+                data: { id: id || randomUUID(), parentId, name, description, level },
             });
         }
     }
 
     // Field Definitions
     if (Array.isArray(data.fieldDefinitions)) {
-        // First, delete all existing field definitions
-        await prisma.fieldDefinition.deleteMany({});
-
-        // Then create the new ones
         for (const field of data.fieldDefinitions) {
-            const { description, ...fieldData } = field; // Remove description field
             try {
+                const { id, categoryId, name, dataType, isRequired, validation } = field;
                 await prisma.fieldDefinition.create({
                     data: {
-                        id: field.id,
-                        categoryId: field.categoryId,
-                        name: field.name,
-                        slug: field.slug,
-                        dataType: field.dataType,
-                        isRequired: field.isRequired,
-                        options: field.options || [],
-                        validation: field.validation || null
+                        id: id || randomUUID(),
+                        categoryId,
+                        name,
+                        dataType,
+                        isRequired,
+                        validation: validation || null
                     }
                 });
             } catch (error) {
                 console.warn(`Failed to create field definition: ${field.name}`, error);
             }
         }
-        console.log(`Successfully created ${data.fieldDefinitions.length} field definitions`);
-    }
-
-    // Product Types
-    if (Array.isArray(data.productTypes)) {
-        for (const type of data.productTypes) {
-            await prisma.productType.upsert({
-                where: { code: type.code }, // code is unique
-                update: type,
-                create: type,
-            });
-        }
-    }
-
-    // Product Tags
-    if (Array.isArray(data.productTags)) {
-        for (const tag of data.productTags) {
-            await prisma.productTag.upsert({
-                where: { slug: tag.slug }, // slug is unique
-                update: tag,
-                create: tag,
-            });
-        }
+        console.log(`Successfully processed ${data.fieldDefinitions.length} field definitions`);
     }
 
     // Products
     if (Array.isArray(data.products)) {
         for (const prod of data.products) {
-            // Remove createdAt and updatedAt from the product object
-            // as they are managed by Prisma
-            const { createdAt, updatedAt, ...productData } = prod;
-
-            await prisma.product.upsert({
-                where: { id: prod.id }, // Use id instead of slug for upsert
-                update: productData,
-                create: productData,
+            const {
+                id,
+                institutionId,
+                name,
+                details,
+                isFeatured,
+                isActive,
+                categoryId
+            } = prod;
+            await prisma.product.create({
+                data: {
+                    id: id || randomUUID(),
+                    institutionId,
+                    name,
+                    details,
+                    isFeatured,
+                    isActive,
+                    categoryId
+                },
             });
         }
-    }
-
-    // Handle product tag mappings
-    if (data.productTagMappings && Array.isArray(data.productTagMappings)) {
-        // Clear existing product tag mappings to prevent duplicates
-        await prisma.productTagMap.deleteMany({});
-
-        // Create all product tag mappings in bulk for better performance
-        await prisma.productTagMap.createMany({
-            data: data.productTagMappings,
-            skipDuplicates: true,
-        });
     }
 
     console.log('Seed completed from seed.json');

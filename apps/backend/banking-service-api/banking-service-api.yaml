@@ -2,46 +2,33 @@ openapi: 3.0.3
 info:
   title: FinVerse Banking Service API
   description: |
-    Comprehensive RESTful API for banking services and financial products management,
-    including creation, editing, bookmarking, comparing, sharing, rating products,
-    and managing related financial data.
+    A comprehensive RESTful API for managing and comparing financial products across institutions.
+
+    ## Key Features
+    - Product Management: Create, update, and manage financial products
+    - Dynamic Fields: Configure custom fields for different product categories
+    - Hierarchical Categories: Organize products in a flexible category structure
   version: 1.1.0
   contact:
-    name: FinVerse API Team
-    email: api@finverse.com
-    url: https://developer.finverse.com
+    name: Thiwanka Sandakalum
+    email: thiwanka2002sandakalum@gmail.com
+    url: https://github.com/Thiwanka-Sandakalum/FinVerse
 
 servers:
-  - url: https://api.finverse.com/v1
-    description: Production server
-  - url: https://d4e3a250-e4e4-451e-876d-6e93bd08d9b0-dev.e1-us-east-azure.choreoapis.dev/bankguru/banking-service-api/v1.0
-    description: Staging server
-  - url: http://localhost:4040
+  - url: http://localhost:3000
     description: Development server
+  - url: https://api.finverse.dev
+    description: Development environment
+  - url: https://api.finverse.staging
+    description: Staging environment
+  - url: https://api.finverse.com
+    description: Production environment
 
 tags:
   - name: Products
-    description: Product management operations
-  - name: Saved Products
-    description: Operations related to bookmarking products
-  - name: Compare Lists
-    description: Operations for product comparison
-  - name: Shared Products
-    description: Operations for sharing products
-  - name: Reviews
-    description: Operations for product reviews and ratings
-  - name: Tags
-    description: Product tag management
+    description: Manage financial products including creation, updates, and status changes
   - name: Institutions
-    description: Financial institution management
-  - name: Product Types
-    description: Product type management
-  - name: Product Categories
-    description: Product category management
-  - name: Rate History
-    description: Product rate history operations
-  - name: Field Definitions
-    description: Product field definitions management and retrieval
+    description: Manage financial institutions and their details
 
 components:
   securitySchemes:
@@ -56,37 +43,20 @@ components:
       properties:
         id:
           type: string
-          format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
         institutionId:
           type: string
-          format: uuid
-        productTypeId:
+        categoryId:
           type: string
-          format: uuid
         name:
           type: string
           example: "Personal Loan"
-        slug:
-          type: string
-          example: "personal-loan"
         details:
           type: object
-          properties:
-            description:
-              type: string
-              example: "Low-interest loan for personal use"
-            terms:
-              type: string
-            fees:
-              type: string
-              example: "5% p.a."
-            eligibility:
-              type: string
-              example: "18+"
-            additionalInfo:
-              type: object
-              description: "Any additional product-specific information"
+          description: "Dynamic fields based on product category"
+          example:
+            description: A low-interest personal loan for various needs.
+            minimumInterestRate: 3.5
+            maximumLoanAmount: 50000
         isFeatured:
           type: boolean
           default: false
@@ -99,555 +69,62 @@ components:
         updatedAt:
           type: string
           format: date-time
-        institution:
-          $ref: "#/components/schemas/Institution"
-        productType:
-          $ref: "#/components/schemas/ProductType"
-        tags:
-          type: array
-          items:
-            $ref: "#/components/schemas/ProductTag"
       required:
-        - institutionId
-        - productTypeId
         - name
-        - slug
-
-    ProductCreate:
-      type: object
-      properties:
-        institutionId:
-          type: string
-          format: uuid
-        productTypeId:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: "Personal Loan"
-        details:
-          type: object
-          properties:
-            description:
-              type: string
-              example: "Low-interest loan for personal use"
-            terms:
-              type: string
-            fees:
-              type: string
-              example: "5% p.a."
-            eligibility:
-              type: string
-              example: "18+"
-            additionalInfo:
-              type: object
-        isFeatured:
-          type: boolean
-          default: false
-      required:
-        - institutionId
-        - productTypeId
-        - name
-
-    ProductUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-          example: "Updated Loan"
-        details:
-          type: object
-          properties:
-            description:
-              type: string
-              example: "Updated description"
-            terms:
-              type: string
-            fees:
-              type: string
-              example: "6% p.a."
-            eligibility:
-              type: string
-            additionalInfo:
-              type: object
-        isFeatured:
-          type: boolean
-
-    Institution:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
-        typeId:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: "FinBank Corp"
-        slug:
-          type: string
-          example: "finbank-corp"
-        logoUrl:
-          type: string
-          format: uri
-          example: "https://storage.finverse.com/logos/finbank.png"
-        licenseNumber:
-          type: string
-          example: "FIN12345678"
-        countryCode:
-          type: string
-          example: "US"
-        isActive:
-          type: boolean
-          default: true
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        type:
-          $ref: "#/components/schemas/InstitutionType"
-      required:
-        - typeId
-        - name
-        - slug
-        - countryCode
-
-    InstitutionCreate:
-      type: object
-      properties:
-        typeId:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: "FinBank Corp"
-        logoUrl:
-          type: string
-          format: uri
-          example: "https://storage.finverse.com/logos/finbank.png"
-        licenseNumber:
-          type: string
-          example: "FIN12345678"
-        countryCode:
-          type: string
-          example: "US"
-      required:
-        - typeId
-        - name
-        - countryCode
-
-    InstitutionUpdate:
-      type: object
-      properties:
-        typeId:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: "FinBank Corp Updated"
-        logoUrl:
-          type: string
-          format: uri
-          example: "https://storage.finverse.com/logos/finbank-updated.png"
-        licenseNumber:
-          type: string
-          example: "FIN87654321"
-        countryCode:
-          type: string
-          example: "US"
-        isActive:
-          type: boolean
-
-    InstitutionType:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
-        code:
-          type: string
-          example: "BANK"
-        name:
-          type: string
-          example: "Bank"
-        description:
-          type: string
-          example: "Commercial banking institution"
-      required:
-        - code
-        - name
-
-    InstitutionTypeCreate:
-      type: object
-      properties:
-        code:
-          type: string
-          example: "BANK"
-        name:
-          type: string
-          example: "Bank"
-        description:
-          type: string
-          example: "Commercial banking institution"
-      required:
-        - code
-        - name
+        - details
 
     ProductCategory:
       type: object
       properties:
         id:
           type: string
-          format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
         parentId:
           type: string
-          format: uuid
-          nullable: true
         name:
           type: string
           example: "Loans"
-        slug:
-          type: string
-          example: "loans"
         description:
           type: string
           example: "Various loan products"
         level:
           type: integer
           example: 0
+          default: 0
         parent:
           $ref: "#/components/schemas/ProductCategory"
-          nullable: true
         children:
           type: array
           items:
             $ref: "#/components/schemas/ProductCategory"
-      required:
-        - name
-        - slug
-
-    ProductCategoryCreate:
-      type: object
-      properties:
-        parentId:
-          type: string
-          format: uuid
-          nullable: true
-        name:
-          type: string
-          example: "Loans"
-        description:
-          type: string
-          example: "Various loan products"
-      required:
-        - name
-
-    ProductType:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
-        categoryId:
-          type: string
-          format: uuid
-        code:
-          type: string
-          example: "PERSONAL_LOAN"
-        name:
-          type: string
-          example: "Personal Loan"
-        description:
-          type: string
-          example: "Loans for personal use"
-        category:
-          $ref: "#/components/schemas/ProductCategory"
-      required:
-        - categoryId
-        - code
-        - name
-
-    ProductTypeCreate:
-      type: object
-      properties:
-        categoryId:
-          type: string
-          format: uuid
-        code:
-          type: string
-          example: "PERSONAL_LOAN"
-        name:
-          type: string
-          example: "Personal Loan"
-        description:
-          type: string
-          example: "Loans for personal use"
-      required:
-        - categoryId
-        - code
-        - name
-
-    SavedProduct:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        clerkUserId:
-          type: string
-        productId:
-          type: string
-          format: uuid
-        createdAt:
-          type: string
-          format: date-time
-        product:
-          $ref: "#/components/schemas/Product"
-      required:
-        - clerkUserId
-        - productId
-
-    CompareList:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        clerkUserId:
-          type: string
-        productIds:
+        fieldDefinitions:
           type: array
           items:
-            type: string
-            format: uuid
-        createdAt:
-          type: string
-          format: date-time
-      required:
-        - clerkUserId
-        - productIds
-
-    SharedLink:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        productId:
-          type: string
-          format: uuid
-        clerkUserId:
-          type: string
-          nullable: true
-        channel:
-          type: string
-          example: "whatsapp"
-        sharedAt:
-          type: string
-          format: date-time
-        product:
-          $ref: "#/components/schemas/Product"
-      required:
-        - productId
-        - channel
-
-    Review:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        clerkUserId:
-          type: string
-        productId:
-          type: string
-          format: uuid
-        rating:
-          type: integer
-          minimum: 1
-          maximum: 5
-        comment:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        product:
-          $ref: "#/components/schemas/Product"
-      required:
-        - clerkUserId
-        - productId
-        - rating
-
-    ProductTag:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        slug:
-          type: string
+            $ref: "#/components/schemas/FieldDefinition"
       required:
         - name
-        - slug
-
-    ProductVersion:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        productId:
-          type: string
-          format: uuid
-        versionNumber:
-          type: integer
-        snapshot:
-          type: object
-        changedBy:
-          type: string
-          nullable: true
-        changeNote:
-          type: string
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-        product:
-          $ref: "#/components/schemas/Product"
-      required:
-        - productId
-        - versionNumber
-        - snapshot
-
-    ProductRateHistory:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        productId:
-          type: string
-          format: uuid
-        metric:
-          type: string
-          example: "interest_rate"
-        value:
-          type: number
-          format: float
-          example: 5.25
-        currency:
-          type: string
-          example: "USD"
-          nullable: true
-        recordedAt:
-          type: string
-          format: date-time
-        source:
-          type: string
-          nullable: true
-        product:
-          $ref: "#/components/schemas/Product"
-      required:
-        - productId
-        - metric
-        - value
 
     FieldDefinition:
       type: object
       properties:
         id:
           type: string
-          format: uuid
         categoryId:
           type: string
-          format: uuid
         name:
           type: string
           example: "Interest Rate"
-        slug:
-          type: string
-          example: "interestRate"
         dataType:
           type: string
           enum: ["string", "number", "date", "boolean", "json"]
         isRequired:
           type: boolean
           default: false
-        options:
-          type: array
-          items:
-            type: string
         validation:
           type: object
-          nullable: true
-          properties:
-            min:
-              type: number
-            max:
-              type: number
-            pattern:
-              type: string
-      required:
-        - categoryId
-        - name
-        - slug
-        - dataType
-
-    FieldDefinitionCreate:
-      type: object
-      properties:
-        categoryId:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: "Interest Rate"
-        slug:
-          type: string
-          example: "interestRate"
-        dataType:
-          type: string
-          enum: ["string", "number", "date", "boolean", "json"]
-        isRequired:
-          type: boolean
-        options:
-          type: array
-          items:
-            type: string
-        validation:
-          type: object
-          nullable: true
       required:
         - categoryId
         - name
         - dataType
-
-    FieldDefinitionUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-        dataType:
-          type: string
-          enum: ["string", "number", "date", "boolean", "json"]
-        isRequired:
-          type: boolean
-        options:
-          type: array
-          items:
-            type: string
-        validation:
-          type: object
-          nullable: true
 
     Error:
       type: object
@@ -680,10 +157,13 @@ components:
           properties:
             total:
               type: integer
+              description: Total number of items
             limit:
               type: integer
+              description: Number of items per page
             offset:
               type: integer
+              description: Offset of items
       required:
         - data
         - meta
@@ -700,62 +180,76 @@ paths:
           in: query
           schema:
             type: string
-            format: uuid
+          description: Filter by category ID
         - name: institutionId
           in: query
           schema:
             type: string
-            format: uuid
-        - name: productTypeId
-          in: query
-          schema:
-            type: string
-            format: uuid
+          description: Filter by institution ID
         - name: isActive
           in: query
           schema:
             type: boolean
+          description: Filter by active status
         - name: isFeatured
           in: query
           schema:
             type: boolean
+          description: Filter by featured status
+        - name: productIds
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: Comma-separated list of product IDs to filter
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number for pagination
         - name: limit
           in: query
           schema:
             type: integer
+            minimum: 1
+            maximum: 100
             default: 20
-        - name: offset
+          description: Number of items per page
+        - name: sort
           in: query
-          schema:
-            type: integer
-            default: 0
-        - name: search
-          in: query
-          description: Search term for product name, type, institution, or tag
-          required: false
           schema:
             type: string
+            enum: [name, createdAt, updatedAt]
+            default: createdAt
+          description: Field to sort by
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort order (ascending or descending)
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search term for product name
       responses:
         "200":
           description: A list of products
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Product"
+                $ref: "#/components/schemas/PaginatedResponse"
         "400":
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
     post:
       summary: Create Product
       description: Create a new financial product
@@ -764,11 +258,11 @@ paths:
       security:
         - bearerAuth: []
       requestBody:
-        # required: true removed (should be inside requestBody, not content)
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductCreate"
+              $ref: "#/components/schemas/Product"
+              required: true
       responses:
         "201":
           description: Product created successfully
@@ -795,71 +289,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /products/batch:
-    post:
-      summary: Get Products by IDs
-      description: Retrieve multiple products by their IDs in a single request
-      tags:
-        - Products
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                productIds:
-                  type: array
-                  items:
-                    type: string
-                    format: uuid
-                  minItems: 1
-                  maxItems: 100
-                  example:
-                    [
-                      "550e8400-e29b-41d4-a716-446655440000",
-                      "550e8400-e29b-41d4-a716-446655440001",
-                    ]
-              required:
-                - productIds
-      responses:
-        "200":
-          description: List of products found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Product"
-                  meta:
-                    type: object
-                    properties:
-                      requested:
-                        type: integer
-                        description: Number of product IDs requested
-                      found:
-                        type: integer
-                        description: Number of products found
-                      notFound:
-                        type: integer
-                        description: Number of products not found
-                    required:
-                      - requested
-                      - found
-                      - notFound
-                required:
-                  - data
-                  - meta
-        "400":
-          description: Bad request - invalid product IDs array
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
   /products/{id}:
     parameters:
       - name: id
@@ -867,8 +296,6 @@ paths:
         required: true
         schema:
           type: string
-          format: uuid
-
     get:
       summary: Get Product Details
       description: Retrieve detailed information about a specific product
@@ -887,7 +314,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
     put:
       summary: Edit Product
       description: Edit an existing product
@@ -900,7 +326,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductUpdate"
+              $ref: "#/components/schemas/Product"
       responses:
         "200":
           description: Product updated successfully
@@ -932,7 +358,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
     delete:
       summary: Delete Product
       description: Delete a specific product from the platform
@@ -966,1279 +391,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /products/{id}/activate:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    patch:
-      summary: Activate/Deactivate Product
-      description: Toggle the product's active/inactive status
-      tags:
-        - Products
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                isActive:
-                  type: boolean
-              required:
-                - isActive
-      responses:
-        "200":
-          description: Product status updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MessageResponse"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not an Institution Admin
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /products/versions/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    get:
-      summary: Get Product Version History
-      description: Get the version history for a specific product
-      tags:
-        - Products
-      responses:
-        "200":
-          description: List of product versions
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ProductVersion"
-        "404":
-          description: Product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /products/{id}/rates:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    get:
-      summary: Get Product Rate History
-      description: Get the rate history for a specific product
-      tags:
-        - Rate History
-      parameters:
-        - name: metric
-          in: query
-          schema:
-            type: string
-        - name: startDate
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: endDate
-          in: query
-          schema:
-            type: string
-            format: date
-      responses:
-        "200":
-          description: List of product rate history entries
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ProductRateHistory"
-        "404":
-          description: Product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    post:
-      summary: Add Rate History Entry
-      description: Add a new rate history entry for a product
-      tags:
-        - Rate History
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                metric:
-                  type: string
-                  example: "interest_rate"
-                value:
-                  type: number
-                  format: float
-                  example: 5.25
-                currency:
-                  type: string
-                  example: "USD"
-                  nullable: true
-                source:
-                  type: string
-                  nullable: true
-              required:
-                - metric
-                - value
-      responses:
-        "201":
-          description: Rate history entry created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProductRateHistory"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /products/{productTypeId}/fields:
-    parameters:
-      - name: productTypeId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    get:
-      summary: Get Field Definitions for Product Type
-      description: Retrieve field definitions associated with a specific product type
-      tags:
-        - Field Definitions
-      responses:
-        "200":
-          description: List of field definitions
-
-        "404":
-          description: Product type not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /saved-products:
-    get:
-      summary: Get Saved Products
-      description: Retrieve a list of all saved (bookmarked) products for the user
-      tags:
-        - Saved Products
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: A list of saved products
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SavedProduct"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    post:
-      summary: Save (Bookmark) Product
-      description: Save (bookmark) a product for a user
-      tags:
-        - Saved Products
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                productId:
-                  type: string
-                  format: uuid
-              required:
-                - productId
-      responses:
-        "201":
-          description: Product saved successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SavedProduct"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /saved-products/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    delete:
-      summary: Delete Saved Product
-      description: Remove a saved (bookmarked) product from a user's saved list
-      tags:
-        - Saved Products
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Product removed from saved list
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MessageResponse"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not the owner of the saved product
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Saved product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /compare-list:
-    get:
-      summary: Get Compare List
-      description: Retrieve the current comparison list for the user
-      tags:
-        - Compare Lists
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: A list of comparison lists
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/CompareList"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    post:
-      summary: Add to Compare List
-      description: Add products to the comparison list
-      tags:
-        - Compare Lists
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                productIds:
-                  type: array
-                  items:
-                    type: string
-                    format: uuid
-              required:
-                - productIds
-      responses:
-        "201":
-          description: Products added to compare list
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CompareList"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: One or more products not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /compare-list/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    delete:
-      summary: Delete Compare List
-      description: Delete a comparison list
-      tags:
-        - Compare Lists
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Compare list deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MessageResponse"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not the owner of the compare list
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Compare list not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    get:
-      summary: Get Compare List Details
-      description: Retrieve details of a specific comparison list
-      tags:
-        - Compare Lists
-      responses:
-        "200":
-          description: Comparison list details
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CompareList"
-        "404":
-          description: Compare list not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /shared-products:
-    get:
-      summary: Get Shared Links
-      description: Retrieve a list of all shared products by the user
-      tags:
-        - Shared Products
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: A list of shared links
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SharedLink"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    post:
-      summary: Share Product
-      description: Share a product via a specified channel (e.g., email, WhatsApp)
-      tags:
-        - Shared Products
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                productId:
-                  type: string
-                  format: uuid
-                channel:
-                  type: string
-                  example: "whatsapp"
-              required:
-                - productId
-                - channel
-      responses:
-        "201":
-          description: Product shared successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SharedLink"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /reviews:
-    post:
-      summary: Submit Product Review
-      description: Submit a product review and rating
-      tags:
-        - Reviews
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                productId:
-                  type: string
-                  format: uuid
-                rating:
-                  type: integer
-                  minimum: 1
-                  maximum: 5
-                comment:
-                  type: string
-              required:
-                - productId
-                - rating
-      responses:
-        "201":
-          description: Review submitted successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Review"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /reviews/user:
-    get:
-      summary: Get Reviews by User
-      description: Retrieve reviews submitted by the current user
-      tags:
-        - Reviews
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: A list of reviews by the user
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Review"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /reviews/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    put:
-      summary: Edit Product Review
-      description: Edit an existing review for a product
-      tags:
-        - Reviews
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                rating:
-                  type: integer
-                  minimum: 1
-                  maximum: 5
-                comment:
-                  type: string
-              required:
-                - rating
-      responses:
-        "200":
-          description: Review updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Review"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not the owner of the review
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Review not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    delete:
-      summary: Delete Product Review
-      description: Delete a review submitted by a user
-      tags:
-        - Reviews
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Review deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MessageResponse"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not the owner of the review
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Review not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /products/{productId}/reviews:
-    parameters:
-      - name: productId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    get:
-      summary: Get Product Reviews
-      description: Get all reviews for a specific product
-      tags:
-        - Reviews
-      responses:
-        "200":
-          description: A list of reviews for the product
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Review"
-        "404":
-          description: Product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /products/tags:
-    get:
-      summary: Get All Product Tags
-      description: Retrieve a list of all product tags
-      tags:
-        - Product Tags
-      responses:
-        "200":
-          description: A list of product tags
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ProductTag"
-
-    post:
-      summary: Create Product Tag
-      description: Create a new product tag
-      tags:
-        - Tags
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-              required:
-                - name
-      responses:
-        "201":
-          description: Tag created successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProductTag"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /products/{id}/tags:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    get:
-      summary: Get Tags for a Product
-      description: Get all tags associated with a specific product
-      tags:
-        - Tags
-      responses:
-        "200":
-          description: A list of product tags
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ProductTag"
-        "404":
-          description: Product not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    post:
-      summary: Add Tag to Product
-      description: Add a tag to a product
-      tags:
-        - Tags
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                tagId:
-                  type: string
-                  format: uuid
-              required:
-                - tagId
-      responses:
-        "200":
-          description: Tag added to product
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProductTag"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not an Institution Admin
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Product or tag not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /products/{id}/tags/{tagId}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: tagId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    delete:
-      summary: Remove Tag from Product
-      description: Remove a tag from a product
-      tags:
-        - Tags
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Tag removed from product
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MessageResponse"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not an Institution Admin
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Product or tag not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /institutions:
-    get:
-      summary: Get All Institutions
-      description: Retrieve a list of all financial institutions
-      tags:
-        - Institutions
-      parameters:
-        - name: typeId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: isActive
-          in: query
-          schema:
-            type: boolean
-        - name: countryCode
-          in: query
-          schema:
-            type: string
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            default: 0
-      responses:
-        "200":
-          description: A list of institutions
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Institution"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    post:
-      summary: Create Institution
-      description: Create a new financial institution
-      tags:
-        - Institutions
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InstitutionCreate"
-      responses:
-        "201":
-          description: Institution created successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Institution"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not a System Admin
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /institutions/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    get:
-      summary: Get Institution Details
-      description: Retrieve detailed information about a specific institution
-      tags:
-        - Institutions
-      responses:
-        "200":
-          description: Institution details
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Institution"
-        "404":
-          description: Institution not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    put:
-      summary: Update Institution
-      description: Update an existing institution
-      tags:
-        - Institutions
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InstitutionUpdate"
-      responses:
-        "200":
-          description: Institution updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Institution"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not a System Admin
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Institution not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    delete:
-      summary: Delete Institution
-      description: Delete a specific institution
-      tags:
-        - Institutions
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Institution deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MessageResponse"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not a System Admin
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Institution not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /institution-types:
-    get:
-      summary: Get All Institution Types
-      description: Retrieve a list of all institution types
-      tags:
-        - Institution Types
-      responses:
-        "200":
-          description: A list of institution types
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/InstitutionType"
-
-    post:
-      summary: Create Institution Type
-      description: Create a new institution type
-      tags:
-        - Institution Types
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InstitutionTypeCreate"
-      responses:
-        "201":
-          description: Institution type created successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InstitutionType"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /institution-types/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-
-    get:
-      summary: Get Institution Type by ID
-      description: Retrieve a specific institution type by its ID
-      tags:
-        - Institution Types
-      responses:
-        "200":
-          description: Institution type details
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InstitutionType"
-        "404":
-          description: Institution type not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    put:
-      summary: Update Institution Type
-      description: Update an existing institution type
-      tags:
-        - Institution Types
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InstitutionTypeCreate"
-      responses:
-        "200":
-          description: Institution type updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InstitutionType"
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Institution type not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-    delete:
-      summary: Delete Institution Type
-      description: Delete a specific institution type
-      tags:
-        - Institution Types
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Institution type deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MessageResponse"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Institution type not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /product-categories:
+  /products/categories:
     get:
       summary: Get All Product Categories
       description: Retrieve a list of all product categories
       tags:
-        - Product Categories
+        - Products
       parameters:
+        - name: filter[parentId]
+          in: query
+          schema:
+            type: string
+        - name: filter[level]
+          in: query
+          schema:
+            type: integer
+            minimum: 0
         - name: includeChildren
           in: query
           schema:
             type: boolean
             default: false
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [name, level]
+            default: level
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
       responses:
         "200":
           description: A list of product categories
@@ -2248,12 +446,11 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ProductCategory"
-
     post:
       summary: Create Product Category
       description: Create a new product category
       tags:
-        - Product Categories
+        - Products
       security:
         - bearerAuth: []
       requestBody:
@@ -2261,7 +458,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductCategoryCreate"
+              $ref: "#/components/schemas/ProductCategory"
       responses:
         "201":
           description: Product category created successfully
@@ -2288,19 +485,18 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /product-categories/{id}:
+  /products/categories/{id}:
     parameters:
       - name: id
         in: path
         required: true
         schema:
           type: string
-          format: uuid
     get:
       summary: Get Product Category by ID
       description: Retrieve a product category by its ID
       tags:
-        - Product Categories
+        - Products
       responses:
         "200":
           description: Product category details
@@ -2318,14 +514,14 @@ paths:
       summary: Update Product Category
       description: Update an existing product category
       tags:
-        - Product Categories
+        - Products
       security:
         - bearerAuth: []
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductCategoryCreate"
+              $ref: "#/components/schemas/ProductCategory"
       responses:
         "200":
           description: Product category updated successfully
@@ -2361,7 +557,7 @@ paths:
       summary: Delete Product Category
       description: Delete a product category by its ID
       tags:
-        - Product Categories
+        - Products
       security:
         - bearerAuth: []
       responses:
@@ -2390,12 +586,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /product-categories/hierarchy:
+  /products/categories/hierarchy:
     get:
       summary: Get Product Category Hierarchy
       description: Retrieve the full hierarchy of product categories
       tags:
-        - Product Categories
+        - Products
       responses:
         "200":
           description: Product category hierarchy
@@ -2406,33 +602,38 @@ paths:
                 items:
                   $ref: "#/components/schemas/ProductCategory"
 
-  /product-types:
+  /products/categories/{categoryId}/fields:
+    parameters:
+      - name: categoryId
+        in: path
+        required: true
+        schema:
+          type: string
     get:
-      summary: Get All Product Types
-      description: Retrieve a list of all product types
+      summary: Get Field Definitions for Category
+      description: Retrieve all field definitions for a product category
       tags:
-        - Product Types
-      parameters:
-        - name: categoryId
-          in: query
-          schema:
-            type: string
-            format: uuid
+        - Products
       responses:
         "200":
-          description: A list of product types
+          description: List of field definitions
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ProductType"
-
+                  $ref: "#/components/schemas/FieldDefinition"
+        "404":
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     post:
-      summary: Create Product Type
-      description: Create a new product type
+      summary: Add Field Definition to Category
+      description: Create a new field definition for a product category
       tags:
-        - Product Types
+        - Products
       security:
         - bearerAuth: []
       requestBody:
@@ -2440,14 +641,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductTypeCreate"
+              type: object
+              properties:
+                name:
+                  type: string
+                dataType:
+                  type: string
+                  enum: ["string", "number", "date", "boolean", "json"]
+                isRequired:
+                  type: boolean
+                validation:
+                  type: object
+              required:
+                - name
+                - dataType
       responses:
         "201":
-          description: Product type created successfully
+          description: Field definition created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProductType"
+                $ref: "#/components/schemas/FieldDefinition"
         "400":
           description: Bad request
           content:
@@ -2466,52 +680,73 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        "404":
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
-  /product-types/{id}:
+  /products/categories/{categoryId}/fields/{fieldId}:
     parameters:
-      - name: id
+      - name: categoryId
         in: path
         required: true
         schema:
           type: string
-          format: uuid
+      - name: fieldId
+        in: path
+        required: true
+        schema:
+          type: string
     get:
-      summary: Get Product Type by ID
-      description: Retrieve a product type by its ID
+      summary: Get Field Definition
+      description: Retrieve a specific field definition
       tags:
-        - Product Types
+        - Products
       responses:
         "200":
-          description: Product type details
+          description: Field definition details
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProductType"
+                $ref: "#/components/schemas/FieldDefinition"
         "404":
-          description: Product type not found
+          description: Field definition not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
     put:
-      summary: Update Product Type
-      description: Update an existing product type
+      summary: Update Field Definition
+      description: Update a field definition
       tags:
-        - Product Types
+        - Products
       security:
         - bearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductTypeCreate"
+              type: object
+              properties:
+                name:
+                  type: string
+                dataType:
+                  type: string
+                  enum: ["string", "number", "date", "boolean", "json"]
+                isRequired:
+                  type: boolean
+                validation:
+                  type: object
       responses:
         "200":
-          description: Product type updated successfully
+          description: Field definition updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProductType"
+                $ref: "#/components/schemas/FieldDefinition"
         "400":
           description: Bad request
           content:
@@ -2531,21 +766,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
         "404":
-          description: Product type not found
+          description: Field definition not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
     delete:
-      summary: Delete Product Type
-      description: Delete a product type by its ID
+      summary: Delete Field Definition
+      description: Delete a field definition
       tags:
-        - Product Types
+        - Products
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Product type deleted successfully
+          description: Field definition deleted successfully
           content:
             application/json:
               schema:
@@ -2563,7 +798,213 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
         "404":
-          description: Product type not found
+          description: Field definition not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/saved:
+    get:
+      summary: Get User's Saved Products
+      description: Retrieve all products saved by the authenticated user
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of items per page
+      responses:
+        "200":
+          description: List of saved products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{productId}/save:
+    parameters:
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID of the product to save/unsave
+    post:
+      summary: Save Product
+      description: Save a product to user's saved list
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Product saved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  isSaved:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                required:
+                  - message
+                  - isSaved
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Product already saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Toggle Save Product
+      description: Toggle save status of a product (save if not saved, unsave if saved)
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Product save status toggled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  action:
+                    type: string
+                    enum: ["saved", "unsaved"]
+                  isSaved:
+                    type: boolean
+                  data:
+                    type: object
+                required:
+                  - message
+                  - action
+                  - isSaved
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Unsave Product
+      description: Remove a product from user's saved list
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Product unsaved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  isSaved:
+                    type: boolean
+                    example: false
+                required:
+                  - message
+                  - isSaved
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Product not saved by user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{productId}/save-status:
+    parameters:
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID of the product to check save status
+    get:
+      summary: Check Product Save Status
+      description: Check if a product is saved by the authenticated user
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Product save status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                  isSaved:
+                    type: boolean
+                  savedAt:
+                    type: string
+                    format: date-time
+                    nullable: true
+                required:
+                  - productId
+                  - isSaved
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:

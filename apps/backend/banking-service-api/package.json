@@ -15,7 +15,8 @@
         "prisma:migrate": "prisma migrate dev",
         "prisma:studio": "prisma studio",
         "prisma:seed": "ts-node prisma/seed.ts",
-        "test": "jest"
+        "test": "jest",
+        "types:generate": "openapi-typescript banking-service-api.yaml --output src/types/api.ts"
     },
     "keywords": [
         "banking",
@@ -35,10 +36,11 @@
         "axios": "^1.11.0",
         "cors": "^2.8.5",
         "express": "^5.1.0",
-        "prisma": "^6.13.0",
+        "express-openapi-validator": "^5.6.0",
         "helmet": "^8.1.0",
         "jsonwebtoken": "^9.0.2",
         "morgan": "^1.10.1",
+        "prisma": "^6.13.0",
         "uuid": "^11.1.0",
         "winston": "^3.17.0"
     },
@@ -56,10 +58,12 @@
         "eslint": "^9.33.0",
         "eslint-config-prettier": "^10.1.8",
         "jest": "^30.0.5",
+        "openapi-typescript": "^7.10.1",
         "prettier": "^3.6.2",
         "prisma": "^6.13.0",
         "supertest": "^7.1.4",
         "ts-jest": "^29.4.1",
-        "ts-node-dev": "^2.0.0"
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.9.3"
     }
 }

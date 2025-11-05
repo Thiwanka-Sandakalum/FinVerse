@@ -1,244 +1,4 @@
 {
-    "institutionTypes": [
-        {
-            "id": "inst-type-001",
-            "code": "COMMERCIAL_BANK",
-            "name": "Commercial Bank",
-            "description": "Licensed commercial banks in Sri Lanka"
-        },
-        {
-            "id": "inst-type-002",
-            "code": "SPECIALIZED_BANK",
-            "name": "Specialized Bank",
-            "description": "Development and specialized banks"
-        },
-        {
-            "id": "inst-type-003",
-            "code": "FINANCE_COMPANY",
-            "name": "Finance Company",
-            "description": "Licensed finance companies"
-        },
-        {
-            "id": "inst-type-004",
-            "code": "INSURANCE_COMPANY",
-            "name": "Insurance Company",
-            "description": "Life and general insurance companies"
-        },
-        {
-            "id": "inst-type-005",
-            "code": "MICROFINANCE",
-            "name": "Microfinance Institution",
-            "description": "Microfinance and cooperative institutions"
-        },
-        {
-            "id": "inst-type-006",
-            "code": "LEASING_COMPANY",
-            "name": "Leasing Company",
-            "description": "Equipment and vehicle leasing companies"
-        }
-    ],
-    "institutions": [
-        {
-            "id": "inst-001",
-            "typeId": "inst-type-001",
-            "name": "Bank of Ceylon",
-            "slug": "bank-of-ceylon",
-            "logoUrl": "https://example.com/logos/boc.png",
-            "licenseNumber": "LB/001",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-002",
-            "typeId": "inst-type-001",
-            "name": "People's Bank",
-            "slug": "peoples-bank",
-            "logoUrl": "https://example.com/logos/peoples.png",
-            "licenseNumber": "LB/002",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-003",
-            "typeId": "inst-type-001",
-            "name": "Commercial Bank of Ceylon",
-            "slug": "commercial-bank-ceylon",
-            "logoUrl": "https://example.com/logos/combank.png",
-            "licenseNumber": "LB/003",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-004",
-            "typeId": "inst-type-001",
-            "name": "Hatton National Bank",
-            "slug": "hatton-national-bank",
-            "logoUrl": "https://example.com/logos/hnb.png",
-            "licenseNumber": "LB/004",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-005",
-            "typeId": "inst-type-001",
-            "name": "Sampath Bank",
-            "slug": "sampath-bank",
-            "logoUrl": "https://example.com/logos/sampath.png",
-            "licenseNumber": "LB/005",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-006",
-            "typeId": "inst-type-001",
-            "name": "Nations Trust Bank",
-            "slug": "nations-trust-bank",
-            "logoUrl": "https://example.com/logos/ntb.png",
-            "licenseNumber": "LB/006",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-007",
-            "typeId": "inst-type-001",
-            "name": "DFCC Bank",
-            "slug": "dfcc-bank",
-            "logoUrl": "https://example.com/logos/dfcc.png",
-            "licenseNumber": "LB/007",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-008",
-            "typeId": "inst-type-001",
-            "name": "Union Bank of Colombo",
-            "slug": "union-bank-colombo",
-            "logoUrl": "https://example.com/logos/ubc.png",
-            "licenseNumber": "LB/008",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-009",
-            "typeId": "inst-type-001",
-            "name": "Pan Asia Banking Corporation",
-            "slug": "pan-asia-banking",
-            "logoUrl": "https://example.com/logos/pabc.png",
-            "licenseNumber": "LB/009",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-010",
-            "typeId": "inst-type-001",
-            "name": "Seylan Bank",
-            "slug": "seylan-bank",
-            "logoUrl": "https://example.com/logos/seylan.png",
-            "licenseNumber": "LB/010",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-011",
-            "typeId": "inst-type-001",
-            "name": "National Trust Bank",
-            "slug": "national-trust-bank",
-            "logoUrl": "https://example.com/logos/national-trust.png",
-            "licenseNumber": "LB/011",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-012",
-            "typeId": "inst-type-001",
-            "name": "Cargills Bank",
-            "slug": "cargills-bank",
-            "logoUrl": "https://example.com/logos/cargills.png",
-            "licenseNumber": "LB/012",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-013",
-            "typeId": "inst-type-001",
-            "name": "HSBC Sri Lanka",
-            "slug": "hsbc-sri-lanka",
-            "logoUrl": "https://example.com/logos/hsbc.png",
-            "licenseNumber": "LB/013",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-014",
-            "typeId": "inst-type-001",
-            "name": "Standard Chartered Bank",
-            "slug": "standard-chartered",
-            "logoUrl": "https://example.com/logos/sc.png",
-            "licenseNumber": "LB/014",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-015",
-            "typeId": "inst-type-001",
-            "name": "Citibank Sri Lanka",
-            "slug": "citibank-sri-lanka",
-            "logoUrl": "https://example.com/logos/citi.png",
-            "licenseNumber": "LB/015",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-016",
-            "typeId": "inst-type-002",
-            "name": "National Development Bank",
-            "slug": "national-development-bank",
-            "logoUrl": "https://example.com/logos/ndb.png",
-            "licenseNumber": "LSB/001",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-017",
-            "typeId": "inst-type-002",
-            "name": "National Savings Bank",
-            "slug": "national-savings-bank",
-            "logoUrl": "https://example.com/logos/nsb.png",
-            "licenseNumber": "LSB/002",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-018",
-            "typeId": "inst-type-002",
-            "name": "Regional Development Bank",
-            "slug": "regional-development-bank",
-            "logoUrl": "https://example.com/logos/rdb.png",
-            "licenseNumber": "LSB/003",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-019",
-            "typeId": "inst-type-002",
-            "name": "Sanasa Development Bank",
-            "slug": "sanasa-development-bank",
-            "logoUrl": "https://example.com/logos/sdb.png",
-            "licenseNumber": "LSB/004",
-            "countryCode": "LK",
-            "isActive": true
-        },
-        {
-            "id": "inst-020",
-            "typeId": "inst-type-002",
-            "name": "Housing Development Finance Corporation",
-            "slug": "hdfc-bank",
-            "logoUrl": "https://example.com/logos/hdfc.png",
-            "licenseNumber": "LSB/005",
-            "countryCode": "LK",
-            "isActive": true
-        }
-    ],
     "productCategories": [
         {
             "id": "cat-001",
@@ -577,111 +337,843 @@
             "level": 1
         }
     ],
-    "productTypes": [
+    "products": [
         {
-            "id": "type-001",
+            "id": "prod-001",
+            "institutionId": "inst-001",
             "categoryId": "cat-002",
-            "code": "REGULAR_SAVINGS",
-            "name": "Regular Savings Account",
-            "description": "Basic savings account with competitive interest rates"
+            "name": "BOC Smart Saver",
+            "details": {
+                "interestRate": 8.5,
+                "minimumBalance": 1000.00,
+                "accountMaintenanceFee": 0,
+                "withdrawalLimits": {
+                    "daily": 500000,
+                    "monthly": 3000000
+                },
+                "initialDeposit": 1000.00
+            },
+            "isFeatured": true,
+            "isActive": true
         },
         {
-            "id": "type-002",
+            "id": "prod-002",
+            "institutionId": "inst-003",
             "categoryId": "cat-002",
-            "code": "PREMIUM_SAVINGS",
-            "name": "Premium Savings Account",
-            "description": "High-tier savings account with premium benefits"
+            "name": "ComBank Power Saver",
+            "details": {
+                "interestRate": 9.0,
+                "minimumBalance": 5000.00,
+                "accountMaintenanceFee": 100,
+                "withdrawalLimits": {
+                    "daily": 1000000,
+                    "monthly": 5000000
+                },
+                "initialDeposit": 5000.00
+            },
+            "isFeatured": true,
+            "isActive": true
         },
         {
-            "id": "type-003",
-            "categoryId": "cat-002",
-            "code": "CHILDREN_SAVINGS",
-            "name": "Children's Savings Account",
-            "description": "Savings account designed for minors"
-        },
-        {
-            "id": "type-004",
-            "categoryId": "cat-003",
-            "code": "BUSINESS_CURRENT",
-            "name": "Business Current Account",
-            "description": "Current account for business operations"
-        },
-        {
-            "id": "type-005",
-            "categoryId": "cat-003",
-            "code": "PERSONAL_CURRENT",
-            "name": "Personal Current Account",
-            "description": "Individual current account"
-        },
-        {
-            "id": "type-006",
+            "id": "prod-003",
+            "institutionId": "inst-004",
             "categoryId": "cat-004",
-            "code": "FIXED_DEPOSIT",
-            "name": "Fixed Deposit",
-            "description": "Time deposit with guaranteed returns"
+            "name": "HNB Premium Fixed Deposit",
+            "details": {
+                "interestRate": 15.5,
+                "tenureMonths": 12,
+                "minimumDeposit": 100000.00,
+                "interestPaymentFrequency": "monthly",
+                "earlyWithdrawalPenalty": 2.0
+            },
+            "isFeatured": true,
+            "isActive": true
         },
         {
-            "id": "type-007",
+            "id": "prod-004",
+            "institutionId": "inst-005",
             "categoryId": "cat-006",
-            "code": "PERSONAL_LOAN",
-            "name": "Personal Loan",
-            "description": "Unsecured personal financing"
+            "name": "Sampath Quick Personal Loan",
+            "details": {
+                "interestRate": 18.5,
+                "minimumAmount": 100000.00,
+                "maximumAmount": 5000000.00,
+                "tenureRange": {
+                    "min": 12,
+                    "max": 60
+                },
+                "processingFee": 1.5,
+                "requiredDocuments": [
+                    "Salary slips for last 3 months",
+                    "Bank statements for last 6 months",
+                    "NIC copy"
+                ]
+            },
+            "isFeatured": true,
+            "isActive": true
         },
         {
-            "id": "type-008",
+            "id": "prod-005",
+            "institutionId": "inst-007",
             "categoryId": "cat-007",
-            "code": "HOME_LOAN",
-            "name": "Home Loan",
-            "description": "Residential property financing"
+            "name": "DFCC Dream Home Loan",
+            "details": {
+                "interestRate": 14.5,
+                "maximumLTV": 75,
+                "maximumAmount": 50000000.00,
+                "tenureRange": {
+                    "min": 60,
+                    "max": 300
+                },
+                "processingFee": 1.0,
+                "requiredDocuments": [
+                    "Property valuation report",
+                    "Title deed",
+                    "Income documents",
+                    "Bank statements"
+                ]
+            },
+            "isFeatured": true,
+            "isActive": true
         },
         {
-            "id": "type-009",
+            "id": "prod-006",
+            "institutionId": "inst-002",
+            "categoryId": "cat-026",
+            "name": "People's Bank Platinum Credit Card",
+            "details": {
+                "annualFee": 5000.00,
+                "interestRate": 28.0,
+                "gracePeriod": 51,
+                "rewardPoints": {
+                    "rate": 1,
+                    "minimumSpend": 100
+                },
+                "creditLimit": {
+                    "minimum": 100000.00,
+                    "maximum": 1000000.00
+                }
+            },
+            "isFeatured": true,
+            "isActive": true
+        },
+        {
+            "id": "prod-007",
+            "institutionId": "inst-016",
+            "categoryId": "cat-019",
+            "name": "NDB SME Growth Loan",
+            "details": {
+                "interestRate": 16.5,
+                "minimumAmount": 1000000.00,
+                "maximumAmount": 50000000.00,
+                "tenureRange": {
+                    "min": 12,
+                    "max": 84
+                },
+                "processingFee": 1.0,
+                "collateralRequired": true,
+                "eligibility": {
+                    "businessAge": "2 years",
+                    "minimumTurnover": 5000000.00
+                }
+            },
+            "isFeatured": true,
+            "isActive": true
+        },
+        {
+            "id": "prod-008",
+            "institutionId": "inst-017",
+            "categoryId": "cat-002",
+            "name": "NSB Hapan Children's Savings",
+            "details": {
+                "interestRate": 12.0,
+                "minimumBalance": 100.00,
+                "accountMaintenanceFee": 0,
+                "withdrawalLimits": {
+                    "daily": 100000,
+                    "monthly": 500000
+                },
+                "initialDeposit": 100.00,
+                "ageLimit": {
+                    "min": 0,
+                    "max": 16
+                }
+            },
+            "isFeatured": true,
+            "isActive": true
+        },
+        {
+            "id": "prod-009",
+            "institutionId": "inst-001",
+            "categoryId": "cat-003",
+            "name": "BOC Current Account",
+            "details": {
+                "monthlyFee": 250.00,
+                "overdraftFacility": true,
+                "overdraftLimit": 50000.00,
+                "chequeBookFacility": true,
+                "minimumInitialDeposit": 5000.00
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-010",
+            "institutionId": "inst-003",
+            "categoryId": "cat-028",
+            "name": "ComBank Visa Debit Card",
+            "details": {
+                "issuanceFee": 500.00,
+                "annualFee": 1000.00,
+                "dailyAtmWithdrawalLimit": 100000.00,
+                "dailyPosTransactionLimit": 250000.00,
+                "cardNetwork": "Visa"
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-011",
+            "institutionId": "inst-004",
             "categoryId": "cat-008",
-            "code": "CAR_LOAN",
-            "name": "Car Loan",
-            "description": "Vehicle purchase financing"
+            "name": "HNB Vehicle Loan",
+            "details": {
+                "interestRate": 13.5,
+                "vehicleType": "car",
+                "vehicleCondition": "brand_new",
+                "maxLoanTenureYears": 7,
+                "downPaymentPercentage": 20
+            },
+            "isFeatured": false,
+            "isActive": true
         },
         {
-            "id": "type-010",
+            "id": "prod-012",
+            "institutionId": "inst-005",
             "categoryId": "cat-010",
-            "code": "TERM_LIFE",
-            "name": "Term Life Insurance",
-            "description": "Temporary life insurance coverage"
+            "name": "Sampath Life Insurance",
+            "details": {
+                "sumAssured": 1000000.00,
+                "premium": 12000.00,
+                "premiumFrequency": "annually",
+                "tenureYears": 20,
+                "ageLimit": {
+                    "min": 18,
+                    "max": 60
+                }
+            },
+            "isFeatured": false,
+            "isActive": true
         },
         {
-            "id": "type-011",
-            "categoryId": "cat-010",
-            "code": "WHOLE_LIFE",
-            "name": "Whole Life Insurance",
-            "description": "Permanent life insurance with investment component"
+            "id": "prod-013",
+            "institutionId": "inst-006",
+            "categoryId": "cat-031",
+            "name": "NTB Mobile Banking App",
+            "details": {
+                "platform": "Android",
+                "features": [
+                    "Balance Inquiry",
+                    "Fund Transfer",
+                    "Bill Payments"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
         },
         {
-            "id": "type-012",
-            "categoryId": "cat-011",
-            "code": "MOTOR_INSURANCE",
-            "name": "Motor Insurance",
-            "description": "Vehicle insurance coverage"
+            "id": "prod-014",
+            "institutionId": "inst-002",
+            "categoryId": "cat-003",
+            "name": "People's Bank Current Account",
+            "details": {
+                "monthlyFee": 200.00,
+                "overdraftFacility": true,
+                "overdraftLimit": 40000.00,
+                "chequeBookFacility": true,
+                "minimumInitialDeposit": 3000.00
+            },
+            "isFeatured": false,
+            "isActive": true
         },
         {
-            "id": "type-013",
-            "categoryId": "cat-011",
-            "code": "HOME_INSURANCE",
-            "name": "Home Insurance",
-            "description": "Property and home insurance"
+            "id": "prod-015",
+            "institutionId": "inst-003",
+            "categoryId": "cat-004",
+            "name": "ComBank 1 Year Fixed Deposit",
+            "details": {
+                "interestRate": 14.0,
+                "tenureMonths": 12,
+                "minimumDeposit": 50000.00,
+                "interestPaymentFrequency": "at_maturity",
+                "earlyWithdrawalPenalty": 1.5
+            },
+            "isFeatured": false,
+            "isActive": true
         },
         {
-            "id": "type-014",
+            "id": "prod-016",
+            "institutionId": "inst-004",
             "categoryId": "cat-006",
-            "code": "EDUCATION_LOAN",
-            "name": "Education Loan",
-            "description": "Student and education financing"
+            "name": "HNB Personal Loan",
+            "details": {
+                "interestRate": 17.0,
+                "minimumAmount": 50000.00,
+                "maximumAmount": 3000000.00,
+                "tenureRange": {
+                    "min": 12,
+                    "max": 48
+                },
+                "processingFee": 1.2,
+                "requiredDocuments": [
+                    "NIC copy",
+                    "Salary slip"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
         },
         {
-            "id": "type-015",
-            "categoryId": "cat-005",
-            "code": "CREDIT_CARD",
-            "name": "Credit Card",
-            "description": "Revolving credit facility"
+            "id": "prod-017",
+            "institutionId": "inst-005",
+            "categoryId": "cat-028",
+            "name": "Sampath Mastercard Debit Card",
+            "details": {
+                "issuanceFee": 600.00,
+                "annualFee": 1200.00,
+                "dailyAtmWithdrawalLimit": 80000.00,
+                "dailyPosTransactionLimit": 200000.00,
+                "cardNetwork": "Mastercard"
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-018",
+            "institutionId": "inst-006",
+            "categoryId": "cat-029",
+            "name": "NTB Prepaid Card",
+            "details": {
+                "issuanceFee": 300.00,
+                "reloadFee": 50.00,
+                "minLoadAmount": 1000.00,
+                "maxCardBalance": 100000.00,
+                "validityPeriodMonths": 36
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-019",
+            "institutionId": "inst-007",
+            "categoryId": "cat-032",
+            "name": "DFCC Online Banking",
+            "details": {
+                "platform": "Web",
+                "features": [
+                    "Account Overview",
+                    "Fund Transfer",
+                    "Utility Payments"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-020",
+            "institutionId": "inst-008",
+            "categoryId": "cat-002",
+            "name": "Union Bank Junior Saver",
+            "details": {
+                "interestRate": 10.0,
+                "minimumBalance": 500.00,
+                "accountMaintenanceFee": 0,
+                "withdrawalLimits": {
+                    "daily": 50000,
+                    "monthly": 200000
+                },
+                "initialDeposit": 500.00
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-021",
+            "institutionId": "inst-009",
+            "categoryId": "cat-004",
+            "name": "Pan Asia 3 Year Fixed Deposit",
+            "details": {
+                "interestRate": 16.0,
+                "tenureMonths": 36,
+                "minimumDeposit": 25000.00,
+                "interestPaymentFrequency": "quarterly",
+                "earlyWithdrawalPenalty": 2.0
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-022",
+            "institutionId": "inst-010",
+            "categoryId": "cat-006",
+            "name": "Seylan Personal Loan",
+            "details": {
+                "interestRate": 19.0,
+                "minimumAmount": 75000.00,
+                "maximumAmount": 2000000.00,
+                "tenureRange": {
+                    "min": 6,
+                    "max": 36
+                },
+                "processingFee": 1.8,
+                "requiredDocuments": [
+                    "NIC",
+                    "Salary slip"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-023",
+            "institutionId": "inst-011",
+            "categoryId": "cat-007",
+            "name": "National Trust Home Loan",
+            "details": {
+                "interestRate": 13.0,
+                "maximumLTV": 70,
+                "maximumAmount": 40000000.00,
+                "tenureRange": {
+                    "min": 60,
+                    "max": 240
+                },
+                "processingFee": 1.0,
+                "requiredDocuments": [
+                    "Title deed",
+                    "Income proof"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-024",
+            "institutionId": "inst-012",
+            "categoryId": "cat-008",
+            "name": "Cargills Vehicle Loan",
+            "details": {
+                "interestRate": 14.2,
+                "vehicleType": "suv",
+                "vehicleCondition": "used",
+                "maxLoanTenureYears": 5,
+                "downPaymentPercentage": 25
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-025",
+            "institutionId": "inst-013",
+            "categoryId": "cat-026",
+            "name": "HSBC Gold Credit Card",
+            "details": {
+                "annualFee": 7000.00,
+                "interestRate": 27.0,
+                "gracePeriod": 50,
+                "rewardPoints": {
+                    "rate": 1.5,
+                    "minimumSpend": 200
+                },
+                "creditLimit": {
+                    "minimum": 150000.00,
+                    "maximum": 2000000.00
+                }
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-026",
+            "institutionId": "inst-014",
+            "categoryId": "cat-028",
+            "name": "Standard Chartered Visa Debit Card",
+            "details": {
+                "issuanceFee": 400.00,
+                "annualFee": 900.00,
+                "dailyAtmWithdrawalLimit": 60000.00,
+                "dailyPosTransactionLimit": 180000.00,
+                "cardNetwork": "Visa"
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-027",
+            "institutionId": "inst-015",
+            "categoryId": "cat-031",
+            "name": "Citibank Mobile Banking",
+            "details": {
+                "platform": "iOS",
+                "features": [
+                    "Account Management",
+                    "Card Control",
+                    "Alerts"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-028",
+            "institutionId": "inst-016",
+            "categoryId": "cat-019",
+            "name": "NDB SME Working Capital Loan",
+            "details": {
+                "interestRate": 15.5,
+                "minimumAmount": 2000000.00,
+                "maximumAmount": 30000000.00,
+                "tenureRange": {
+                    "min": 12,
+                    "max": 60
+                },
+                "processingFee": 1.2,
+                "collateralRequired": false,
+                "eligibility": {
+                    "businessAge": "3 years",
+                    "minimumTurnover": 10000000.00
+                }
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-029",
+            "institutionId": "inst-017",
+            "categoryId": "cat-002",
+            "name": "NSB Senior Citizens Savings",
+            "details": {
+                "interestRate": 11.0,
+                "minimumBalance": 2000.00,
+                "accountMaintenanceFee": 0,
+                "withdrawalLimits": {
+                    "daily": 200000,
+                    "monthly": 1000000
+                },
+                "initialDeposit": 2000.00
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-030",
+            "institutionId": "inst-018",
+            "categoryId": "cat-004",
+            "name": "Regional Bank Fixed Deposit",
+            "details": {
+                "interestRate": 15.0,
+                "tenureMonths": 24,
+                "minimumDeposit": 30000.00,
+                "interestPaymentFrequency": "annually",
+                "earlyWithdrawalPenalty": 1.8
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-031",
+            "institutionId": "inst-019",
+            "categoryId": "cat-006",
+            "name": "Sanasa Personal Loan",
+            "details": {
+                "interestRate": 18.2,
+                "minimumAmount": 40000.00,
+                "maximumAmount": 1500000.00,
+                "tenureRange": {
+                    "min": 6,
+                    "max": 36
+                },
+                "processingFee": 1.5,
+                "requiredDocuments": [
+                    "NIC",
+                    "Salary slip"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-032",
+            "institutionId": "inst-020",
+            "categoryId": "cat-007",
+            "name": "HDFC Home Loan",
+            "details": {
+                "interestRate": 12.8,
+                "maximumLTV": 80,
+                "maximumAmount": 35000000.00,
+                "tenureRange": {
+                    "min": 60,
+                    "max": 180
+                },
+                "processingFee": 1.1,
+                "requiredDocuments": [
+                    "Title deed",
+                    "Income proof"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-033",
+            "institutionId": "inst-001",
+            "categoryId": "cat-008",
+            "name": "BOC Vehicle Loan",
+            "details": {
+                "interestRate": 13.8,
+                "vehicleType": "motorcycle",
+                "vehicleCondition": "brand_new",
+                "maxLoanTenureYears": 4,
+                "downPaymentPercentage": 15
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-034",
+            "institutionId": "inst-002",
+            "categoryId": "cat-026",
+            "name": "People's Bank Classic Credit Card",
+            "details": {
+                "annualFee": 3500.00,
+                "interestRate": 29.0,
+                "gracePeriod": 45,
+                "rewardPoints": {
+                    "rate": 1,
+                    "minimumSpend": 50
+                },
+                "creditLimit": {
+                    "minimum": 50000.00,
+                    "maximum": 500000.00
+                }
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-035",
+            "institutionId": "inst-003",
+            "categoryId": "cat-028",
+            "name": "ComBank LankaPay Debit Card",
+            "details": {
+                "issuanceFee": 200.00,
+                "annualFee": 800.00,
+                "dailyAtmWithdrawalLimit": 40000.00,
+                "dailyPosTransactionLimit": 100000.00,
+                "cardNetwork": "LankaPay"
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-036",
+            "institutionId": "inst-004",
+            "categoryId": "cat-031",
+            "name": "HNB Mobile Banking App",
+            "details": {
+                "platform": "Android",
+                "features": [
+                    "Balance Inquiry",
+                    "Fund Transfer",
+                    "Bill Payments"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-037",
+            "institutionId": "inst-005",
+            "categoryId": "cat-032",
+            "name": "Sampath Online Banking",
+            "details": {
+                "platform": "Web",
+                "features": [
+                    "Account Overview",
+                    "Fund Transfer",
+                    "Utility Payments"
+                ]
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-038",
+            "institutionId": "inst-006",
+            "categoryId": "cat-010",
+            "name": "NTB Life Insurance",
+            "details": {
+                "sumAssured": 2000000.00,
+                "premium": 18000.00,
+                "premiumFrequency": "quarterly",
+                "tenureYears": 15,
+                "ageLimit": {
+                    "min": 21,
+                    "max": 55
+                }
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-039",
+            "institutionId": "inst-007",
+            "categoryId": "cat-011",
+            "name": "DFCC Motor Insurance",
+            "details": {
+                "coverageType": "motor",
+                "coverageAmount": 1500000.00,
+                "premium": 12000.00,
+                "deductible": 5000.00,
+                "policyTermMonths": 12
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-040",
+            "institutionId": "inst-008",
+            "categoryId": "cat-033",
+            "name": "Union Bank Microinsurance",
+            "details": {
+                "coverageAmount": 100000.00,
+                "premium": 500.00,
+                "eligibilityIncome": {
+                    "max": 30000.00
+                },
+                "targetSegment": "low_income",
+                "claimProcess": "simple"
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-041",
+            "institutionId": "inst-009",
+            "categoryId": "cat-013",
+            "name": "Pan Asia Treasury Bill",
+            "details": {
+                "issuer": "Central Bank of Sri Lanka",
+                "securityType": "Treasury Bill",
+                "maturityDate": "2026-11-03",
+                "interestRate": 10.5,
+                "minimumInvestment": 10000.00
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-042",
+            "institutionId": "inst-010",
+            "categoryId": "cat-014",
+            "name": "Seylan Equity Mutual Fund",
+            "details": {
+                "fundHouse": "Seylan",
+                "fundType": "Equity",
+                "nav": 15.25,
+                "expenseRatio": 1.2,
+                "minimumInvestment": 5000.00
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-043",
+            "institutionId": "inst-011",
+            "categoryId": "cat-015",
+            "name": "National Trust Unit Trust",
+            "details": {
+                "trustee": "NTB",
+                "managementCompany": "NTB Asset Management",
+                "fundType": "Balanced",
+                "unitPrice": 12.5,
+                "minInitialInvestment": 10000.00
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-044",
+            "institutionId": "inst-012",
+            "categoryId": "cat-016",
+            "name": "Cargills REIT",
+            "details": {
+                "reitManager": "Cargills",
+                "propertyPortfolio": [
+                    "Mall",
+                    "Office"
+                ],
+                "dividendYield": 6.5,
+                "marketPrice": 10.0,
+                "navPerUnit": 9.8
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-045",
+            "institutionId": "inst-013",
+            "categoryId": "cat-018",
+            "name": "HSBC Leasing",
+            "details": {
+                "assetType": "equipment",
+                "interestRateOrRental": 12.0,
+                "tenureMonths": 36,
+                "downPayment": 10000.00,
+                "residualValue": 2000.00
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-046",
+            "institutionId": "inst-014",
+            "categoryId": "cat-020",
+            "name": "Standard Chartered Gold Loan",
+            "details": {
+                "ltvRatio": 75,
+                "interestRate": 13.0,
+                "goldKaratageAccepted": "22K",
+                "repaymentTermMonths": 12,
+                "valuationFee": 500.00
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-047",
+            "institutionId": "inst-015",
+            "categoryId": "cat-035",
+            "name": "Citibank Domestic Payment",
+            "details": {
+                "serviceType": "RTGS",
+                "fee": 100.00,
+                "processingTime": "same_day"
+            },
+            "isFeatured": false,
+            "isActive": true
+        },
+        {
+            "id": "prod-048",
+            "institutionId": "inst-016",
+            "categoryId": "cat-036",
+            "name": "NDB International Remittance",
+            "details": {
+                "serviceType": "SWIFT",
+                "fee": 150.00,
+                "processingTime": "1-2 days"
+            },
+            "isFeatured": false,
+            "isActive": true
         }
     ],
     "fieldDefinitions": [
@@ -2230,292 +2722,6 @@
             "isRequired": true,
             "options": [],
             "validation": null
-        }
-    ],
-    "productTagMappings": [
-        {
-            "productId": "prod-001",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-001",
-            "tagId": "tag-004"
-        },
-        {
-            "productId": "prod-001",
-            "tagId": "tag-005"
-        },
-        {
-            "productId": "prod-002",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-002",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-002",
-            "tagId": "tag-004"
-        },
-        {
-            "productId": "prod-003",
-            "tagId": "tag-012"
-        },
-        {
-            "productId": "prod-003",
-            "tagId": "tag-002"
-        },
-        {
-            "productId": "prod-006",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-008",
-            "tagId": "tag-006"
-        },
-        {
-            "productId": "prod-008",
-            "tagId": "tag-008"
-        },
-        {
-            "productId": "prod-009",
-            "tagId": "tag-007"
-        },
-        {
-            "productId": "prod-009",
-            "tagId": "tag-008"
-        },
-        {
-            "productId": "prod-012",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-012",
-            "tagId": "tag-004"
-        },
-        {
-            "productId": "prod-013",
-            "tagId": "tag-002"
-        },
-        {
-            "productId": "prod-013",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-013",
-            "tagId": "tag-005"
-        },
-        {
-            "productId": "prod-015",
-            "tagId": "tag-012"
-        },
-        {
-            "productId": "prod-016",
-            "tagId": "tag-007"
-        },
-        {
-            "productId": "prod-016",
-            "tagId": "tag-008"
-        },
-        {
-            "productId": "prod-018",
-            "tagId": "tag-006"
-        },
-        {
-            "productId": "prod-019",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-019",
-            "tagId": "tag-004"
-        },
-        {
-            "productId": "prod-020",
-            "tagId": "tag-006"
-        },
-        {
-            "productId": "prod-020",
-            "tagId": "tag-008"
-        },
-        {
-            "productId": "prod-021",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-022",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-022",
-            "tagId": "tag-004"
-        },
-        {
-            "productId": "prod-023",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-023",
-            "tagId": "tag-005"
-        },
-        {
-            "productId": "prod-024",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-025",
-            "tagId": "tag-006"
-        },
-        {
-            "productId": "prod-026",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-026",
-            "tagId": "tag-004"
-        },
-        {
-            "productId": "prod-027",
-            "tagId": "tag-008"
-        },
-        {
-            "productId": "prod-028",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-028",
-            "tagId": "tag-004"
-        },
-        {
-            "productId": "prod-029",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-030",
-            "tagId": "tag-006"
-        },
-        {
-            "productId": "prod-030",
-            "tagId": "tag-008"
-        },
-        {
-            "productId": "prod-031",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-031",
-            "tagId": "tag-004"
-        },
-        {
-            "productId": "prod-032",
-            "tagId": "tag-006"
-        },
-        {
-            "productId": "prod-033",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-034",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-034",
-            "tagId": "tag-004"
-        },
-        {
-            "productId": "prod-035",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-036",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-037",
-            "tagId": "tag-008"
-        },
-        {
-            "productId": "prod-038",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-039",
-            "tagId": "tag-006"
-        },
-        {
-            "productId": "prod-040",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-041",
-            "tagId": "tag-002"
-        },
-        {
-            "productId": "prod-042",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-043",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-044",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-045",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-046",
-            "tagId": "tag-006"
-        },
-        {
-            "productId": "prod-047",
-            "tagId": "tag-002"
-        },
-        {
-            "productId": "prod-047",
-            "tagId": "tag-011"
-        },
-        {
-            "productId": "prod-048",
-            "tagId": "tag-012"
-        },
-        {
-            "productId": "prod-049",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-049",
-            "tagId": "tag-011"
-        },
-        {
-            "productId": "prod-050",
-            "tagId": "tag-002"
-        },
-        {
-            "productId": "prod-051",
-            "tagId": "tag-008"
-        },
-        {
-            "productId": "prod-051",
-            "tagId": "tag-015"
-        },
-        {
-            "productId": "prod-004",
-            "tagId": "tag-003"
-        },
-        {
-            "productId": "prod-004",
-            "tagId": "tag-015"
-        },
-        {
-            "productId": "prod-005",
-            "tagId": "tag-001"
-        },
-        {
-            "productId": "prod-005",
-            "tagId": "tag-015"
         }
     ]
 }

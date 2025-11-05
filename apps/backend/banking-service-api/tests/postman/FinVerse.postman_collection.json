@@ -1,0 +1,350 @@
+{
+    "info": {
+        "_postman_id": "bf7e2e1d-8f25-4b4c-a7c3-1234567890ab",
+        "name": "FinVerse API Tests",
+        "description": "Test suite for FinVerse Banking Service API endpoints",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "categoryId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "institutionId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "productId",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "exec": [
+                    "// Set default headers for all requests",
+                    "if (!pm.collectionVariables.get('role')) {",
+                    "    pm.collectionVariables.set('role', 'institution_admin');",
+                    "}",
+                    "",
+                    "if (!pm.collectionVariables.get('userId')) {",
+                    "    pm.collectionVariables.set('userId', 'test-user-123');",
+                    "}",
+                    "",
+                    "// Set request headers",
+                    "pm.request.headers.upsert({",
+                    "    key: 'x-role',",
+                    "    value: pm.collectionVariables.get('role')",
+                    "});",
+                    "",
+                    "pm.request.headers.upsert({",
+                    "    key: 'x-user-id',",
+                    "    value: pm.collectionVariables.get('userId')",
+                    "});",
+                    "",
+                    "// Set institution ID header only when role is not superadmin",
+                    "if (pm.collectionVariables.get('role') !== 'superadmin') {",
+                    "    pm.request.headers.upsert({",
+                    "        key: 'x-institution-id',",
+                    "        value: pm.collectionVariables.get('institutionId')",
+                    "    });",
+                    "}"
+                ],
+                "type": "text/javascript"
+            }
+        }
+    ],
+    "item": [
+        {
+            "name": "Products",
+            "item": [
+                {
+                    "name": "Get All Products",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has data array', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.be.an('object');",
+                                    "    pm.expect(jsonData.data).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has correct meta pagination', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.meta).to.be.an('object');",
+                                    "    pm.expect(jsonData.meta).to.have.property('total');",
+                                    "    pm.expect(jsonData.meta).to.have.property('limit');",
+                                    "    pm.expect(jsonData.meta).to.have.property('offset');",
+                                    "});",
+                                    "",
+                                    "// Test filters if they are applied",
+                                    "if (pm.request.url.query.get('categoryId')) {",
+                                    "    pm.test('Products filtered by categoryId', function () {",
+                                    "        const jsonData = pm.response.json();",
+                                    "        const categoryId = pm.request.url.query.get('categoryId');",
+                                    "        jsonData.data.forEach(product => {",
+                                    "            pm.expect(product.categoryId).to.equal(categoryId);",
+                                    "        });",
+                                    "    });",
+                                    "}",
+                                    "",
+                                    "if (pm.request.url.query.get('institutionId')) {",
+                                    "    pm.test('Products filtered by institutionId', function () {",
+                                    "        const jsonData = pm.response.json();",
+                                    "        const institutionId = pm.request.url.query.get('institutionId');",
+                                    "        jsonData.data.forEach(product => {",
+                                    "            pm.expect(product.institutionId).to.equal(institutionId);",
+                                    "        });",
+                                    "    });",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/products?categoryId={{categoryId}}&institutionId={{institutionId}}&isFeatured={{isFeatured}}&isActive={{isActive}}&search={{search}}&page={{page}}&limit={{limit}}&sort={{sort}}&order={{order}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products"
+                            ],
+                            "query": [
+                                {
+                                    "key": "categoryId",
+                                    "value": "{{categoryId}}"
+                                },
+                                {
+                                    "key": "institutionId",
+                                    "value": "{{institutionId}}"
+                                },
+                                {
+                                    "key": "isFeatured",
+                                    "value": "{{isFeatured}}"
+                                },
+                                {
+                                    "key": "isActive",
+                                    "value": "{{isActive}}"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "{{search}}"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "{{page}}"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "{{limit}}"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "{{sort}}"
+                                },
+                                {
+                                    "key": "order",
+                                    "value": "{{order}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has valid product data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.be.an('object');",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData).to.have.property('name');",
+                                    "    pm.expect(jsonData).to.have.property('institutionId');",
+                                    "    pm.expect(jsonData).to.have.property('details');",
+                                    "    pm.expect(jsonData).to.have.property('createdAt');",
+                                    "});",
+                                    "",
+                                    "// Save productId for other requests",
+                                    "const jsonData = pm.response.json();",
+                                    "pm.collectionVariables.set('productId', jsonData.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{productName}}\",\n    \"institutionId\": \"{{institutionId}}\",\n    \"categoryId\": \"{{categoryId}}\",\n    \"details\": {\n        \"description\": \"{{productDescription}}\",\n        \"minimumInterestRate\": {{minInterestRate}},\n        \"maximumLoanAmount\": {{maxLoanAmount}}\n    },\n    \"isFeatured\": {{isFeatured}},\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/products",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Product by ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has correct product ID', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.id).to.equal(pm.collectionVariables.get('productId'));",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/products/{{productId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                "{{productId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response reflects updated values', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const requestData = JSON.parse(pm.request.body.raw);",
+                                    "    ",
+                                    "    pm.expect(jsonData.name).to.equal(requestData.name);",
+                                    "    pm.expect(jsonData.details).to.deep.include(requestData.details);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{updatedProductName}}\",\n    \"details\": {\n        \"description\": \"{{updatedDescription}}\",\n        \"minimumInterestRate\": {{updatedMinInterestRate}},\n        \"maximumLoanAmount\": {{updatedMaxLoanAmount}}\n    },\n    \"isFeatured\": {{updatedIsFeatured}}\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/products/{{productId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                "{{productId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "// Send a GET request to verify product is deleted",
+                                    "pm.sendRequest({",
+                                    "    url: pm.collectionVariables.get('baseUrl') + '/products/' + pm.collectionVariables.get('productId'),",
+                                    "    method: 'GET',",
+                                    "}, function (err, res) {",
+                                    "    pm.test('GET request after delete returns 404', function () {",
+                                    "        pm.expect(res).to.have.property('code', 404);",
+                                    "    });",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/products/{{productId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                "{{productId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

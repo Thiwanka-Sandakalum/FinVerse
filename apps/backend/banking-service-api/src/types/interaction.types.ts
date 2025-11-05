@@ -15,8 +15,7 @@ export interface ProductViewEvent extends BaseInteractionEvent {
         name: string;
         categoryId: string;
         categoryName?: string;
-        productTypeId: string;
-        productTypeName?: string;
+
         institutionId: string;
         institutionName?: string;
         interestRate?: number;
@@ -36,7 +35,7 @@ export interface SearchEvent extends BaseInteractionEvent {
     filters?: {
         categoryId?: string;
         institutionId?: string;
-        productTypeId?: string;
+
         isFeatured?: boolean;
         isActive?: boolean;
     };
