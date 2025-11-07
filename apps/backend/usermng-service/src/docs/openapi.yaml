@@ -1,0 +1,1063 @@
+openapi: 3.1.0
+info:
+  title: FinVerse User Management Service API
+  version: "1.0.0"
+  description: |
+    REST API for managing organizations, members, roles, invitations, users and audit logs.
+    Authenticated using Auth0 (JWT, RS256). The spec documents endpoints, request/response schemas,
+    example payloads, pagination, and example JWT scopes/permissions.
+
+servers:
+  - url: https:/.finverse.example.com
+    description: Production server (example)
+  - url: https://staging-api.finverse.example.com
+    description: Staging server (example)
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Organizations
+    description: Organization lifecycle and settings
+  - name: Members
+    description: Organization membership and roles
+  - name: Invitations
+    description: Invite flows and token validation
+  - name: Users
+    description: User profile and cross-org operations
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Auth0-issued access token (RS256). Example scopes:
+        - admin:manage
+        - org:read
+        - org:write
+        - user:read
+        - user:write
+        - invite:manage
+        - audit:read
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 25
+        total:
+          type: integer
+          example: 123
+    Error:
+      type: object
+      properties:
+        status:
+          type: integer
+        code:
+          type: string
+        message:
+          type: string
+      example:
+        status: 404
+        code: not_found
+        message: Resource not found
+    Organization:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        display_name:
+          type: string
+        branding:
+          type: object
+          properties:
+            logo_url:
+              type: string
+              format: uri
+            colors:
+              type: object
+              additionalProperties:
+                type: string
+        enabled_connections:
+          type: array
+          items:
+            type: object
+            properties:
+              connection_id:
+                type: string
+              assign_membership_on_login:
+                type: boolean
+              show_as_button:
+                type: boolean
+              is_signup_enabled:
+                type: boolean
+            required:
+              - connection_id
+        metadata:
+          type: object
+          properties:
+            description:
+              type: string
+            industryType:
+              type: string
+              enum:
+                - Bank
+                - Insurance
+                - Fintech
+                - CreditUnion
+                - InvestmentFirm
+                - PaymentProvider
+                - Microfinance
+                - LeasingCompany
+                - FinanceCompany
+                - StockBroker
+                - UnitTrust
+                - PawnBroker
+                - MoneyTransfer
+                - DevelopmentBank
+                - CooperativeSociety
+                - InsuranceBroker
+                - Other
+            registrationNumber:
+              type: string
+            country:
+              type: string
+            region:
+              type: string
+            headquartersAddress:
+              type: string
+            contactEmail:
+              type: string
+              format: email
+            contactPhone:
+              type: string
+            website:
+              type: string
+              format: uri
+            establishedYear:
+              type: string
+            supportedProducts:
+              type: array
+              items:
+                type: string
+                enum:
+                  - SavingsAccount
+                  - CurrentAccount
+                  - FixedDeposit
+                  - PersonalLoan
+                  - HomeLoan
+                  - Leasing
+                  - Microfinance
+                  - CreditCard
+                  - DebitCard
+                  - Insurance
+                  - LifeInsurance
+                  - GeneralInsurance
+                  - Investment
+                  - StockTrading
+                  - UnitTrust
+                  - Remittance
+                  - MobileBanking
+                  - InternetBanking
+                  - PaymentGateway
+                  - PawnBroking
+                  - Other
+            numberOfBranches:
+              type: string
+            numberOfEmployees:
+              type: string
+            logoUrl:
+              type: string
+              format: uri
+            swiftCode:
+              type: string
+      required:
+        - id
+        - name
+        - metadata
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Auth0 user id (sub)
+          example: "auth0|1234567890"
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        picture:
+          type: string
+          format: uri
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - id
+        - email
+    OrganizationInvitation:
+      type: object
+      properties:
+        id:
+          type: string
+        organization_id:
+          type: string
+        inviter:
+          type: object
+          properties:
+            name:
+              type: string
+        invitee:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+        invitation_url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        client_id:
+          type: string
+        connection_id:
+          type: string
+        app_metadata:
+          type: object
+          additionalProperties: true
+        user_metadata:
+          type: object
+          additionalProperties: true
+        roles:
+          type: array
+          items:
+            type: string
+        ticket_id:
+          type: string
+      required:
+        - id
+        - organization_id
+        - invitee
+    Role:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+      required:
+        - id
+        - name
+    Member:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Auth0 user id (sub)
+          example: "auth0|1234567890"
+        user:
+          $ref: "#/components/schemas/User"
+        role:
+          type: string
+          example: "member"
+        status:
+          type: string
+          enum: [active, suspended]
+          example: "active"
+        joinedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T12:00:00Z"
+      required:
+        - userId
+        - user
+        - role
+        - status
+
+  responses:
+    PaginatedResponse:
+      description: Generic paginated response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              pagination:
+                $ref: "#/components/schemas/Pagination"
+              items:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+    ItemResponse:
+      description: Single item response
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+    NoContent:
+      description: Operation successful, no content returned
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 401
+            code: unauthorized
+            message: "Missing or invalid access token"
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 403
+            code: forbidden
+            message: "Insufficient permissions for this operation"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ------------------
+  # Organizations
+  # ------------------
+  /orgs:
+    post:
+      tags: [Organizations]
+      summary: Create a new organization
+      description: |
+        Create a new organization. Creates Auth0 Organization if using Auth0 Organizations.
+        Access: super_admin (permission: admin:manage or org:write).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Organization name
+                display_name:
+                  type: string
+                  description: Display name for the organization
+                metadata:
+                  type: object
+                  properties:
+                    description:
+                      type: string
+                    industryType:
+                      type: string
+                      enum:
+                        - Bank
+                        - Insurance
+                        - Fintech
+                        - CreditUnion
+                        - InvestmentFirm
+                        - PaymentProvider
+                        - Microfinance
+                        - LeasingCompany
+                        - FinanceCompany
+                        - StockBroker
+                        - UnitTrust
+                        - PawnBroker
+                        - MoneyTransfer
+                        - DevelopmentBank
+                        - CooperativeSociety
+                        - InsuranceBroker
+                        - Other
+                    registrationNumber:
+                      type: string
+                    country:
+                      type: string
+                    region:
+                      type: string
+                    headquartersAddress:
+                      type: string
+                    contactEmail:
+                      type: string
+                      format: email
+                    contactPhone:
+                      type: string
+                    website:
+                      type: string
+                      format: uri
+                    establishedYear:
+                      type: string
+                    supportedProducts:
+                      type: array
+                      items:
+                        type: string
+                        enum:
+                          - SavingsAccount
+                          - CurrentAccount
+                          - FixedDeposit
+                          - PersonalLoan
+                          - HomeLoan
+                          - Leasing
+                          - Microfinance
+                          - CreditCard
+                          - DebitCard
+                          - Insurance
+                          - LifeInsurance
+                          - GeneralInsurance
+                          - Investment
+                          - StockTrading
+                          - UnitTrust
+                          - Remittance
+                          - MobileBanking
+                          - InternetBanking
+                          - PaymentGateway
+                          - PawnBroking
+                          - Other
+                    numberOfBranches:
+                      type: string
+                    numberOfEmployees:
+                      type: string
+                    logoUrl:
+                      type: string
+                      format: uri
+                    swiftCode:
+                      type: string
+              required:
+                - name
+                - metadata
+      responses:
+        "201":
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden (requires super_admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      tags: [Organizations]
+      summary: List organizations
+      description: |
+        List all organizations with pagination and optional filters.
+        Access: super_admin (permission: admin:manage or org:read).
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: q
+          in: query
+          description: Search term for org name
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated list of organizations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Organization"
+              example:
+                pagination:
+                  page: 1
+                  limit: 2
+                  total: 42
+                items:
+                  - id: "6fa459ea-ee8a-3ca4-894e-db77e160355e"
+                    name: "Acme Corporation"
+                    metadata: {}
+                  - id: "9b8b3b24-2c3a-4b88-9d9a-df4c8b8b1234"
+                    name: "Beta LLC"
+                    metadata: {}
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /orgs/{orgId}:
+    parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Organizations]
+      summary: Get organization details
+      description: "Get organization details (name, members, roles, settings). Access: org_admin, super_admin (org:read)."
+      responses:
+        "200":
+          description: Organization details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags: [Organizations]
+      summary: Update organization
+      description: "Update organization info (name, metadata). Access: org_admin (org:update)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                metadata:
+                  type: object
+                  additionalProperties: true
+            example:
+              name: "Acme Corporation International"
+              metadata:
+                region: "EMEA"
+      responses:
+        "200":
+          description: Updated organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    delete:
+      tags: [Organizations]
+      summary: Delete or deactivate an organization
+      description: "Delete or deactivate organization. Access: super_admin (admin:manage)."
+      responses:
+        "204":
+          description: Organization deleted/deactivated (no content)
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ------------------
+  # Members
+  # ------------------
+  /orgs/{orgId}/members:
+    get:
+      tags: [Members]
+      summary: List all members of an organization
+      description: "List organization members (paginated). Access: org_admin (permission: org:read)."
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Paginated members list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Member"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      tags: [Members]
+      summary: Remove members from organization
+      description: "Remove members. Access: org_admin, super_admin (org:write)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                members:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of user IDs to remove
+              required:
+                - members
+      responses:
+        "204":
+          description: Members removed
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orgs/{orgId}/members/{userId}/roles:
+    get:
+      tags: [Members]
+      summary: Get roles assigned to a member
+      description: "Get roles assigned to a member within an organization. Access: org_admin (org:read)."
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: List of roles assigned to member
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  start:
+                    type: integer
+                  limit:
+                    type: integer
+                  total:
+                    type: integer
+                  roles:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Role"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: [Members]
+      summary: Assign roles to a member
+      description: "Assign roles to a member within an organization. Access: org_admin (org:write)."
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roles:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of role IDs to assign
+              required:
+                - roles
+      responses:
+        "204":
+          description: Roles assigned successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ------------------
+  # Invitations
+  # ------------------
+  /orgs/{orgId}/invitations:
+    post:
+      tags: [Invitations]
+      summary: Invite a new user via email
+      description: |
+        Send an invitation email (Auth0 or app-managed invite link). Access: org_admin (invite:manage).
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inviter:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+                invitee:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                  required:
+                    - email
+                user_metadata:
+                  type: object
+                  properties:
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    jobTitle:
+                      type: string
+                    companyName:
+                      type: string
+                    country:
+                      type: string
+                    industry:
+                      type: string
+                    branch:
+                      type: string
+                    contactNumber:
+                      type: string
+                  additionalProperties: true
+                roles:
+                  type: array
+                  items:
+                    type: string
+                    description: Array of role IDs to assign
+                  required:
+                    - invitee
+                    - inviter
+                    - roles
+      responses:
+        "201":
+          description: Invitation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationInvitation"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+    get:
+      tags: [Invitations]
+      summary: List pending invitations for an org
+      description: "List pending invitations for an organization (paginated). Access: org_admin (invite:manage)."
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Paginated list of invitations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/OrganizationInvitation"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orgs/{orgId}/invitations/{invitationId}:
+    delete:
+      tags: [Invitations]
+      summary: Delete an invitation
+      description: "Delete a pending invitation. Access: org_admin (invite:manage)."
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Invitation deleted successfully
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  # ------------------
+  # Users
+  # ------------------
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List all users in the system
+      description: "List users (paginated). Access: super_admin (user:read)."
+      parameters:
+        - name: organizationId
+          in: query
+          description: Filter users by organization ID
+          schema:
+            type: string
+
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ------------------
+  # Roles
+  # ------------------
+  /roles:
+    get:
+      tags: [Roles]
+      summary: List all roles in the system
+      description: >
+        List roles (paginated). Access - super_admin (permission - admin-manage).
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: name_filter
+          in: query
+          description: Filter roles by name
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  start:
+                    type: integer
+                  limit:
+                    type: integer
+                  total:
+                    type: integer
+                  roles:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Role"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /users/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Users]
+      summary: Get specific user (cross-org)
+      description: "Access: super_admin (user:read)."
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Users]
+      summary: Deactivate or delete user
+      description: "Deactivate or delete user. Access: super_admin (admin:manage)."
+      responses:
+        "204":
+          description: User deactivated/deleted
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    put:
+      tags: [Users]
+      summary: Update user details
+      description: "Update user information. Access: super_admin (user:write)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                picture:
+                  type: string
+                  format: uri
+                metadata:
+                  type: object
+                  additionalProperties: true
+            example:
+              name: "John Doe"
+              metadata:
+                department: "Finance"
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
