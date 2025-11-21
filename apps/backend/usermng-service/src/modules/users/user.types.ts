@@ -8,8 +8,8 @@ export interface Auth0User {
     created_at?: string;
     updated_at?: string;
     identities?: any[];
-    app_metadata?: Record<string, any>;
-    user_metadata?: Record<string, any>;
+    app_metadata?: UserAppMetadata;
+    user_metadata?: UserMetadata;
     picture?: string;
     name?: string;
     nickname?: string;
@@ -22,10 +22,51 @@ export interface Auth0User {
     family_name?: string;
 }
 
+export interface UserMetadata {
+    isCompany?: boolean;
+    companyName?: string;
+    firstName?: string;
+    lastName?: string;
+    [key: string]: any;
+}
+
+export interface UserAppMetadata {
+    org_id?: string;
+    role?: 'org_admin' | 'member';
+    permissions?: string[];
+    [key: string]: any;
+}
+
 export interface Auth0UserListResponse {
     start?: number;
     limit?: number;
     length?: number;
     total?: number;
     users: Auth0User[];
+}
+
+export interface EnhancedUser extends Auth0User {
+    organization?: {
+        id: string;
+        name: string;
+        display_name?: string;
+    };
+}
+
+export interface EnhancedUserListResponse {
+    start?: number;
+    limit?: number;
+    length?: number;
+    total?: number;
+    users: EnhancedUser[];
+}
+
+export interface LoginCallbackRequest {
+    token: string;
+}
+
+export interface LoginCallbackResponse {
+    success: boolean;
+    user: EnhancedUser;
+    message: string;
 }

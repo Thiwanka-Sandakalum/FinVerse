@@ -4,7 +4,7 @@ import { ManagementClient } from 'auth0';
 const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
 const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID;
 const AUTH0_CLIENT_SECRET = process.env.AUTH0_CLIENT_SECRET;
-const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || 'https://dev-finvers.us.auth0.com/api/v2/';
+const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || 'usermng-service';
 
 if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID || !AUTH0_CLIENT_SECRET) {
     throw new Error('Missing required Auth0 environment variables');
