@@ -4,7 +4,7 @@ Service for product-specific chat functionality.
 
 import logging
 import uuid
-from typing import Dict, Any, List, Tuple, Optional, cast
+from typing import Dict, Any, List, Tuple, Optional
 import traceback
 
 from src.services.database_service import DatabaseService

@@ -1,6 +1,4 @@
 from enum import Enum
-from typing import Literal, Dict, Any, List, Optional
-import re
 import google.generativeai as genai
 from src.config.settings import Settings
 
