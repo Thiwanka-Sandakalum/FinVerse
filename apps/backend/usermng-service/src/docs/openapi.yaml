@@ -3,27 +3,61 @@ info:
   title: FinVerse User Management Service API
   version: "1.0.0"
   description: |
-    REST API for managing organizations, members, roles, invitations, users and audit logs.
-    Authenticated using Auth0 (JWT, RS256). The spec documents endpoints, request/response schemas,
-    example payloads, pagination, and example JWT scopes/permissions.
+    REST API for managing organizations, members, roles, invitations, and users in the FinVerse platform.
+
+    **Authentication:** Auth0 JWT (RS256) bearer tokens required for all endpoints.
+
+    **Response Format:** All responses follow a standardized envelope structure with:
+    - `success` (boolean) - Indicates if the operation succeeded
+    - `message` (string) - Human-readable description of the result
+    - `data` (object/array) - Response payload (on success)
+    - `error` (object) - Error details (on failure)
+    - `meta` (object) - Metadata including timestamp and requestId for tracing
+
+    **Request Tracing:** Each request can include an `X-Request-ID` header for distributed tracing.
+    If not provided, the server generates a unique ID included in the response metadata.
+
+    **Pagination:** List endpoints return paginated data with page, limit, and total count.
+
+    **Error Handling:** Errors include descriptive messages, error codes, and optional field-level details.
+
+  contact:
+    name: FinVerse API Support
+    email: api-support@finverse.example.com
+    url: https://docs.finverse.example.com
+
+  license:
+    name: Proprietary
+    url: https://finverse.example.com/license
 
 servers:
-  - url: https:/.finverse.example.com
-    description: Production server (example)
-  - url: https://staging-api.finverse.example.com
-    description: Staging server (example)
-  - url: http://localhost:3000
+  - url: https://api.finverse.example.com/api/v1
+    description: Production server
+  - url: https://staging-api.finverse.example.com/api/v1
+    description: Staging server
+  - url: http://localhost:3001/api/v1
     description: Local development
 
 tags:
   - name: Organizations
-    description: Organization lifecycle and settings
+    description: |
+      Organization lifecycle management including creation, updates, deletion, and configuration.
+      Organizations represent financial institutions (banks, insurance companies, fintechs, etc.).
   - name: Members
-    description: Organization membership and roles
+    description: |
+      Organization membership management including adding/removing members and role assignments.
+      Controls user access and permissions within organizations.
   - name: Invitations
-    description: Invite flows and token validation
+    description: |
+      User invitation workflows for onboarding new members to organizations.
+      Handles invitation creation, listing, and deletion.
   - name: Users
-    description: User profile and cross-org operations
+    description: |
+      User profile management and cross-organization user operations.
+      Includes user retrieval, updates, and deletion.
+  - name: Roles
+    description: |
+      Role and permission management for access control within organizations.
 
 components:
   securitySchemes:
@@ -31,324 +65,892 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: >
-        Auth0-issued access token (RS256). Example scopes:
-        - admin:manage
-        - org:read
-        - org:write
-        - user:read
-        - user:write
-        - invite:manage
-        - audit:read
+      description: |
+        Auth0-issued access token (RS256 algorithm).
+
+        **Required Header:** `Authorization: Bearer <token>`
+
+        **Example Scopes:**
+        - `admin:manage` - Super admin operations (create orgs, manage all users)
+        - `org:read` - Read organization data
+        - `org:write` - Create/update organizations
+        - `org:delete` - Delete organizations
+        - `user:read` - Read user data
+        - `user:write` - Update user data
+        - `invite:manage` - Create/manage invitations
+        - `member:manage` - Manage organization members
+
+        **Token Validation:**
+        - Issuer: Auth0 domain
+        - Audience: API identifier
+        - Algorithm: RS256
+        - Expiration: Checked on every request
+
+  parameters:
+    RequestIdHeader:
+      name: X-Request-ID
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+        example: "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6"
+      description: |
+        Optional request ID for distributed tracing. If not provided, 
+        the server will generate one and include it in the response metadata.
+
+    OrgIdPath:
+      name: orgId
+      in: path
+      required: true
+      schema:
+        type: string
+        example: "org_abc123xyz"
+      description: Unique organization identifier (Auth0 organization ID)
+
+    UserIdPath:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        example: "auth0|1234567890abcdef"
+      description: Unique user identifier (Auth0 user ID / sub claim)
+
+    InvitationIdPath:
+      name: invitationId
+      in: path
+      required: true
+      schema:
+        type: string
+        example: "inv_xyz789abc"
+      description: Unique invitation identifier
+
+    PageQuery:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Page number for pagination (0-indexed)
+      example: 0
+
+    LimitQuery:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+      description: Number of items per page
+      example: 25
+
+    SearchQuery:
+      name: q
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Search term for filtering results
+      example: "Acme"
+
   schemas:
+    # ========================================
+    # Standard Response Envelope Schemas
+    # ========================================
+
+    ApiSuccessResponse:
+      type: object
+      required:
+        - success
+        - message
+        - data
+        - meta
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+          description: Always true for successful responses
+          example: true
+        message:
+          type: string
+          description: Human-readable success message
+          example: "Operation completed successfully"
+        data:
+          description: Response payload (type varies by endpoint)
+          oneOf:
+            - type: object
+            - type: array
+            - type: string
+              enum: [null]
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    ApiErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+        - error
+        - meta
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+          description: Always false for error responses
+          example: false
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Validation failed"
+        error:
+          type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: "VALIDATION_ERROR"
+              enum:
+                - VALIDATION_ERROR
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - NOT_FOUND
+                - CONFLICT
+                - INTERNAL_SERVER_ERROR
+                - BAD_REQUEST
+            details:
+              type: array
+              description: Optional array of field-level error details
+              items:
+                $ref: "#/components/schemas/ErrorDetail"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    ResponseMeta:
+      type: object
+      required:
+        - timestamp
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of the response
+          example: "2024-12-17T10:30:00.000Z"
+        requestId:
+          type: string
+          description: Unique request identifier for tracing
+          example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+
+    ErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Name of the field that caused the error
+          example: "email"
+        message:
+          type: string
+          description: Specific error message for this field
+          example: "Email address is required"
+        code:
+          type: string
+          description: Error code for this specific field
+          example: "REQUIRED_FIELD"
+
+    PaginatedData:
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          description: Array of data items for current page
+          items:
+            type: object
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
     Pagination:
       type: object
+      required:
+        - page
+        - limit
+        - total
       properties:
         page:
           type: integer
-          example: 1
+          minimum: 0
+          description: Current page number (0-indexed)
+          example: 0
         limit:
           type: integer
-          example: 25
+          minimum: 1
+          description: Number of items per page
+          example: 50
         total:
           type: integer
+          minimum: 0
+          description: Total number of items across all pages
           example: 123
-    Error:
-      type: object
-      properties:
-        status:
-          type: integer
-        code:
-          type: string
-        message:
-          type: string
-      example:
-        status: 404
-        code: not_found
-        message: Resource not found
+
+    # ========================================
+    # Domain Entity Schemas
+    # ========================================
+
     Organization:
       type: object
+      required:
+        - id
+        - name
+        - display_name
       properties:
         id:
           type: string
+          description: Unique organization identifier
+          example: "org_abc123xyz"
         name:
           type: string
+          description: Organization name (URL-friendly)
+          example: "acme-corp"
+          pattern: "^[a-z0-9-]+$"
         display_name:
           type: string
+          description: Human-readable organization name
+          example: "Acme Corporation"
         branding:
           type: object
+          description: Organization branding configuration
           properties:
             logo_url:
               type: string
               format: uri
+              description: URL to organization logo
+              example: "https://cdn.finverse.com/logos/acme.png"
             colors:
               type: object
+              description: Brand color scheme
               additionalProperties:
                 type: string
+              example:
+                primary: "#1E40AF"
+                secondary: "#6366F1"
         enabled_connections:
           type: array
+          description: Configured authentication connections
           items:
             type: object
+            required:
+              - connection_id
             properties:
               connection_id:
                 type: string
+                example: "con_abc123"
               assign_membership_on_login:
                 type: boolean
+                default: false
               show_as_button:
                 type: boolean
+                default: true
               is_signup_enabled:
                 type: boolean
-            required:
-              - connection_id
+                default: false
         metadata:
-          type: object
-          properties:
-            description:
-              type: string
-            industryType:
-              type: string
-              enum:
-                - Bank
-                - Insurance
-                - Fintech
-                - CreditUnion
-                - InvestmentFirm
-                - PaymentProvider
-                - Microfinance
-                - LeasingCompany
-                - FinanceCompany
-                - StockBroker
-                - UnitTrust
-                - PawnBroker
-                - MoneyTransfer
-                - DevelopmentBank
-                - CooperativeSociety
-                - InsuranceBroker
-                - Other
-            registrationNumber:
-              type: string
-            country:
-              type: string
-            region:
-              type: string
-            headquartersAddress:
-              type: string
-            contactEmail:
-              type: string
-              format: email
-            contactPhone:
-              type: string
-            website:
-              type: string
-              format: uri
-            establishedYear:
-              type: string
-            supportedProducts:
-              type: array
-              items:
-                type: string
-                enum:
-                  - SavingsAccount
-                  - CurrentAccount
-                  - FixedDeposit
-                  - PersonalLoan
-                  - HomeLoan
-                  - Leasing
-                  - Microfinance
-                  - CreditCard
-                  - DebitCard
-                  - Insurance
-                  - LifeInsurance
-                  - GeneralInsurance
-                  - Investment
-                  - StockTrading
-                  - UnitTrust
-                  - Remittance
-                  - MobileBanking
-                  - InternetBanking
-                  - PaymentGateway
-                  - PawnBroking
-                  - Other
-            numberOfBranches:
-              type: string
-            numberOfEmployees:
-              type: string
-            logoUrl:
-              type: string
-              format: uri
-            swiftCode:
-              type: string
+          $ref: "#/components/schemas/OrganizationMetadata"
+
+    OrganizationMetadata:
+      type: object
+      description: Organization business metadata
       required:
-        - id
-        - name
-        - metadata
+        - industryType
+        - country
+      properties:
+        description:
+          type: string
+          description: Organization description
+          example: "Leading financial services provider"
+        industryType:
+          type: string
+          description: Type of financial institution
+          enum:
+            - Bank
+            - Insurance
+            - Fintech
+            - CreditUnion
+            - InvestmentFirm
+            - PaymentProvider
+            - Microfinance
+            - LeasingCompany
+            - FinanceCompany
+            - StockBroker
+            - UnitTrust
+            - PawnBroker
+            - MoneyTransfer
+            - DevelopmentBank
+            - CooperativeSociety
+            - InsuranceBroker
+            - Other
+          example: "Bank"
+        registrationNumber:
+          type: string
+          description: Business registration number
+          example: "REG-123456"
+        country:
+          type: string
+          description: Country of operation (ISO 3166-1 alpha-2)
+          pattern: "^[A-Z]{2}$"
+          example: "US"
+        region:
+          type: string
+          description: Operating region
+          example: "North America"
+        headquartersAddress:
+          type: string
+          description: Physical headquarters address
+          example: "123 Finance Street, New York, NY 10001"
+        contactEmail:
+          type: string
+          format: email
+          description: Primary contact email
+          example: "contact@acmecorp.com"
+        contactPhone:
+          type: string
+          description: Primary contact phone number
+          pattern: "^\\+?[1-9]\\d{1,14}$"
+          example: "+1-555-0123"
+        website:
+          type: string
+          format: uri
+          description: Organization website URL
+          example: "https://www.acmecorp.com"
+        establishedYear:
+          type: string
+          description: Year organization was established
+          pattern: "^\\d{4}$"
+          example: "1995"
+        supportedProducts:
+          type: array
+          description: Financial products offered
+          items:
+            type: string
+            enum:
+              - SavingsAccount
+              - CurrentAccount
+              - FixedDeposit
+              - PersonalLoan
+              - HomeLoan
+              - Leasing
+              - Microfinance
+              - CreditCard
+              - DebitCard
+              - Insurance
+              - LifeInsurance
+              - GeneralInsurance
+              - Investment
+              - StockTrading
+              - UnitTrust
+              - Remittance
+              - MobileBanking
+              - InternetBanking
+              - PaymentGateway
+              - PawnBroking
+              - Other
+          example: ["SavingsAccount", "PersonalLoan", "MobileBanking"]
+        numberOfBranches:
+          type: string
+          description: Total number of branches
+          example: "50"
+        numberOfEmployees:
+          type: string
+          description: Total employee count
+          example: "1000"
+        logoUrl:
+          type: string
+          format: uri
+          description: Organization logo URL
+          example: "https://cdn.finverse.com/logos/acme.png"
+        swiftCode:
+          type: string
+          description: SWIFT/BIC code for banking institutions
+          pattern: "^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$"
+          example: "ACMEUS33XXX"
+
     User:
       type: object
+      required:
+        - user_id
+        - email
       properties:
-        id:
+        user_id:
           type: string
-          description: Auth0 user id (sub)
-          example: "auth0|1234567890"
+          description: Auth0 user identifier (sub claim)
+          example: "auth0|1234567890abcdef"
         email:
           type: string
           format: email
+          description: User's email address
+          example: "john.doe@example.com"
         name:
           type: string
+          description: User's full name
+          example: "John Doe"
         picture:
           type: string
           format: uri
-        metadata:
-          type: object
-          additionalProperties: true
-      required:
-        - id
-        - email
-    OrganizationInvitation:
-      type: object
-      properties:
-        id:
-          type: string
-        organization_id:
-          type: string
-        inviter:
-          type: object
-          properties:
-            name:
-              type: string
-        invitee:
-          type: object
-          properties:
-            email:
-              type: string
-              format: email
-        invitation_url:
-          type: string
-          format: uri
+          description: URL to user's profile picture
+          example: "https://cdn.finverse.com/avatars/johndoe.jpg"
+        email_verified:
+          type: boolean
+          description: Whether email has been verified
+          example: true
         created_at:
           type: string
           format: date-time
-        expires_at:
+          description: Account creation timestamp
+          example: "2024-01-15T10:30:00.000Z"
+        updated_at:
           type: string
           format: date-time
-        client_id:
-          type: string
-        connection_id:
-          type: string
+          description: Last profile update timestamp
+          example: "2024-12-17T10:30:00.000Z"
         app_metadata:
           type: object
-          additionalProperties: true
+          description: Application-specific metadata (not editable by user)
+          properties:
+            org_id:
+              type: string
+              description: Primary organization ID
+              example: "org_abc123"
+            roles:
+              type: array
+              items:
+                type: string
+              example: ["org_admin", "member"]
         user_metadata:
           type: object
-          additionalProperties: true
-        roles:
-          type: array
-          items:
-            type: string
-        ticket_id:
-          type: string
+          description: User-editable metadata
+          properties:
+            firstName:
+              type: string
+              example: "John"
+            lastName:
+              type: string
+              example: "Doe"
+            jobTitle:
+              type: string
+              example: "Finance Manager"
+            companyName:
+              type: string
+              example: "Acme Corp"
+            country:
+              type: string
+              example: "US"
+            industry:
+              type: string
+              example: "Banking"
+            branch:
+              type: string
+              example: "New York Branch"
+            contactNumber:
+              type: string
+              example: "+1-555-0123"
+        organization:
+          type: object
+          description: Primary organization details (enhanced field)
+          properties:
+            id:
+              type: string
+              example: "org_abc123"
+            name:
+              type: string
+              example: "acme-corp"
+            display_name:
+              type: string
+              example: "Acme Corporation"
+
+    OrganizationInvitation:
+      type: object
       required:
         - id
         - organization_id
         - invitee
-    Role:
-      type: object
       properties:
         id:
           type: string
-        name:
+          description: Unique invitation identifier
+          example: "inv_xyz789abc"
+        organization_id:
           type: string
-        description:
+          description: Organization the invitation is for
+          example: "org_abc123xyz"
+        inviter:
+          type: object
+          description: Person who created the invitation
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              example: "Admin User"
+        invitee:
+          type: object
+          description: Person being invited
+          required:
+            - email
+          properties:
+            email:
+              type: string
+              format: email
+              example: "newuser@example.com"
+        invitation_url:
           type: string
+          format: uri
+          description: URL for accepting the invitation
+          example: "https://finverse.com/accept-invite?invitation=inv_xyz789abc&organization=org_abc123xyz"
+        created_at:
+          type: string
+          format: date-time
+          description: When invitation was created
+          example: "2024-12-17T10:30:00.000Z"
+        expires_at:
+          type: string
+          format: date-time
+          description: When invitation expires
+          example: "2024-12-24T10:30:00.000Z"
+        client_id:
+          type: string
+          description: Auth0 client ID
+          example: "client_abc123"
+        connection_id:
+          type: string
+          description: Auth0 connection ID
+          example: "con_xyz789"
+        app_metadata:
+          type: object
+          description: Application metadata for invited user
+          additionalProperties: true
+        user_metadata:
+          type: object
+          description: User metadata for invited user
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+            jobTitle:
+              type: string
+          additionalProperties: true
+        roles:
+          type: array
+          description: Roles to assign upon acceptance
+          items:
+            type: string
+          example: ["rol_member"]
+        ticket_id:
+          type: string
+          description: Auth0 ticket identifier
+          example: "ticket_123"
+
+    Role:
+      type: object
       required:
         - id
         - name
+      properties:
+        id:
+          type: string
+          description: Unique role identifier
+          example: "rol_abc123"
+        name:
+          type: string
+          description: Role name
+          example: "Organization Admin"
+        description:
+          type: string
+          description: Role description
+          example: "Administrator with full access to organization settings"
+
     Member:
       type: object
-      properties:
-        userId:
-          type: string
-          description: Auth0 user id (sub)
-          example: "auth0|1234567890"
-        user:
-          $ref: "#/components/schemas/User"
-        role:
-          type: string
-          example: "member"
-        status:
-          type: string
-          enum: [active, suspended]
-          example: "active"
-        joinedAt:
-          type: string
-          format: date-time
-          example: "2025-01-01T12:00:00Z"
       required:
-        - userId
-        - user
-        - role
-        - status
+        - user_id
+        - email
+        - name
+      properties:
+        user_id:
+          type: string
+          description: Auth0 user identifier
+          example: "auth0|1234567890"
+        email:
+          type: string
+          format: email
+          description: Member's email address
+          example: "member@example.com"
+        name:
+          type: string
+          description: Member's full name
+          example: "Jane Smith"
+        picture:
+          type: string
+          format: uri
+          description: Profile picture URL
+          example: "https://cdn.finverse.com/avatars/janesmith.jpg"
+        roles:
+          type: array
+          description: Roles assigned within the organization
+          items:
+            type: string
+          example: ["rol_member", "rol_viewer"]
+
+  # ========================================
+  # Reusable Response Components
+  # ========================================
 
   responses:
-    PaginatedResponse:
-      description: Generic paginated response
+    # Success Responses
+
+    OrganizationCreated:
+      description: Organization created successfully
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              pagination:
-                $ref: "#/components/schemas/Pagination"
+            allOf:
+              - $ref: "#/components/schemas/ApiSuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Organization"
+          example:
+            success: true
+            message: "Organization created successfully"
+            data:
+              id: "org_abc123xyz"
+              name: "acme-corp"
+              display_name: "Acme Corporation"
+              metadata:
+                industryType: "Bank"
+                country: "US"
+                contactEmail: "contact@acmecorp.com"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+
+    OrganizationRetrieved:
+      description: Organization retrieved successfully
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiSuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Organization"
+          example:
+            success: true
+            message: "Organization retrieved successfully"
+            data:
+              id: "org_abc123xyz"
+              name: "acme-corp"
+              display_name: "Acme Corporation"
+              metadata:
+                industryType: "Bank"
+                country: "US"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7"
+
+    OrganizationsPaginated:
+      description: Organizations retrieved successfully (paginated)
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiSuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    allOf:
+                      - $ref: "#/components/schemas/PaginatedData"
+                      - type: object
+                        properties:
+                          items:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/Organization"
+          example:
+            success: true
+            message: "Organizations retrieved successfully"
+            data:
               items:
-                type: array
-                items:
-                  type: object
-                  additionalProperties: true
-    ItemResponse:
-      description: Single item response
+                - id: "org_abc123"
+                  name: "acme-corp"
+                  display_name: "Acme Corporation"
+                - id: "org_xyz789"
+                  name: "beta-llc"
+                  display_name: "Beta LLC"
+              pagination:
+                page: 0
+                limit: 50
+                total: 2
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8"
+
+    OrganizationUpdated:
+      description: Organization updated successfully
       content:
         application/json:
           schema:
-            type: object
-            additionalProperties: true
-    NoContent:
-      description: Operation successful, no content returned
+            allOf:
+              - $ref: "#/components/schemas/ApiSuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Organization"
+          example:
+            success: true
+            message: "Organization updated successfully"
+            data:
+              id: "org_abc123xyz"
+              name: "acme-corp-international"
+              display_name: "Acme Corporation International"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9"
+
+    OrganizationDeleted:
+      description: Organization deleted successfully
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiSuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    type: string
+                    enum: [null]
+          example:
+            success: true
+            message: "Organization deleted successfully"
+            data: null
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0"
+
+    # Error Responses
+
     BadRequest:
-      description: Bad request
+      description: Bad request - validation or input error
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ApiErrorResponse"
+          example:
+            success: false
+            message: "Validation failed"
+            error:
+              code: "VALIDATION_ERROR"
+              details:
+                - field: "name"
+                  message: "Organization name is required"
+                  code: "REQUIRED_FIELD"
+                - field: "metadata.industryType"
+                  message: "Industry type must be one of the allowed values"
+                  code: "INVALID_ENUM"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1"
+
     Unauthorized:
-      description: Unauthorized
+      description: Unauthorized - missing or invalid authentication token
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ApiErrorResponse"
           example:
-            status: 401
-            code: unauthorized
+            success: false
             message: "Missing or invalid access token"
+            error:
+              code: "UNAUTHORIZED"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2"
+
     Forbidden:
-      description: Forbidden
+      description: Forbidden - insufficient permissions
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ApiErrorResponse"
           example:
-            status: 403
-            code: forbidden
+            success: false
             message: "Insufficient permissions for this operation"
+            error:
+              code: "FORBIDDEN"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3"
+
     NotFound:
-      description: Resource not found
+      description: Not found - requested resource doesn't exist
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ApiErrorResponse"
+          example:
+            success: false
+            message: "Resource not found"
+            error:
+              code: "NOT_FOUND"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4"
+
+    Conflict:
+      description: Conflict - resource already exists or state conflict
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+          example:
+            success: false
+            message: "Organization with this name already exists"
+            error:
+              code: "CONFLICT"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5"
+
+    InternalServerError:
+      description: Internal server error - unexpected error occurred
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+          example:
+            success: false
+            message: "An unexpected error occurred"
+            error:
+              code: "INTERNAL_SERVER_ERROR"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6"
 
 security:
   - bearerAuth: []
 
 paths:
+  # ========================================
+  # Organizations Endpoints
+  # ========================================
   # ------------------
   # Organizations
   # ------------------

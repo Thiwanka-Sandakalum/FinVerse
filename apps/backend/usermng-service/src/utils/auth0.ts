@@ -1,14 +1,6 @@
 
 import { ManagementClient } from 'auth0';
-
-const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
-const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID;
-const AUTH0_CLIENT_SECRET = process.env.AUTH0_CLIENT_SECRET;
-const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || 'usermng-service';
-
-if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID || !AUTH0_CLIENT_SECRET) {
-    throw new Error('Missing required Auth0 environment variables');
-}
+import { config } from '../config/env';
 
 // Token cache interface
 interface TokenCache {
@@ -26,9 +18,9 @@ const TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000;
  * Singleton Auth0 ManagementClient instance
  */
 export const management = new ManagementClient({
-    domain: AUTH0_DOMAIN.replace(/^https?:\/\//, ''),
-    clientId: AUTH0_CLIENT_ID,
-    clientSecret: AUTH0_CLIENT_SECRET,
+    domain: config.AUTH0_DOMAIN.replace(/^https?:\/\//, ''),
+    clientId: config.AUTH0_CLIENT_ID,
+    clientSecret: config.AUTH0_CLIENT_SECRET,
 });
 
 /**
@@ -37,14 +29,14 @@ export const management = new ManagementClient({
  */
 async function fetchNewToken(): Promise<TokenCache> {
     try {
-        const url = `${AUTH0_DOMAIN}/oauth/token`;
+        const url = `${config.AUTH0_DOMAIN}/oauth/token`;
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({
-                client_id: AUTH0_CLIENT_ID,
-                client_secret: AUTH0_CLIENT_SECRET,
-                audience: AUTH0_AUDIENCE,
+                client_id: config.AUTH0_CLIENT_ID,
+                client_secret: config.AUTH0_CLIENT_SECRET,
+                audience: config.AUTH0_AUDIENCE,
                 grant_type: 'client_credentials',
             }),
         });

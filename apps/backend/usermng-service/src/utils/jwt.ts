@@ -1,11 +1,5 @@
 import jwt from 'jsonwebtoken';
-
-const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
-const AUTH0_API_AUDIENCE = process.env.AUTH0_API_AUDIENCE;
-
-if (!AUTH0_DOMAIN) {
-    throw new Error('AUTH0_DOMAIN environment variable is required');
-}
+import { config } from '../config/env';
 
 // JWKS client instance (will be loaded dynamically)
 let jwksClientInstance: any = null;
@@ -17,7 +11,7 @@ async function getJwksClient(): Promise<any> {
     if (!jwksClientInstance) {
         const { default: jwksClient } = await import('jwks-client');
         jwksClientInstance = jwksClient({
-            jwksUri: `${AUTH0_DOMAIN}/.well-known/jwks.json`,
+            jwksUri: `${config.AUTH0_DOMAIN}/.well-known/jwks.json`,
             cache: true,
             cacheMaxEntries: 5,
             cacheMaxAge: 60000 * 10 // 10 minutes
@@ -56,6 +50,8 @@ export interface DecodedToken {
     iat: number; // Issued at
     azp?: string; // Authorized party
     scope?: string;
+    orgid?: string; // Organization ID
+    role?: string; // User role
     [key: string]: any; // Additional claims
 }
 
@@ -70,8 +66,8 @@ export function verifyToken(token: string): Promise<DecodedToken> {
             token,
             getKey,
             {
-                audience: AUTH0_API_AUDIENCE,
-                issuer: `${AUTH0_DOMAIN}/`,
+                audience: config.AUTH0_API_AUDIENCE,
+                issuer: `${config.AUTH0_DOMAIN}/`,
                 algorithms: ['RS256']
             },
             (err, decoded) => {
