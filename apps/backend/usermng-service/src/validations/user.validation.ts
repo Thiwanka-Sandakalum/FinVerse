@@ -4,13 +4,14 @@
  */
 
 import { AllowedUserUpdates } from '../types/user.types';
+import { ValidationError } from '../utils/errors';
 
 /**
  * Validate user update request
  */
 export function validateUserUpdate(updates: any): AllowedUserUpdates {
     if (!updates || typeof updates !== 'object') {
-        throw new Error('Updates object is required');
+        throw new ValidationError('Updates object is required');
     }
 
     const { name, metadata, picture } = updates;
@@ -21,7 +22,7 @@ export function validateUserUpdate(updates: any): AllowedUserUpdates {
     if (picture !== undefined) allowedUpdates.picture = picture;
 
     if (Object.keys(allowedUpdates).length === 0) {
-        throw new Error('At least one valid field (name, user_metadata, or picture) must be provided for update');
+        throw new ValidationError('At least one valid field (name, user_metadata, or picture) must be provided for update');
     }
 
     return allowedUpdates;

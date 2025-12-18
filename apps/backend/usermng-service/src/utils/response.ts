@@ -31,6 +31,12 @@ export function successResponse<T>(
         data,
         meta: generateMeta(requestId)
     };
+
+    // Set X-Request-ID header if provided
+    if (requestId) {
+        res.setHeader('X-Request-ID', requestId);
+    }
+
     res.status(statusCode).json(response);
 }
 
@@ -54,6 +60,12 @@ export function errorResponse(
         },
         meta: generateMeta(requestId)
     };
+
+    // Set X-Request-ID header if provided
+    if (requestId) {
+        res.setHeader('X-Request-ID', requestId);
+    }
+
     res.status(statusCode).json(response);
 }
 

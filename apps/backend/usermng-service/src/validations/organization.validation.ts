@@ -6,6 +6,7 @@
 import path from 'path';
 import fs from 'fs';
 import { OrganizationCreateRequest, OrganizationMetadata } from '../types/organization.types';
+import { ValidationError } from '../utils/errors';
 
 /**
  * Load enabled_connections config from file
@@ -25,18 +26,18 @@ export function loadEnabledConnectionsConfig(): any[] {
  */
 export function validateOrgName(name: string): string {
     if (!name || typeof name !== 'string') {
-        throw new Error('Organization name is required and must be a string.');
+        throw new ValidationError('Organization name is required and must be a string.');
     }
 
     const normalized = name.replace(/\s+/g, '').toLowerCase();
 
     if (normalized.length < 1 || normalized.length > 50) {
-        throw new Error('Organization name must be between 1 and 50 characters.');
+        throw new ValidationError('Organization name must be between 1 and 50 characters.');
     }
 
     const nameRegex = /^[a-z0-9][a-z0-9\-_]*$/;
     if (!nameRegex.test(normalized)) {
-        throw new Error('Organization name must only contain lowercase letters, numbers, hyphens, and underscores, and must start with a letter or number.');
+        throw new ValidationError('Organization name must only contain lowercase letters, numbers, hyphens, and underscores, and must start with a letter or number.');
     }
 
     return normalized;
@@ -53,7 +54,7 @@ export function validateDisplayName(displayName: string | undefined, fallback?: 
     }
 
     if (value.length < 1 || value.length > 255) {
-        throw new Error('Organization display_name must be between 1 and 255 characters.');
+        throw new ValidationError('Organization display_name must be between 1 and 255 characters.');
     }
 
     return value;
@@ -64,7 +65,7 @@ export function validateDisplayName(displayName: string | undefined, fallback?: 
  */
 export function validateAndFilterMetadata(metadata: any): Record<string, string> {
     if (typeof metadata !== 'object' || metadata === null) {
-        throw new Error('Metadata must be an object.');
+        throw new ValidationError('Metadata must be an object.');
     }
 
     const filtered: Record<string, string> = {};
@@ -77,7 +78,7 @@ export function validateAndFilterMetadata(metadata: any): Record<string, string>
     }
 
     if (Object.keys(filtered).length > 25) {
-        throw new Error('Metadata can have a maximum of 25 properties.');
+        throw new ValidationError('Metadata can have a maximum of 25 properties.');
     }
 
     return filtered;
@@ -132,7 +133,7 @@ export function validateOrganizationUpdate(data: Partial<OrganizationCreateReque
     }
 
     if (Object.keys(allowedUpdates).length === 0) {
-        throw new Error('At least one valid field (name, display_name, or metadata) must be provided for update.');
+        throw new ValidationError('At least one valid field (name, display_name, or metadata) must be provided for update.');
     }
 
     return allowedUpdates;

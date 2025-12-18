@@ -1,3 +1,10 @@
+export class ValidationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'ValidationError';
+    }
+}
+
 export class Auth0Error extends Error {
     statusCode: number;
     errorCode?: string;
