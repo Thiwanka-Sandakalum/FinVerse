@@ -4,7 +4,7 @@ Service for comparing multiple financial products.
 
 import logging
 import json
-from typing import List, Dict, Any, Optional, cast
+from typing import List, Dict, Any
 
 import google.generativeai as genai
 from google.generativeai.generative_models import GenerativeModel

@@ -14,7 +14,6 @@ from src.services.chat_history_service import ChatHistoryService
 from src.services.product_comparison_service import ProductComparisonService
 from src.services.product_chat_service import ProductChatService
 from src.services.database_service import DatabaseService
-from src.services.prisma_client import PrismaClient
 from src.models.api_models import Message, Source
 
 logger = logging.getLogger(__name__)
@@ -32,9 +31,7 @@ class QueryOrchestrator:
         self.rag_service = RAGService()
         self.chat_history_service = chat_history_service or ChatHistoryService()
         
-        # Initialize additional services with database
-        prisma_client = PrismaClient()
-        db_service = DatabaseService(prisma_client)
+        db_service = DatabaseService()
         self.product_comparison_service = ProductComparisonService(db_service)
         self.product_chat_service = ProductChatService(
             rag_service=self.rag_service,
