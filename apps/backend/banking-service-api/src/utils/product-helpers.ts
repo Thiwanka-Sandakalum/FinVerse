@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { NotFoundError, ValidationError } from './error-handler';
 
 const prisma = new PrismaClient();
 
@@ -27,11 +26,11 @@ export const validateProductAccess = async (id: string, userInstitutionId?: stri
     });
 
     if (!product) {
-        throw new NotFoundError('Product not found');
+        throw new Error('Product not found');
     }
 
     if (userInstitutionId && product.institutionId !== userInstitutionId) {
-        throw new ValidationError('Access denied: Product does not belong to your institution');
+        throw new Error('Access denied: Product does not belong to your institution');
     }
 
     return product;

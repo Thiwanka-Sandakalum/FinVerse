@@ -63,7 +63,6 @@ export interface FieldInfo {
 export const analyzeProductFields = (products: { details: any }[]) => {
     const fieldMap = new Map<string, FieldInfo>();
 
-    // Process each product's details
     for (const product of products) {
         if (product.details && typeof product.details === 'object') {
             const details = product.details as Record<string, any>;
@@ -81,12 +80,10 @@ export const analyzeProductFields = (products: { details: any }[]) => {
 
                 const field = fieldMap.get(key)!;
 
-                // Add example value (limit to prevent too much data)
                 if (field.examples.size < 5) {
                     field.examples.add(value);
                 }
 
-                // Check if types are consistent
                 const currentType = inferDataType(value);
                 if (field.type !== currentType && field.type !== 'mixed') {
                     field.type = 'mixed';
@@ -95,7 +92,6 @@ export const analyzeProductFields = (products: { details: any }[]) => {
         }
     }
 
-    // Convert to final format and sort by frequency
     const totalProducts = products.length;
     const fields = Array.from(fieldMap.values()).map(field => ({
         key: field.key,
