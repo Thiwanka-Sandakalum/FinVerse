@@ -35,3 +35,5 @@ apps/backend/chatbot-service/venv
 apps/backend/chatbot-service/src/utils/__pycache__/
 apps/backend/usermng-service/src/config/organizationConnections.json
 apps/backend/banking-service-api/prisma/data.json
+apps/backend/banking-service-api/.vscode/launch.json
+apps/backend/banking-service-api/.vscode/settings.json
