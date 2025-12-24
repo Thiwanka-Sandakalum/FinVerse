@@ -1,5 +1,4 @@
 import prisma from '../config/database';
-import { NotFoundError, ValidationError } from '../utils/error-handler';
 
 export const saveProduct = async (userId: string, productId: string) => {
     // Check if product exists and is active
@@ -8,7 +7,7 @@ export const saveProduct = async (userId: string, productId: string) => {
     });
 
     if (!product) {
-        throw new NotFoundError('Product not found or not active');
+        throw new Error('Product not found or not active');
     }
 
     // Check if already saved
@@ -22,7 +21,7 @@ export const saveProduct = async (userId: string, productId: string) => {
     });
 
     if (existingSave) {
-        throw new ValidationError('Product is already saved');
+        throw new Error('Product is already saved');
     }
 
     // Create the saved product
@@ -55,7 +54,7 @@ export const unsaveProduct = async (userId: string, productId: string) => {
     });
 
     if (!existingSave) {
-        throw new NotFoundError('Product is not saved by this user');
+        throw new Error('Product is not saved by this user');
     }
 
     // Delete the saved product
@@ -78,7 +77,7 @@ export const toggleSaveProduct = async (userId: string, productId: string) => {
     });
 
     if (!product) {
-        throw new NotFoundError('Product not found or not active');
+        throw new Error('Product not found or not active');
     }
 
     // Check if already saved

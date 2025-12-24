@@ -1,7 +1,5 @@
 
-import { Prisma } from '@prisma/client';
 import prisma from '../config/database';
-import slugify from '../utils/slugify';
 
 export interface ProductCategoryCreateDto {
     parentId?: string;
@@ -133,7 +131,6 @@ export async function deleteProductCategory(id: string) {
 }
 
 export async function getCategoryFields(categoryId: string) {
-    // First, get the category to check its level and relationships
     const category = await prisma.productCategory.findUnique({
         where: { id: categoryId },
         include: {
@@ -144,7 +141,6 @@ export async function getCategoryFields(categoryId: string) {
 
     if (!category) throw new Error(`Product category with ID ${categoryId} not found`);
 
-    // If it's a parent category (has children), get fields for itself and all children
     if (category.children.length > 0) {
         return prisma.fieldDefinition.findMany({
             where: {
@@ -166,7 +162,6 @@ export async function getCategoryFields(categoryId: string) {
         });
     }
 
-    // If it's a child category, only get its own fields
     return prisma.fieldDefinition.findMany({
         where: { categoryId },
         include: {
@@ -209,9 +204,6 @@ export async function deleteFieldDefinition(categoryId: string, fieldId: string)
         where: { id: fieldId }
     });
     if (!field) throw new Error(`Field definition with ID ${fieldId} not found in category ${categoryId}`);
-    // Check if the field definition is in use by any products (adjust logic as needed)
-    // If you have a relation between products and field definitions, query that relation here.
-    // For now, just proceed to delete.
     return prisma.fieldDefinition.delete({ where: { id: fieldId } });
 }
 

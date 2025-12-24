@@ -1,20 +1,8 @@
-import { Response, Request } from 'express';
-import { logger } from '../config/logger';
+import { Response, Request, NextFunction } from 'express';
+import { apiSuccess } from '../utils/response';
 import * as productService from '../services/product.service';
-import * as interactionTracker from '../services/interaction-tracking.service';
-import { ProductCreateRequest, ProductUpdateRequest, ErrorResponse, MessageResponse, PaginatedResponse } from '../types';
+import { AppError } from '../utils/AppError';
 import { Role } from '../types/roles';
-import { createErrorResponse, createMessageResponse, createPaginatedResponse } from '../utils/response.utils';
-// Types
-interface ProductFilters {
-    categoryId?: string;
-    institutionId?: string;
-    isFeatured?: boolean;
-    isActive?: boolean;
-    limit?: number;
-    offset?: number;
-    search?: string;
-}
 
 interface RequestWithContext extends Request {
     institutionContext?: {
@@ -29,130 +17,103 @@ export const getAllProducts = async (req: RequestWithContext, res: Response) => 
     const { institutionId, userId } = req.institutionContext || {};
 
     const result = await productService.getAllProducts(req.query, userId, institutionId);
-
-    // Track search interaction asynchronously
-    if (req.query.search || req.query.categoryId || institutionId) {
-        trackSearchInteraction(req, req.query, result.meta.total).catch(error => {
-            logger.error('Failed to track search interaction:', error);
-        });
-    }
-
-    res.status(200).json(createPaginatedResponse(
-        result.products,
-        result.meta.total,
-        result.meta.limit,
-        (result.meta.page - 1) * result.meta.limit
-    ));
-}
+    return apiSuccess(res, {
+        status: 200,
+        message: 'Products fetched successfully',
+        data: result.products,
+        meta: {
+            total: result.meta.total,
+            limit: result.meta.limit,
+            offset: (result.meta.page - 1) * result.meta.limit,
+            timestamp: new Date().toISOString()
+        }
+    });
+};
 
 export const getProductById = async (req: RequestWithContext, res: Response) => {
     const { id } = req.params;
-    const { institutionId, userId } = req.institutionContext || {};
-    const product = await productService.getProductById(id);
-
-    // Track product view asynchronously
-    trackProductView(req, product).catch(error => {
-        logger.error('Failed to track product view:', error);
+    const { institutionId } = req.institutionContext || {};
+    const product = await productService.getProductById(id, institutionId);
+    if (!product) {
+        throw new AppError(404, 'Product not found', 'NOT_FOUND');
+    }
+    return apiSuccess(res, {
+        status: 200,
+        message: 'Product fetched successfully',
+        data: product,
+        meta: { timestamp: new Date().toISOString() }
     });
-
-    res.status(200).json(product);
-}
+};
 
 export const getProductsByIds = async (req: RequestWithContext, res: Response) => {
     const productIds = req.body.productIds;
-    const { institutionId, userId } = req.institutionContext || {};
     const products = await productService.getProductsByIds(productIds);
-
-    // Track batch product views asynchronously
-    Promise.all(products.map((product: any) => trackProductView(req, product))).catch(error => {
-        logger.error('Failed to track batch product view:', error);
-    });
-
-    res.status(200).json({
+    return apiSuccess(res, {
+        status: 200,
+        message: 'Products fetched successfully',
         data: products,
         meta: {
             total: products.length,
             limit: productIds.length,
-            offset: 0
+            offset: 0,
+            timestamp: new Date().toISOString()
         }
     });
-}
-
+};
 export const getProductFieldsByCategory = async (req: Request, res: Response) => {
     const { categoryId } = req.params;
     const fields = await productService.getProductFieldsByCategory(categoryId);
-
-    res.status(200).json({
+    return apiSuccess(res, {
+        status: 200,
+        message: 'Product fields fetched successfully',
         data: fields,
-        categoryId
+        meta: {
+            categoryId,
+            timestamp: new Date().toISOString()
+        }
     });
-}
-
-export const createProduct = async (req: RequestWithContext, res: Response) => {
-    const productData = req.body;
-    const { institutionId } = req.institutionContext || {};
-
-    if (!institutionId) {
-        return res.status(400).json({ error: 'institutionId is required' });
-    }
-
-    const product = await productService.createProduct(productData, institutionId);
-
-    res.status(201).json(product);
-}
-
-export const updateProduct = async (req: RequestWithContext, res: Response) => {
-    const { id } = req.params;
-    const productData = req.body;
-    const { institutionId } = req.institutionContext || {};
-    const product = await productService.updateProduct(id, productData);
-
-    res.status(200).json(product);
-}
-
-export const deleteProduct = async (req: RequestWithContext, res: Response) => {
-    const { id } = req.params;
-    await productService.deleteProduct(id);
-
-    res.status(200).json(createMessageResponse('Product deleted successfully'));
-}
-
-const trackSearchInteraction = async (req: Request, filters: ProductFilters, resultCount: number): Promise<void> => {
-    try {
-        logger.info('Starting search tracking', {
-            query: filters.search || '',
-            filters: {
-                categoryId: filters.categoryId,
-                institutionId: filters.institutionId
-            },
-            resultCount,
-            userId: (req as any).user?.userId || 'anonymous'
-        });
-
-        await interactionTracker.trackSearch(req, filters.search || '', resultCount, {
-            categoryId: filters.categoryId,
-            institutionId: filters.institutionId,
-            isFeatured: filters.isFeatured,
-            isActive: filters.isActive
-        });
-
-        logger.info('Search tracking completed');
-    } catch (error) {
-        logger.error('Error in trackSearchInteraction:', error);
-    }
 };
 
-const trackProductView = async (req: Request, product: any): Promise<void> => {
-    try {
-        logger.info('Starting product view tracking', {
-            productId: product.id,
-            productName: product.name,
-            userId: (req as any).user?.userId || 'anonymous'
-        });
-
-        await interactionTracker.trackProductView(req, product);
-        logger.info('Product view tracking completed');
-    } catch (error) {
-        logger.error('Error in trackProductView:', error);
+export const createProduct = async (req: RequestWithContext, res: Response, next: NextFunction) => {
+    const productData = req.body;
+    const { institutionId } = req.institutionContext || {};
+    if (!institutionId) {
+        throw new AppError(403, 'Institution ID is required', 'FORBIDDEN');
     }
+    const product = await productService.createProduct(productData, institutionId);
+    return apiSuccess(res, {
+        status: 201,
+        message: 'Product created successfully',
+        data: product,
+        meta: { timestamp: new Date().toISOString() }
+    });
+};
+
+export const updateProduct = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const productData = req.body;
+    const product = await productService.updateProduct(id, productData);
+    if (!product) {
+        throw new AppError(404, 'Product not found', 'NOT_FOUND');
+    }
+    return apiSuccess(res, {
+        status: 200,
+        message: 'Product updated successfully',
+        data: product,
+        meta: { timestamp: new Date().toISOString() }
+    });
+};
+
+export const deleteProduct = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const deleted = await productService.deleteProduct(id);
+    if (!deleted) {
+        throw new AppError(404, 'Product not found', 'NOT_FOUND');
+    }
+    return apiSuccess(res, {
+        status: 200,
+        message: 'Product deleted successfully',
+        data: null,
+        meta: { timestamp: new Date().toISOString() }
+    });
 };

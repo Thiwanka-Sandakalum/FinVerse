@@ -1,245 +1,227 @@
-import { NotFoundError, ValidationError } from '../utils/error-handler';
 import prisma from '../config/database';
 import { Prisma, Product } from '@prisma/client';
 import { generateProductId } from '../utils/slugify';
 import { analyzeProductFields } from '../utils/data-analysis';
-import { getSavedProductIds, isProductSavedByUser, validateProductAccess } from '../utils/product-helpers';
+import { getSavedProductIds, isProductSavedByUser } from '../utils/product-helpers';
+import { AppError } from '../utils/AppError';
 
 interface ProductFilters {
     categoryId?: string;
     institutionId?: string;
     isActive?: boolean;
     isFeatured?: boolean;
+    productIds?: string[];
+    page?: number;
     limit?: number;
-    offset?: number;
+    sort?: 'name' | 'createdAt' | 'updatedAt';
+    order?: 'asc' | 'desc';
     search?: string;
 }
 
+
 export const getAllProducts = async (
-    filters: ProductFilters & {
-        productIds?: string[];
-        page?: number;
-        sort?: string;
-        order?: 'asc' | 'desc';
-    },
+    filters: ProductFilters,
     userId?: string,
-    institutionId?: string
-) => {
+    userInstitutionId?: string
+): Promise<{
+    products: (Product & { category?: any; isSaved: boolean })[];
+    meta: { total: number; page: number; limit: number; pages: number };
+}> => {
     const {
         categoryId,
-        isActive,
+        institutionId,
+        isActive = true,
         isFeatured,
-        limit = 20,
-        page = 1,
-        search,
         productIds,
+        page = 1,
+        limit = 20,
         sort = 'createdAt',
-        order = 'desc'
+        order = 'desc',
+        search
     } = filters;
 
-    // Calculate offset from page and limit
-    const offset = (page - 1) * limit;
+    const take = Math.min(limit, 100);
+    const skip = (page - 1) * take;
+    const where: Prisma.ProductWhereInput = {
+        institutionId: userInstitutionId ?? institutionId,
+        isActive,
+        ...(typeof isFeatured === 'boolean' && { isFeatured }),
+        ...(productIds?.length && { id: { in: productIds } })
+    };
 
-    // Build where condition
-    const where: Prisma.ProductWhereInput = {};
-    if (institutionId) where.institutionId = institutionId;
-    if (filters.institutionId) where.institutionId = filters.institutionId;
-    if (isActive !== undefined) where.isActive = isActive;
-    if (isFeatured !== undefined) where.isFeatured = isFeatured;
-    if (productIds && productIds.length > 0) {
-        where.id = { in: productIds };
-    }
-
-    // Build AND/OR for category and search
-    const orConditions: Prisma.ProductWhereInput[] = [];
     if (categoryId) {
-        orConditions.push({ categoryId: categoryId });
-        orConditions.push({ category: { parentId: categoryId } });
-    }
-    if (search) {
-        orConditions.push({ name: { contains: search } });
-    }
-    if (orConditions.length > 0) {
-        where.OR = orConditions;
+        where.OR = [
+            { categoryId },
+            { category: { parentId: categoryId } }
+        ];
     }
 
-    // First get total count
-    const total = await prisma.product.count({ where });
+    if (search?.trim()) {
+        return prisma.$queryRaw`
+          SELECT *
+          FROM Product
+          WHERE MATCH(name) AGAINST (${search} IN NATURAL LANGUAGE MODE)
+          AND isActive = 1
+          LIMIT ${take} OFFSET ${skip}
+        `;
+    }
 
-    // Then get paginated data
-    // Validate sort field to prevent SQL injection or invalid fields
-    const allowedSortFields = ['name', 'createdAt', 'updatedAt'];
-    const sortField = allowedSortFields.includes(sort) ? sort : 'createdAt';
+    const [total, products] = await prisma.$transaction([
+        prisma.product.count({ where }),
+        prisma.product.findMany({
+            where,
+            include: { category: true },
+            orderBy: { [sort]: order },
+            take,
+            skip
+        })
+    ]);
 
-    const products = await prisma.product.findMany({
-        where,
-        include: {
-            category: true
-        },
-        skip: offset,
-        take: limit,
-        orderBy: { [sortField]: order }
-    });
-
-    // If userId is provided, get saved products for this user
-    const savedProductIds = userId ? await getSavedProductIds(userId) : [];
-
-    // Add isSaved indicator to each product
-    const productsWithSavedIndicator = products.map(product => ({
-        ...product,
-        isSaved: userId ? savedProductIds.includes(product.id) : false
-    }));
+    const savedIds = userId ? await getSavedProductIds(userId) : [];
 
     return {
-        products: productsWithSavedIndicator,
+        products: products.map(p => ({
+            ...p,
+            isSaved: savedIds.includes(p.id)
+        })),
         meta: {
             total,
-            limit,
-            page
+            page,
+            limit: take,
+            pages: Math.ceil(total / take)
         }
     };
 };
 
-export const getProductById = async (id: string, userId?: string) => {
+
+export const getProductById = async (id: string, userId?: string): Promise<(Product & { category?: any; isSaved: boolean }) | null> => {
     const product = await prisma.product.findUnique({
         where: { id },
-        include: {
-        }
+        include: { category: true }
     });
 
     if (!product) {
-        throw new NotFoundError('Product not found');
+        throw new AppError(404, 'Product not found', 'PRODUCT_NOT_FOUND');
     }
-
-    // If userId is provided, check if this product is saved by the user
-    const isSaved = userId ? await isProductSavedByUser(userId, id) : false;
 
     return {
         ...product,
-        isSaved
+        isSaved: userId ? await isProductSavedByUser(userId, id) : false
     };
 };
 
-export const getProductsByIds = async (ids: string[], userId?: string, userInstitutionId?: string) => {
-    // Get all products with the given IDs
+
+export const getProductsByIds = async (
+    ids: string[],
+    userId?: string,
+    institutionId?: string
+): Promise<(Product & { category?: any; isSaved: boolean })[]> => {
+    if (!ids.length) return [];
+
     const products = await prisma.product.findMany({
         where: {
             id: { in: ids },
-            isActive: true
+            isActive: true,
+            ...(institutionId && { institutionId })
         },
-        include: {
-            category: true
-        },
+        include: { category: true },
         orderBy: { createdAt: 'desc' }
     });
 
-    // If userId is provided, get saved products for this user
-    const savedProductIds = userId ? await getSavedProductIds(userId) : [];
+    const savedIds = userId ? await getSavedProductIds(userId) : [];
 
-    // Add isSaved indicator to each product
-    const productsWithSavedIndicator = products.map(product => ({
-        ...product,
-        isSaved: userId ? savedProductIds.includes(product.id) : false
+    return products.map(p => ({
+        ...p,
+        isSaved: savedIds.includes(p.id)
     }));
-
-    // If user has institutionId, filter products that belong to their institution
-    return userInstitutionId
-        ? productsWithSavedIndicator.filter(product => product.institutionId === userInstitutionId)
-        : productsWithSavedIndicator;
 };
 
-export const createProduct = async (data: Partial<Product>, userInstitutionId?: string) => {
 
-    const {
-        categoryId,
-        name,
-        details,
-        isFeatured = false,
-        isActive = true
-    } = data;
+export const createProduct = async (
+    data: Partial<Product>,
+    institutionId: string
+): Promise<Product> => {
+    if (!data.categoryId || !data.name) {
+        throw new AppError(400, 'Missing required fields', 'VALIDATION_ERROR');
+    }
 
-    const generatedId = await generateProductId(data);
+    const categoryExists = await prisma.productCategory.findUnique({
+        where: { id: data.categoryId }
+    });
+
+    if (!categoryExists) {
+        throw new AppError(400, 'Invalid categoryId', 'INVALID_CATEGORY');
+    }
 
     return prisma.product.create({
         data: {
-            id: generatedId,
-            institutionId: userInstitutionId!,
-            categoryId: categoryId!,
-            name: name!,
-            details: details as Prisma.InputJsonValue,
-            isFeatured,
-            isActive
-        },
-        include: {
+            id: await generateProductId(data),
+            institutionId,
+            categoryId: data.categoryId,
+            name: data.name,
+            details: data.details as Prisma.InputJsonValue,
+            isFeatured: data.isFeatured ?? false,
+            isActive: data.isActive ?? true
         }
     });
 };
 
-export const updateProduct = async (id: string, data: Partial<Product>, userInstitutionId?: string) => {
-    const {
-        categoryId,
-        name,
-        details,
-        isFeatured = false,
-        isActive = true
-    } = data;
 
+export const updateProduct = async (
+    id: string,
+    data: Partial<Product>
+): Promise<Product> => {
     return prisma.product.update({
         where: { id },
         data: {
-            categoryId: categoryId!,
-            name: name!,
-            details: details as Prisma.InputJsonValue,
-            isFeatured,
-            isActive
-        },
-        include: {
+            ...(data.categoryId && { categoryId: data.categoryId }),
+            ...(data.name && { name: data.name }),
+            ...(data.details && { details: data.details as Prisma.InputJsonValue }),
+            ...(typeof data.isFeatured === 'boolean' && { isFeatured: data.isFeatured }),
+            ...(typeof data.isActive === 'boolean' && { isActive: data.isActive })
         }
     });
 };
 
-export const deleteProduct = async (id: string) => {
+
+export const deleteProduct = async (id: string): Promise<Product> => {
     return prisma.product.delete({ where: { id } });
 };
 
-export const setProductActiveStatus = async (id: string, isActive: boolean) => {
+
+export const setProductActiveStatus = async (
+    id: string,
+    isActive: boolean
+): Promise<Product> => {
     return prisma.product.update({
         where: { id },
         data: { isActive }
     });
 };
 
-export const getProductFieldsByCategory = async (categoryId: string) => {
-    // First verify the category exists
+
+export const getProductFieldsByCategory = async (categoryId: string): Promise<any> => {
     const category = await prisma.productCategory.findUnique({
         where: { id: categoryId }
     });
 
     if (!category) {
-        throw new NotFoundError('Product category not found');
+        throw new AppError(404, 'Category not found', 'CATEGORY_NOT_FOUND');
     }
 
-    // Get all products of this category that have details
     const products = await prisma.product.findMany({
         where: {
-            categoryId: categoryId,
-            details: {
-                not: Prisma.DbNull
-            }
+            categoryId,
+            details: { not: Prisma.DbNull }
         },
-        select: {
-            details: true
-        }
+        select: { details: true }
     });
-
-    // Process field information
-    const fields = analyzeProductFields(products);
 
     return {
         category,
         fields: {
             totalProducts: products.length,
-            fields
+            fields: analyzeProductFields(products)
         }
     };
 };
