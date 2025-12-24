@@ -26,7 +26,6 @@ pnpm-debug.log*
 
 # turbo
 .turbo
-<<<<<<< HEAD
 apps/backend/chatbot-service/data
 
 **/__pycache__/
@@ -34,67 +33,5 @@ apps/backend/chatbot-service/data
 */*/venv/
 apps/backend/chatbot-service/venv
 apps/backend/chatbot-service/src/utils/__pycache__/
-=======
-**/venv/
-**/data
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Logs
-*.log
-logs/
->>>>>>> 28a45538ee80466433c39f982207c8effe2f7b2a
+apps/backend/usermng-service/src/config/organizationConnections.json
+apps/backend/banking-service-api/prisma/data.json
