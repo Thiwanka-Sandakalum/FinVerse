@@ -69,9 +69,20 @@ components:
         updatedAt:
           type: string
           format: date-time
+          nullable: true
+        fieldDefinitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldDefinition"
+        Product:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
       required:
         - name
         - details
+        - institutionId
+        - categoryId
 
     ProductCategory:
       type: object
@@ -130,12 +141,44 @@ components:
       type: object
       properties:
         code:
+          type: string
+          description: Error code identifier
+        details:
+          type: array
+          description: Optional array of error details
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Field name related to the error
+              message:
+                type: string
+                description: Error message for the field
+              code:
+                type: string
+                description: Error code for the field
+      required:
+        - code
+        - details
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        status:
           type: integer
         message:
           type: string
+        error:
+          $ref: "#/components/schemas/Error"
       required:
-        - code
+        - success
+        - status
         - message
+        - error
 
     MessageResponse:
       type: object
@@ -164,6 +207,10 @@ components:
             offset:
               type: integer
               description: Offset of items
+            timestamp:
+              type: string
+              format: date-time
+              description: Response timestamp (ISO8601)
       required:
         - data
         - meta
@@ -249,7 +296,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
     post:
       summary: Create Product
       description: Create a new financial product
@@ -275,19 +322,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: Forbidden - User is not an Institution Admin
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
 
   /products/{id}:
     parameters:
@@ -313,7 +360,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
     put:
       summary: Edit Product
       description: Edit an existing product
@@ -339,25 +386,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: Forbidden - User is not an Institution Admin
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: Product not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
     delete:
       summary: Delete Product
       description: Delete a specific product from the platform
@@ -377,13 +424,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: Forbidden - User is not an Institution Admin
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: Product not found
           content:
@@ -670,12 +717,6 @@ paths:
                 $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden - User is not a System Admin
           content:
             application/json:
               schema:
