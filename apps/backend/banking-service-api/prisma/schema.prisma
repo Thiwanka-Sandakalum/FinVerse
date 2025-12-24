@@ -8,15 +8,20 @@ datasource db {
 }
 
 model ProductCategory {
-    id              String            @id @default(uuid())
-    parentId        String?
-    name            String            @unique
-    description     String?
-    level           Int               @default(0)
-    parent          ProductCategory?  @relation("CategoryParent", fields: [parentId], references: [id], onDelete: SetNull)
-    children        ProductCategory[] @relation("CategoryParent")
+    id          String  @id @default(uuid())
+    parentId    String?
+    name        String  @unique
+    description String?
+    level       Int     @default(0)
+
+    parent   ProductCategory?  @relation("CategoryParent", fields: [parentId], references: [id], onDelete: SetNull)
+    children ProductCategory[] @relation("CategoryParent")
+
     FieldDefinition FieldDefinition[]
     Product         Product[]
+
+    @@index([parentId])
+    @@index([level])
 }
 
 model Product {
@@ -30,25 +35,28 @@ model Product {
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
 
-    category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
+    category      ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
     savedProducts SavedProduct[]
 
+    @@index([institutionId, isActive])
+    @@index([categoryId, isActive])
+    @@index([isFeatured, isActive])
+    @@index([createdAt])
     @@index([name])
 }
 
-// Definitions for dynamic fields associated with a ProductCategory (e.g. "Minimum Interest Rate", "Max LTV Ratio", etc.)
 model FieldDefinition {
     id         String  @id @default(uuid())
     categoryId String
     name       String
-    dataType   String // "string", "number", "date", "boolean", "json"
+    dataType   String
     isRequired Boolean @default(false)
-    validation Json? // Validation rules (e.g., min, max, pattern)
+    validation Json?
 
-    category ProductCategory @relation(fields: [categoryId], references: [id])
+    category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
     @@unique([categoryId, name])
+    @@index([categoryId])
 }
 
 model SavedProduct {
@@ -57,7 +65,26 @@ model SavedProduct {
     productId String
     createdAt DateTime @default(now())
 
-    product Product @relation(fields: [productId], references: [id])
+    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
     @@unique([UserId, productId])
+    @@index([UserId])
+    @@index([productId])
+}
+
+model AuditLog {
+    id        String   @id @default(uuid())
+    userId    String?
+    sessionId String?
+    action    String
+    details   Json?
+    ipAddress String?
+    userAgent String?
+    referrer  String?
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+    @@index([sessionId])
+    @@index([action])
+    @@index([createdAt])
 }

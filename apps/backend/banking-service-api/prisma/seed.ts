@@ -6,25 +6,19 @@ import path from 'path';
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('Starting seed operation from seed.json...');
-    const seedPath = path.join(__dirname, 'seed.json');
+    console.log('Starting seed operation from data.json...');
+    const seedPath = path.join(__dirname, 'data.json');
     const raw = fs.readFileSync(seedPath, 'utf8');
     const data = JSON.parse(raw);
 
-    // Remove all data in correct order to avoid FK constraint errors
     console.log('Deleting all data...');
     await prisma.savedProduct.deleteMany();
     await prisma.product.deleteMany();
     await prisma.fieldDefinition.deleteMany();
     await prisma.productCategory.deleteMany();
-    console.log('All data deleted. Seeding fresh data...');
 
-    // Product Categories
-    if (Array.isArray(data.productCategories)) {
-        const categories = Array.isArray(data.productCategories[0])
-            ? data.productCategories[0]
-            : data.productCategories;
-        for (const cat of categories) {
+    if (Array.isArray(data.categories)) {
+        for (const cat of data.categories) {
             const { id, parentId, name, description, level } = cat;
             if (!name) {
                 console.warn(`Skipping category with missing name:`, cat);
@@ -34,9 +28,9 @@ async function main() {
                 data: { id: id || randomUUID(), parentId, name, description, level },
             });
         }
+        console.log(`Seeded ${data.categories.length} product categories.`);
     }
 
-    // Field Definitions
     if (Array.isArray(data.fieldDefinitions)) {
         for (const field of data.fieldDefinitions) {
             try {
@@ -58,7 +52,6 @@ async function main() {
         console.log(`Successfully processed ${data.fieldDefinitions.length} field definitions`);
     }
 
-    // Products
     if (Array.isArray(data.products)) {
         for (const prod of data.products) {
             const {
@@ -68,7 +61,9 @@ async function main() {
                 details,
                 isFeatured,
                 isActive,
-                categoryId
+                categoryId,
+                createdAt,
+                updatedAt
             } = prod;
             await prisma.product.create({
                 data: {
@@ -78,13 +73,16 @@ async function main() {
                     details,
                     isFeatured,
                     isActive,
-                    categoryId
+                    categoryId,
+                    createdAt: createdAt ? new Date(createdAt) : undefined,
+                    updatedAt: updatedAt ? new Date(updatedAt) : undefined
                 },
             });
         }
+        console.log(`Seeded ${data.products.length} products.`);
     }
 
-    console.log('Seed completed from seed.json');
+    console.log('Seed completed from data.json');
 }
 
 main()
