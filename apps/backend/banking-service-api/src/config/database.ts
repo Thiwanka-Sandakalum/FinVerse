@@ -24,20 +24,13 @@ const prismaClientSingleton = () => {
     });
 };
 
-// Use global to maintain a singleton instance across hot reloads in development
 declare global {
     var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
 const prisma = globalThis.prisma ?? prismaClientSingleton();
 
-// Log prisma events in development
 if (process.env.NODE_ENV !== 'production') {
-    prisma.$on('query', (e: any) => {
-        logger.debug(`Query: ${e.query}`);
-        logger.debug(`Duration: ${e.duration}ms`);
-    });
-
     prisma.$on('error', (e: any) => {
         logger.error(`Prisma error: ${e.message}`);
     });
