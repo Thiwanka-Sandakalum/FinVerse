@@ -35,9 +35,9 @@ jobs:
         with:
           appSourcePath: ${{ github.workspace }}/apps/backend/banking-service-api
           dockerfilePath: Dockerfile
-          registryUrl: myregistry.azurecr.io
+          registryUrl: portfolioacr01.azurecr.io
           registryUsername: ${{ secrets.CABANKINGSRV_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.CABANKINGSRV_REGISTRY_PASSWORD }}
           containerAppName: ca-banking-srv
           resourceGroup: rg-finVerse
-          imageToBuild: myregistry.azurecr.io/ca-banking-srv:${{ github.sha }}
+          imageToBuild: portfolioacr01.azurecr.io/ca-banking-srv:${{ github.sha }}
