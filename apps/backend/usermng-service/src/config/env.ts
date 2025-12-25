@@ -24,17 +24,6 @@ interface EnvConfig {
 
 // Validate required environment variables
 function validateEnv(): EnvConfig {
-    const requiredVars = [
-        'AUTH0_DOMAIN',
-        'AUTH0_CLIENT_ID',
-        'AUTH0_CLIENT_SECRET',
-    ];
-
-    const missing = requiredVars.filter(varName => !process.env[varName]);
-    if (missing.length > 0) {
-        throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
-    }
-
     return {
         PORT: parseInt(process.env.PORT || '3000', 10),
         NODE_ENV: process.env.NODE_ENV || 'development',

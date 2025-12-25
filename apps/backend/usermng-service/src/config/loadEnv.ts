@@ -16,8 +16,13 @@ function loadEnv() {
                 }
             }
         });
-    } catch (error) {
-        console.error('Error loading .env file:', error);
+    } catch (error: any) {
+        if (error.code === 'ENOENT') {
+            // .env file not found, ignore in production (use Azure env vars)
+            console.warn('.env file not found, skipping load. Using environment variables from Azure.');
+        } else {
+            console.error('Error loading .env file:', error);
+        }
     }
 }
 
