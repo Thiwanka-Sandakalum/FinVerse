@@ -34,7 +34,7 @@ jobs:
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }}/apps/backend/banking-service-api
-          dockerfilePath: apps/backend/banking-service-api/Dockerfile
+          dockerfilePath: Dockerfile
           registryUrl: myregistry.azurecr.io
           registryUsername: ${{ secrets.CABANKINGSRV_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.CABANKINGSRV_REGISTRY_PASSWORD }}
