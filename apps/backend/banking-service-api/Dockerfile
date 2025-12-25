@@ -10,16 +10,20 @@ RUN apk add --no-cache python3 make g++
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci --no-audit --no-optional --omit=dev && \
-    npx prisma generate && \
-    npm cache clean --force
+# Install all dependencies (including devDependencies) for build
+RUN npm ci --no-audit --no-optional
 
 # Copy source code
 COPY . .
 
+# Generate Prisma client
+RUN npx prisma generate
+
 # Build TypeScript code
 RUN npm run build
+
+# Prune devDependencies after build
+RUN npm prune --omit=dev && npm cache clean --force
 
 # Production stage - use distroless for minimal size
 FROM node:20-alpine AS production
