@@ -33,14 +33,11 @@ jobs:
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
         with:
-          appSourcePath: ${{ github.workspace }}
+          appSourcePath: ${{ github.workspace }}/apps/backend/banking-service-api
           dockerfilePath: apps/backend/banking-service-api/Dockerfile
-          _targetLabelKey_: _targetLabel_
-          registryUrl:
+          registryUrl: myregistry.azurecr.io
           registryUsername: ${{ secrets.CABANKINGSRV_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.CABANKINGSRV_REGISTRY_PASSWORD }}
           containerAppName: ca-banking-srv
           resourceGroup: rg-finVerse
-          imageToBuild: default/[parameters('containerAppName')]:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
+          imageToBuild: myregistry.azurecr.io/ca-banking-srv:${{ github.sha }}
