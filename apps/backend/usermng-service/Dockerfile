@@ -15,9 +15,6 @@ RUN npm ci --no-audit --no-optional
 # Copy source code
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
-
 # Build TypeScript code
 RUN npm run build
 
