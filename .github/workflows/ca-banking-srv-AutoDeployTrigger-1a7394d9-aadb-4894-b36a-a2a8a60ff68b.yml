@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "**"
+      - "apps/backend/banking-service-api/**"
       - ".github/workflows/ca-banking-srv-AutoDeployTrigger-1a7394d9-aadb-4894-b36a-a2a8a60ff68b.yml"
 
   # Allow manual trigger
