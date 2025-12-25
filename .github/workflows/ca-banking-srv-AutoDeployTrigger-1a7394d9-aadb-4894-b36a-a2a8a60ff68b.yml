@@ -4,19 +4,18 @@ name: Trigger auto deployment for ca-banking-srv
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
-      [ main ]
+    branches: [main]
     paths:
-    - '**'
-    - '.github/workflows/ca-banking-srv-AutoDeployTrigger-1a7394d9-aadb-4894-b36a-a2a8a60ff68b.yml'
+      - "**"
+      - ".github/workflows/ca-banking-srv-AutoDeployTrigger-1a7394d9-aadb-4894-b36a-a2a8a60ff68b.yml"
 
-  # Allow manual trigger 
-  workflow_dispatch:      
+  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       id-token: write #This is required for requesting the OIDC JWT Token
       contents: read #Required when GH token is used to authenticate with private repo
 
@@ -35,9 +34,9 @@ jobs:
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
+          dockerfilePath: apps/backend/banking-service-api/Dockerfile
           _targetLabelKey_: _targetLabel_
-          registryUrl: 
+          registryUrl:
           registryUsername: ${{ secrets.CABANKINGSRV_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.CABANKINGSRV_REGISTRY_PASSWORD }}
           containerAppName: ca-banking-srv
@@ -45,5 +44,3 @@ jobs:
           imageToBuild: default/[parameters('containerAppName')]:${{ github.sha }}
           _buildArgumentsKey_: |
             _buildArgumentsValues_
-
-
