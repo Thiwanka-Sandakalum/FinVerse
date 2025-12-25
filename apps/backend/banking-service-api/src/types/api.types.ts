@@ -1,4 +1,7 @@
-import { Request } from 'express';
+import type { Request } from 'express';
+import type { Response } from 'express';
+
+export { type Request, type Response };
 
 // Auth related types
 export interface JwtPayload {
@@ -59,40 +62,19 @@ export interface ProductCategoryUpdateDto {
     description?: string;
 }
 
-// Product Type related types
-export interface ProductTypeCreateDto {
-    categoryId: string;
-    code: string;
-    name: string;
-    description?: string;
-}
-
-export interface ProductTypeUpdateDto {
-    categoryId?: string;
-    name?: string;
-    description?: string;
-}
-
 // Product related types
 export interface ProductCreateDto {
     institutionId: string;
-    productTypeId: string;
+    categoryId: string;
     name: string;
-    description?: string;
-    terms?: string;
-    fees?: string;
-    eligibility?: string;
-    customAttributes?: Record<string, any>;
+    details?: Record<string, any>;
     isFeatured?: boolean;
 }
 
 export interface ProductUpdateDto {
     name?: string;
-    description?: string;
-    terms?: string;
-    fees?: string;
-    eligibility?: string;
-    customAttributes?: Record<string, any>;
+    categoryId?: string;
+    details?: Record<string, any>;
     isFeatured?: boolean;
 }
 

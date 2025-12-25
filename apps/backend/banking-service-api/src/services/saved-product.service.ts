@@ -1,57 +1,177 @@
-import { SavedProductRepository } from '../repositories/saved-product.repository';
-import { ProductRepository } from '../repositories/product.repository';
-import { ApiError } from '../middlewares/error.middleware';
+import prisma from '../config/database';
 
-export class SavedProductService {
-    private savedProductRepository: SavedProductRepository;
-    private productRepository: ProductRepository;
+export const saveProduct = async (userId: string, productId: string) => {
+    // Check if product exists and is active
+    const product = await prisma.product.findUnique({
+        where: { id: productId, isActive: true }
+    });
 
-    constructor() {
-        this.savedProductRepository = new SavedProductRepository();
-        this.productRepository = new ProductRepository();
+    if (!product) {
+        throw new Error('Product not found or not active');
     }
 
-    /**
-     * Get all saved products for a user
-     */
-    async getAllSavedProducts(clerkUserId: string) {
-        return this.savedProductRepository.findAllByUser(clerkUserId);
+    // Check if already saved
+    const existingSave = await prisma.savedProduct.findUnique({
+        where: {
+            UserId_productId: {
+                UserId: userId,
+                productId: productId
+            }
+        }
+    });
+
+    if (existingSave) {
+        throw new Error('Product is already saved');
     }
 
-    /**
-     * Save a product for a user
-     */
-    async saveProduct(clerkUserId: string, productId: string) {
-        // Check if product exists
-        const product = await this.productRepository.findById(productId);
-
-        if (!product) {
-            throw new ApiError(404, 'Product not found');
+    // Create the saved product
+    const savedProduct = await prisma.savedProduct.create({
+        data: {
+            UserId: userId,
+            productId: productId
+        },
+        include: {
+            product: {
+                include: {
+                    category: true
+                }
+            }
         }
+    });
 
-        // Check if already saved
-        const existingSaved = await this.savedProductRepository.findByProductAndUser(productId, clerkUserId);
+    return savedProduct;
+};
 
-        if (existingSaved) {
-            throw new ApiError(400, 'Product already saved');
+export const unsaveProduct = async (userId: string, productId: string) => {
+    // Check if the save exists
+    const existingSave = await prisma.savedProduct.findUnique({
+        where: {
+            UserId_productId: {
+                UserId: userId,
+                productId: productId
+            }
         }
+    });
 
+    if (!existingSave) {
+        throw new Error('Product is not saved by this user');
+    }
+
+    // Delete the saved product
+    await prisma.savedProduct.delete({
+        where: {
+            UserId_productId: {
+                UserId: userId,
+                productId: productId
+            }
+        }
+    });
+
+    return { message: 'Product unsaved successfully' };
+};
+
+export const toggleSaveProduct = async (userId: string, productId: string) => {
+    // Check if product exists and is active
+    const product = await prisma.product.findUnique({
+        where: { id: productId, isActive: true }
+    });
+
+    if (!product) {
+        throw new Error('Product not found or not active');
+    }
+
+    // Check if already saved
+    const existingSave = await prisma.savedProduct.findUnique({
+        where: {
+            UserId_productId: {
+                UserId: userId,
+                productId: productId
+            }
+        }
+    });
+
+    if (existingSave) {
+        // Unsave the product
+        await prisma.savedProduct.delete({
+            where: {
+                UserId_productId: {
+                    UserId: userId,
+                    productId: productId
+                }
+            }
+        });
+        return {
+            action: 'unsaved',
+            isSaved: false,
+            message: 'Product unsaved successfully'
+        };
+    } else {
         // Save the product
-        return this.savedProductRepository.create(clerkUserId, productId);
+        const savedProduct = await prisma.savedProduct.create({
+            data: {
+                UserId: userId,
+                productId: productId
+            }
+        });
+        return {
+            action: 'saved',
+            isSaved: true,
+            message: 'Product saved successfully',
+            savedProduct
+        };
     }
+};
 
-    /**
-     * Delete a saved product
-     */
-    async deleteSavedProduct(id: string, clerkUserId: string) {
-        // Check if saved product exists and belongs to user
-        const savedProduct = await this.savedProductRepository.findByIdAndUser(id, clerkUserId);
+export const getUserSavedProducts = async (userId: string, page: number = 1, limit: number = 20) => {
+    const offset = (page - 1) * limit;
 
-        if (!savedProduct) {
-            throw new ApiError(404, 'Saved product not found');
+    // Get total count
+    const total = await prisma.savedProduct.count({
+        where: { UserId: userId }
+    });
+
+    // Get paginated saved products
+    const savedProducts = await prisma.savedProduct.findMany({
+        where: { UserId: userId },
+        include: {
+            product: {
+                include: {
+                    category: true
+                }
+            }
+        },
+        skip: offset,
+        take: limit,
+        orderBy: { createdAt: 'desc' }
+    });
+
+    return {
+        savedProducts: savedProducts.map(sp => ({
+            ...sp.product,
+            isSaved: true,
+            savedAt: sp.createdAt
+        })),
+        meta: {
+            total,
+            limit,
+            page
         }
+    };
+};
 
-        // Delete the saved product
-        return this.savedProductRepository.delete(id);
-    }
-}
+export const checkProductSaveStatus = async (userId: string, productId: string) => {
+    const savedProduct = await prisma.savedProduct.findUnique({
+        where: {
+            UserId_productId: {
+                UserId: userId,
+                productId: productId
+            }
+        }
+    });
+
+    return {
+        productId,
+        isSaved: !!savedProduct,
+        savedAt: savedProduct?.createdAt || null
+    };
+};

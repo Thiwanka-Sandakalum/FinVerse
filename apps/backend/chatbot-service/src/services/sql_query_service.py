@@ -1,10 +1,9 @@
 import google.generativeai as genai
 from typing import Dict, Any, List, Optional, Tuple
-import json
 import re
 from src.config.settings import Settings
-from src.services.prisma_client import PrismaClient
-from src.utils.json_utils import process_value, json_dumps, CustomJSONEncoder
+from src.services.database_service import DatabaseService
+from src.utils.json_utils import process_value, json_dumps
 from src.models.api_models import Source
 
 settings = Settings()
@@ -15,7 +14,7 @@ class SQLQueryService:
     
     def __init__(self):
         self.model = genai.GenerativeModel('gemini-2.5-flash')
-        self.db_client = PrismaClient()
+        self.db_client = DatabaseService()
         self.table_schema = self._get_table_schema()
     
     def _get_table_schema(self) -> str:
@@ -99,7 +98,7 @@ class SQLQueryService:
         
         CREATE TABLE Review (
             id VARCHAR(191) PRIMARY KEY,
-            clerkUserId VARCHAR(191) NOT NULL,
+            UserId VARCHAR(191) NOT NULL,
             productId VARCHAR(191) NOT NULL,
             rating INT NOT NULL,
             comment VARCHAR(191),

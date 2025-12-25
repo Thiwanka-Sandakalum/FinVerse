@@ -1,0 +1,1 @@
+how to catch user details based one each req / when req hit the api gatway then pass to the downstream services with jwt token user info in the payload
