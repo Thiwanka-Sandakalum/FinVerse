@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "apps/backend/user-management-service/**"
+      - "apps/backend/usermng-service/**"
       - ".github/workflows/ca-usrmng-srv-AutoDeployTrigger-5c322ea3-f2e9-491f-b52b-46a78418d5ac.yml"
 
   # Allow manual trigger
@@ -33,7 +33,7 @@ jobs:
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
         with:
-          appSourcePath: ${{ github.workspace }}/apps/backend/user-management-service
+          appSourcePath: ${{ github.workspace }}/apps/backend/usermng-service
           dockerfilePath: Dockerfile
           registryUrl: portfolioacr01.azurecr.io
           registryUsername: ${{ secrets.CAUSRMNGSRV_REGISTRY_USERNAME }}
