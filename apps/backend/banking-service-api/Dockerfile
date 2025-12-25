@@ -1,52 +1,49 @@
 # Build stage
 FROM node:20-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install python and build dependencies required for node-gyp
-RUN apk add --no-cache python3 make g++ 
+# Install only essential build dependencies
+RUN apk add --no-cache python3 make g++
 
-# Copy package files
+# Copy package files first (better layer caching)
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies including 'prisma' for the build
-RUN npm ci --no-audit --no-optional && \
-    npx prisma generate
+# Install dependencies
+RUN npm ci --no-audit --no-optional --omit=dev && \
+    npx prisma generate && \
+    npm cache clean --force
 
 # Copy source code
 COPY . .
 
 # Build TypeScript code
-RUN npm run build && \
-    npm prune --production
+RUN npm run build
 
-# Production stage
+# Production stage - use distroless for minimal size
 FROM node:20-alpine AS production
 
-# Set working directory
 WORKDIR /app
 
-# Install runtime dependencies only
-RUN apk add --no-cache libc6-compat
-
-# Copy package files and built assets from builder
+# Copy only production dependencies from builder
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/banking-service-api.yaml ./
 
 # Set environment variables
 ENV NODE_ENV=production \
     PORT=3000
 
-# Clean npm cache
-RUN npm cache clean --force && \
-    rm -rf /root/.npm /root/.node-gyp
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /app
 
-# Expose the port the app runs on
+USER nodejs
+
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+CMD ["node", "dist/server.js"]
