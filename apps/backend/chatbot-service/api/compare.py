@@ -10,5 +10,7 @@ router = APIRouter()
 @router.post("")
 def compare(payload: CompareRequest, db=Depends(get_product_db)):
     service = ComparisonService(db)
-    result = service.compare(payload.productIds)
+    # Pass user prompt if available, else default
+    user_prompt = getattr(payload, 'message', None) or "Compare these products"
+    result = service.compare(payload.productIds, user_prompt=user_prompt)
     return APIResponse.success(result)

@@ -1,11 +1,11 @@
 {
-    "instruction": "Given a user question about financial products, generate a SQL WHERE clause or filter expression to retrieve relevant products from the following schema:",
+    "instruction": "You are a financial data assistant. Given a user's question about financial products, generate a precise SQL WHERE clause or JSON filter expression to retrieve relevant products from the schema provided. Only use the schema and details fields; do not assume or invent values. Always ensure SQL syntax is valid for MySQL JSON queries when filtering details fields.",
     "schema": {
         "products": [
             "id VARCHAR PRIMARY KEY",
             "name VARCHAR NOT NULL",
             "category_id VARCHAR",
-            "details JSON (see details_fields below)",
+            "details JSON",
             "is_featured BOOLEAN",
             "is_active BOOLEAN",
             "created_at DATETIME",
@@ -72,10 +72,16 @@
             }
         }
     },
-    "example": {
-        "user": "Show me active credit cards with low interest rates",
-        "sql": "WHERE is_active = TRUE AND details->'$.interest_rate' < 5 AND category_id IN (SELECT id FROM product_categories WHERE name LIKE '%credit card%')"
-    },
+    "examples": [
+        {
+            "user": "Show me active credit cards with low interest rates",
+            "sql": "WHERE is_active = TRUE AND details->'$.interestRate' < 5 AND category_id IN (SELECT id FROM product_categories WHERE name LIKE '%credit card%')"
+        },
+        {
+            "user": "List loans for self-employed with minimum income 100000",
+            "sql": "WHERE is_active = TRUE AND JSON_EXTRACT(details, '$.eligibility.employment') = 'Self-employed' AND JSON_EXTRACT(details, '$.eligibility.minIncome') >= 100000 AND category_id IN (SELECT id FROM product_categories WHERE name LIKE '%loan%')"
+        }
+    ],
     "user_query": "{user_query}",
     "sql_prefix": "SQL:"
 }
