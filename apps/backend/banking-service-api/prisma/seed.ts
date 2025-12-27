@@ -65,9 +65,10 @@ async function main() {
                 createdAt,
                 updatedAt
             } = prod;
+            const productId = id || randomUUID();
             await prisma.product.create({
                 data: {
-                    id: id || randomUUID(),
+                    id: productId,
                     institutionId,
                     name,
                     details,
@@ -78,6 +79,34 @@ async function main() {
                     updatedAt: updatedAt ? new Date(updatedAt) : undefined
                 },
             });
+
+            // Auto-generate FieldDefinition for each details key if not already defined for the category
+            if (details && typeof details === 'object' && !Array.isArray(details)) {
+                const existingFields = await prisma.fieldDefinition.findMany({
+                    where: { categoryId },
+                    select: { name: true }
+                });
+                const existingFieldNames = new Set(existingFields.map(f => f.name));
+                for (const key of Object.keys(details)) {
+                    if (!existingFieldNames.has(key)) {
+                        try {
+                            await prisma.fieldDefinition.create({
+                                data: {
+                                    id: randomUUID(),
+                                    categoryId,
+                                    name: key,
+                                    dataType: typeof details[key],
+                                    isRequired: false,
+                                    validation: undefined
+                                }
+                            });
+                            console.log(`Auto-created FieldDefinition for key '${key}' in category '${categoryId}'`);
+                        } catch (error) {
+                            console.warn(`Failed to auto-create field definition for key '${key}' in category '${categoryId}':`, error);
+                        }
+                    }
+                }
+            }
         }
         console.log(`Seeded ${data.products.length} products.`);
     }
