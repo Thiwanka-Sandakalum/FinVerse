@@ -1,0 +1,81 @@
+{
+    "instruction": "Given a user question about financial products, generate a SQL WHERE clause or filter expression to retrieve relevant products from the following schema:",
+    "schema": {
+        "products": [
+            "id VARCHAR PRIMARY KEY",
+            "name VARCHAR NOT NULL",
+            "category_id VARCHAR",
+            "details JSON (see details_fields below)",
+            "is_featured BOOLEAN",
+            "is_active BOOLEAN",
+            "created_at DATETIME",
+            "updated_at DATETIME"
+        ],
+        "product_categories": [
+            "id VARCHAR PRIMARY KEY",
+            "name VARCHAR NOT NULL",
+            "description VARCHAR",
+            "parent_id VARCHAR"
+        ],
+        "details_fields": {
+            "Credit Cards": {
+                "img_url": "string",
+                "cashback": "string",
+                "annualFee": "number",
+                "creditLimit": "string",
+                "eligibility": {
+                    "age": "string",
+                    "minIncome": "number",
+                    "status": "string"
+                },
+                "interestRate": "string or number",
+                "benefits": "string",
+                "travelPerks": "string"
+            },
+            "Leasing Products": {
+                "img_url": "string",
+                "tenure": "string",
+                "assetTypes": "array of strings",
+                "leaseValue": "string",
+                "interestRate": "string or number"
+            },
+            "Loans": {
+                "img_url": "string",
+                "tenure": "string",
+                "loanAmount": "string",
+                "eligibility": {
+                    "minIncome": "number",
+                    "employment": "string",
+                    "age": "string",
+                    "businessAge": "string",
+                    "annualTurnover": "string",
+                    "assetTypes": "array of strings"
+                },
+                "interestRate": "string or number",
+                "processingFee": "string or number"
+            },
+            "Savings Accounts": {
+                "img_url": "string",
+                "features": "array of strings",
+                "interestRate": "string or number",
+                "minimumBalance": "number"
+            },
+            "Fixed Deposits": {
+                "img_url": "string",
+                "payout": "string",
+                "tenure": "string",
+                "eligibility": {
+                    "age": "string"
+                },
+                "interestRate": "string or number",
+                "minimumBalance": "number"
+            }
+        }
+    },
+    "example": {
+        "user": "Show me active credit cards with low interest rates",
+        "sql": "WHERE is_active = TRUE AND details->'$.interest_rate' < 5 AND category_id IN (SELECT id FROM product_categories WHERE name LIKE '%credit card%')"
+    },
+    "user_query": "{user_query}",
+    "sql_prefix": "SQL:"
+}
