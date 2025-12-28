@@ -34,18 +34,13 @@ export function errorHandler(
         }
     }
 
-
-
-    // Log error message, and include the error object (with stack) in meta for stack trace logging
-    logger.error((err && err.message) ? err.message : 'API Error', {
+    logger.error('API Error', {
         status,
         code,
         message,
         details,
         path: req.path,
-        method: req.method,
-        stack: (err as any).stack,
-        error: err
+        method: req.method
     });
 
     return apiError(res, {

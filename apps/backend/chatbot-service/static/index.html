@@ -3,66 +3,31 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinVerse Chatbot</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked@5.1.0/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/lib/highlight.min.js"></script>
 </head>
 
 <body>
-    <div class="container">
+    <div class="chat-bg">
         <div class="chat-container">
             <div class="chat-header">
-                <h1>FinVerse Assistant</h1>
-                <p>Ask me about financial products in Sri Lanka</p>
+                <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg?semt=ais_hybrid&w=740&q=80"
+                    class="chat-avatar" alt="Bot" />
+                <span>FinVerse Chatbot</span>
             </div>
-            <div class="chat-messages" id="chat-messages">
-                <div class="message bot">
-                    <div class="message-content">
-                        <h3>👋 Welcome to FinVerse Assistant!</h3>
-                        <p>I can help you with information about financial products in Sri Lanka, including:</p>
-                        <ul>
-                            <li><strong>Loans</strong> - Personal, Home, Auto, and Business</li>
-                            <li><strong>Deposits</strong> - Fixed, Savings, and Term</li>
-                            <li><strong>Credit Cards</strong> - Features, benefits, and rates</li>
-                            <li><strong>Investment Options</strong> - Available in Sri Lanka</li>
-                        </ul>
-                        <p>Try these new features:</p>
-                        <ul>
-                            <li><strong>Product-Specific Chat</strong> - Ask about a specific product using
-                                <code>/product-chat</code> endpoint</li>
-                            <li><strong>Product Comparison</strong> - Compare multiple products using
-                                <code>/compare-products</code> endpoint</li>
-                        </ul>
-                        <p>Example questions:</p>
-                        <ul>
-                            <li>"What are the best fixed deposit rates?"</li>
-                            <li>"Compare personal loans with the lowest interest rates"</li>
-                            <li>"Tell me about home loan options for first-time buyers"</li>
-                        </ul>
-                        <p>How can I assist you today?</p>
-                    </div>
-                </div>
-            </div>
-            <div class="chat-input">
-                <input type="text" id="user-input" placeholder="Type your question here...">
+            <div id="chat-meta" class="chat-meta"></div>
+            <div id="chat-error" class="chat-error" style="display:none;"></div>
+            <div id="chat-box"></div>
+            <div id="loading-indicator" style="display:none;">Thinking<span class="dot">.</span><span
+                    class="dot">.</span><span class="dot">.</span></div>
+            <div class="chat-input-row">
+                <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" />
                 <button id="send-btn">Send</button>
             </div>
         </div>
-        <div class="stats-container">
-            <div class="stats-header" id="stats-header">
-                <h3>Query Statistics</h3>
-                <button id="stats-toggle">Show Stats</button>
-            </div>
-            <div class="stats-content" id="stats-content">
-                <!-- Stats will be loaded here -->
-                <div class="stats-loading">Loading statistics...</div>
-            </div>
-        </div>
     </div>
-    <script src="/static/app.js"></script>
+    <script src="/static/marked.min.js"></script>
+    <script src="/static/script.js"></script>
 </body>
 
 </html>
