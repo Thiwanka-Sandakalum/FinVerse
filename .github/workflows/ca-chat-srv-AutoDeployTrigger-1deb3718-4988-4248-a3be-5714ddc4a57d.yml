@@ -1,0 +1,49 @@
+name: Trigger auto deployment for ca-chat-srv
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/ca-chat-srv-AutoDeployTrigger-1deb3718-4988-4248-a3be-5714ddc4a57d.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.CACHATSRV_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.CACHATSRV_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.CACHATSRV_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}/apps/backend/chatbot-service
+          _dockerfilePathKey_: _dockerfilePath_
+          _targetLabelKey_: _targetLabel_
+          registryUrl: portfolioacr01.azurecr.io
+          registryUsername: ${{ secrets.CACHATSRV_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CACHATSRV_REGISTRY_PASSWORD }}
+          containerAppName: ca-chat-srv
+          resourceGroup: rg-finVerse
+          imageToBuild: portfolioacr01.azurecr.io/ca-chat-srv:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
