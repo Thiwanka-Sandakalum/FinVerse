@@ -4,19 +4,18 @@ name: Trigger auto deployment for ca-chat-srv
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
-      [ main ]
+    branches: [main]
     paths:
-    - '**'
-    - '.github/workflows/ca-chat-srv-AutoDeployTrigger-1deb3718-4988-4248-a3be-5714ddc4a57d.yml'
+      - "apps/backend/chatbot-service/**"
+      - ".github/workflows/ca-chat-srv-AutoDeployTrigger-1deb3718-4988-4248-a3be-5714ddc4a57d.yml"
 
-  # Allow manual trigger 
-  workflow_dispatch:      
+  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       id-token: write #This is required for requesting the OIDC JWT Token
       contents: read #Required when GH token is used to authenticate with private repo
 
@@ -45,5 +44,3 @@ jobs:
           imageToBuild: portfolioacr01.azurecr.io/ca-chat-srv:${{ github.sha }}
           _buildArgumentsKey_: |
             _buildArgumentsValues_
-
-
