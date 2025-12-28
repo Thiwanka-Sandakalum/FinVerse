@@ -37,11 +37,19 @@ class ChatOrchestrator:
         ]) if history else "(No previous messages)"
 
         # 2. Generate SQL WHERE clause from user message using LLM
+        # Add example values for details fields
+        details_examples = "\n".join([
+            f"- {field}: example value" for field in SQL_PROMPT_JSON["schema"].get("details_fields", [])
+        ])
+        # Add example product categories
+        categories_examples = ", ".join(SQL_PROMPT_JSON["schema"].get("product_categories_names", []))
         sql_prompt = (
             SQL_PROMPT_JSON["instruction"] + "\n" +
             "# Product Table Schema:\n" +
             "products(" + ", ".join(SQL_PROMPT_JSON["schema"]["products"]) + ")\n" +
             "product_categories(" + ", ".join(SQL_PROMPT_JSON["schema"]["product_categories"]) + ")\n" +
+            f"# Example values for details fields in products table:\n{details_examples}\n" +
+            f"# Example product categories:\n{categories_examples}\n" +
             f"# Example:\nUser: {SQL_PROMPT_JSON['examples'][0]['user']}\nSQL: {SQL_PROMPT_JSON['examples'][0]['sql']}\n" +
             f"# Now, generate a SQL WHERE clause for this user question:\nUser: {message}\nSQL:"
         )
