@@ -8,16 +8,12 @@ RUN apk add --no-cache python3 make g++
 
 # Copy package files first (better layer caching)
 COPY package*.json ./
-COPY prisma ./prisma/
 
 # Install all dependencies (including devDependencies) for build
 RUN npm ci --no-audit --no-optional
 
 # Copy source code
 COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
 
 # Build TypeScript code
 RUN npm run build
@@ -34,8 +30,7 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/banking-service-api.yaml ./
+COPY --from=builder /app/src/docs/openapi-v1.yaml ./
 
 # Set environment variables
 ENV NODE_ENV=production \
