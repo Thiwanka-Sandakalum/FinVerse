@@ -17,60 +17,45 @@
             "description VARCHAR",
             "parent_id VARCHAR"
         ],
-        "details_fields": {
-            "Credit Cards": {
-                "img_url": "string",
-                "cashback": "string",
-                "annualFee": "number",
-                "creditLimit": "string",
-                "eligibility": {
-                    "age": "string",
-                    "minIncome": "number",
-                    "status": "string"
-                },
-                "interestRate": "string or number",
-                "benefits": "string",
-                "travelPerks": "string"
-            },
-            "Leasing Products": {
-                "img_url": "string",
-                "tenure": "string",
-                "assetTypes": "array of strings",
-                "leaseValue": "string",
-                "interestRate": "string or number"
-            },
-            "Loans": {
-                "img_url": "string",
-                "tenure": "string",
-                "loanAmount": "string",
-                "eligibility": {
-                    "minIncome": "number",
-                    "employment": "string",
-                    "age": "string",
-                    "businessAge": "string",
-                    "annualTurnover": "string",
-                    "assetTypes": "array of strings"
-                },
-                "interestRate": "string or number",
-                "processingFee": "string or number"
-            },
-            "Savings Accounts": {
-                "img_url": "string",
-                "features": "array of strings",
-                "interestRate": "string or number",
-                "minimumBalance": "number"
-            },
-            "Fixed Deposits": {
-                "img_url": "string",
-                "payout": "string",
-                "tenure": "string",
-                "eligibility": {
-                    "age": "string"
-                },
-                "interestRate": "string or number",
-                "minimumBalance": "number"
-            }
-        }
+        "product_categories_names": [
+            "Cashback Cards",
+            "Credit Cards",
+            "Travel Cards",
+            "Student Cards",
+            "Equipment Leasing",
+            "Leasing",
+            "Fixed Deposits",
+            "Savings & Deposits",
+            "Home Loans",
+            "Loans",
+            "Vehicle Leasing",
+            "Personal Loans",
+            "Savings Accounts",
+            "SME Loans",
+            "Vehicle Loans"
+        ],
+        "details_fields": [
+            "interestRate",
+            "annualFee",
+            "creditLimit",
+            "cashback",
+            "eligibility",
+            "img_url",
+            "travelPerks",
+            "loanAmount",
+            "tenure",
+            "processingFee",
+            "minimumBalance",
+            "payout",
+            "features",
+            "assetTypes",
+            "employment",
+            "businessAge",
+            "annualTurnover",
+            "benefits",
+            "status",
+            "leaseValue"
+        ]
     },
     "examples": [
         {
