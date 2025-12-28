@@ -80,8 +80,8 @@ class ChatOrchestrator:
         ]) if products else "(No relevant products)"
 
         # 4. Fetch Yahoo Finance snapshot (optional)
-        market = self.finance.get_snapshot()
-        market_str = f"Interest Rate: {market.get('interestRate', 'N/A')}" if market else "(No market data)"
+        # market = self.finance.get_snapshot()
+        # market_str = f"Interest Rate: {market.get('interestRate', 'N/A')}" if market else "(No market data)"
 
         # 5. Compose response prompt
         response_prompt = (
@@ -89,7 +89,7 @@ class ChatOrchestrator:
             "## Context:\n" +
             f"Chat History:\n{history_str}\n\n" +
             f"Product Summary:\n{product_summary}\n\n" +
-            f"Finance Snapshot:\n{market_str}\n\n" +
+            # f"Finance Snapshot:\n{market_str}\n\n" +
             f"## User Question:\n{message}\n\n" +
             RESPONSE_PROMPT_JSON["answer_prefix"]
         )
