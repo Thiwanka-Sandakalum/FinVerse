@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     default-libmysqlclient-dev \
     curl \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
@@ -22,8 +23,12 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 # Copy app source code
 COPY . .
+
+# Ensure the SSL certificate is present in the image
+RUN mkdir -p /app/core
 
 # Create a directory for static files (if using UI)
 RUN mkdir -p /app/static

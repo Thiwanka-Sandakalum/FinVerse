@@ -6,5 +6,6 @@
         "finance_snapshot": "{finance_snapshot}"
     },
     "user_query": "{user_query}",
-    "response_format": "Answer in Markdown. Use bullet points, tables, or highlights where appropriate. Start your response with the prefix 'Answer:' and keep it concise."
+    "response_format": "Answer in Markdown. Use bullet points, tables, or highlights where appropriate. Start your response with the prefix 'Answer:' and keep it concise.",
+    "answer_prefix": "Answer:"
 }

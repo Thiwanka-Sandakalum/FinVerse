@@ -42,20 +42,24 @@ class ChatOrchestrator:
             "# Product Table Schema:\n" +
             "products(" + ", ".join(SQL_PROMPT_JSON["schema"]["products"]) + ")\n" +
             "product_categories(" + ", ".join(SQL_PROMPT_JSON["schema"]["product_categories"]) + ")\n" +
-            f"# Example:\nUser: {SQL_PROMPT_JSON['example']['user']}\nSQL: {SQL_PROMPT_JSON['example']['sql']}\n" +
+            f"# Example:\nUser: {SQL_PROMPT_JSON['examples'][0]['user']}\nSQL: {SQL_PROMPT_JSON['examples'][0]['sql']}\n" +
             f"# Now, generate a SQL WHERE clause for this user question:\nUser: {message}\nSQL:"
         )
         logger.info("LLM SQL prompt:\n%s", sql_prompt)
-        sql_where = self.llm.generate(user_prompt=sql_prompt, context=SYSTEM_PROMPT)
-        logger.info("LLM SQL response:\n%s", sql_where)
-        # Clean up LLM output: remove code block markers and leading SQL:
-        sql_where = sql_where.strip()
-        if sql_where.startswith('```sql'):
-            sql_where = sql_where[6:]
-        if sql_where.startswith('```'):
-            sql_where = sql_where[3:]
-        sql_where = sql_where.replace('```', '').strip()
-        sql_where = sql_where.split('\n')[0].replace('SQL:', '').strip()
+        try:
+            sql_where = self.llm.generate(user_prompt=sql_prompt, context=SYSTEM_PROMPT)
+            logger.info("LLM SQL response:\n%s", sql_where)
+            # Clean up LLM output: remove code block markers and leading SQL:
+            sql_where = sql_where.strip()
+            if sql_where.startswith('```sql'):
+                sql_where = sql_where[6:]
+            if sql_where.startswith('```'):
+                sql_where = sql_where[3:]
+            sql_where = sql_where.replace('```', '').strip()
+            sql_where = sql_where.split('\n')[0].replace('SQL:', '').strip()
+        except Exception as e:
+            logger.error(f"LLM SQL generation failed: {e}")
+            raise
 
         # 3. Fetch relevant products using generated SQL (fallback to default if fails)
         try:
@@ -72,7 +76,6 @@ class ChatOrchestrator:
         market_str = f"Interest Rate: {market.get('interestRate', 'N/A')}" if market else "(No market data)"
 
         # 5. Compose response prompt
-        # Build response prompt from JSON template
         response_prompt = (
             RESPONSE_PROMPT_JSON["instruction"] + "\n\n" +
             "## Context:\n" +
@@ -83,8 +86,12 @@ class ChatOrchestrator:
             RESPONSE_PROMPT_JSON["answer_prefix"]
         )
         logger.info("LLM response prompt:\n%s", response_prompt)
-        reply = self.llm.generate(user_prompt=response_prompt, context=SYSTEM_PROMPT)
-        logger.info("LLM response:\n%s", reply)
+        try:
+            reply = self.llm.generate(user_prompt=response_prompt, context=SYSTEM_PROMPT)
+            logger.info("LLM response:\n%s", reply)
+        except Exception as e:
+            logger.error(f"LLM response generation failed: {e}")
+            raise
 
         # 6. Save Q/A to DB
         self.chat_repo.save_message(session_id, user_id, "user", message)
