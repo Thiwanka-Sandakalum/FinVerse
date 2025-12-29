@@ -1,0 +1,49 @@
+name: Trigger auto deployment for ca-usrmng-srv
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/ca-usrmng-srv-AutoDeployTrigger-cec99285-a1b2-4f03-b72e-e85858c31548.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.CAUSRMNGSRV_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.CAUSRMNGSRV_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.CAUSRMNGSRV_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}/apps/backend/usermng-service
+          _dockerfilePathKey_: _dockerfilePath_
+          _targetLabelKey_: _targetLabel_
+          registryUrl: portfolioacr01.azurecr.io
+          registryUsername: ${{ secrets.CAUSRMNGSRV_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CAUSRMNGSRV_REGISTRY_PASSWORD }}
+          containerAppName: ca-usrmng-srv
+          resourceGroup: rg-finVerse
+          imageToBuild: portfolioacr01.azurecr.io/ca-usrmng-srv:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
