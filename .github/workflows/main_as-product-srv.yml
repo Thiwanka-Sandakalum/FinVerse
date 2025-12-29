@@ -31,10 +31,10 @@ jobs:
       - name: Build and push container image to registry
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./apps/backend/banking-service-api
           push: true
           tags: portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}/img-product-srv:${{ github.sha }}
-          file: ./Dockerfile
+          file: ./apps/backend/banking-service-api/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,9 +43,8 @@ jobs:
       contents: read #This is required for actions/checkout
 
     needs: build
-    
+
     steps:
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -57,7 +56,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'as-product-srv'
-          slot-name: 'Production'
-          images: 'portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}/img-product-srv:${{ github.sha }}'
-          
+          app-name: "as-product-srv"
+          slot-name: "Production"
+          images: "portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}/img-product-srv:${{ github.sha }}"
