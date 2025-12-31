@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - main
+    paths:
+      - ".github/workflows/main_as-product-srv.yml"
+      - "apps/backend/banking-service-api/**"
+
   workflow_dispatch:
 
 jobs:

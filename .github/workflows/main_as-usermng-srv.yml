@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - ".github/workflows/main_as-usermng-srv.yml"
+      - "apps/backend/usermng-service/**"
   workflow_dispatch:
 
 jobs:
@@ -31,10 +34,10 @@ jobs:
       - name: Build and push container image to registry
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./apps/backend/usermng-service
           push: true
           tags: portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_08FC317EC62645F497057DB7F8FA497D }}/img-usermng:${{ github.sha }}
-          file: ./Dockerfile
+          file: ./apps/backend/usermng-service/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,9 +46,8 @@ jobs:
       contents: read #This is required for actions/checkout
 
     needs: build
-    
+
     steps:
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -57,7 +59,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'as-usermng-srv'
-          slot-name: 'Production'
-          images: 'portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_08FC317EC62645F497057DB7F8FA497D }}/img-usermng:${{ github.sha }}'
-          
+          app-name: "as-usermng-srv"
+          slot-name: "Production"
+          images: "portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_08FC317EC62645F497057DB7F8FA497D }}/img-usermng:${{ github.sha }}"
