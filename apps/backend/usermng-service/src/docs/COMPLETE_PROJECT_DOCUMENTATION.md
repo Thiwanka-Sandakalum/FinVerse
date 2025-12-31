@@ -589,7 +589,7 @@ const domain = process.env.AUTH0_DOMAIN;
 
 **After:**
 ```typescript
-import { config } from '../config/env';
+
 const domain = config.AUTH0_DOMAIN;
 ```
 
@@ -746,7 +746,7 @@ export async function getOrganizationSettings(id: string) {
 
 ```typescript
 // Configuration
-import { config } from '../config/env';
+
 
 // Models
 import * as OrganizationModel from '../models/organization.model';

@@ -5,7 +5,6 @@
 
 import * as UserModel from '../models/user.model';
 import * as UserValidation from '../validations/user.validation';
-import { config } from '../config/env';
 import {
     Auth0User,
     EnhancedUser,

@@ -3,7 +3,7 @@
  * Contains all validation logic for invitation operations
  */
 
-import { config } from '../config/env';
+
 import { CreateInvitationPayload } from '../types/invitation.types';
 
 /**
@@ -52,7 +52,7 @@ export function validateInvitationCreate(payload: CreateInvitationPayload): Crea
     }
 
     // Always set client_id from environment config
-    const clientId = config.INVITATION_CLIENT_ID;
+    const clientId = process.env.INVITATION_CLIENT_ID;
 
     return {
         ...payload,

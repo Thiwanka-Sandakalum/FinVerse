@@ -38,6 +38,7 @@ export async function getManagementClient(): Promise<ManagementClient> {
  */
 async function fetchNewToken(): Promise<TokenCache> {
     try {
+        console.log('Fetching new Auth0 access token...', process.env.AUTH0_DOMAIN, process.env.AUTH0_CLIENT_ID, process.env.AUTH0_CLIENT_SECRET, process.env.AUTH0_AUDIENCE);
         const url = `${process.env.AUTH0_DOMAIN}/oauth/token`;
         const response = await fetch(url, {
             method: 'POST',

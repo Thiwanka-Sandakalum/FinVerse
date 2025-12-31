@@ -3,7 +3,7 @@
  * Handles all Auth0 API interactions for organization members
  */
 
-import { config } from '../config/env';
+
 import { getAuth0AccessToken } from '../utils/auth0';
 import {
     OrganizationMember,
@@ -40,7 +40,7 @@ export async function getOrganizationMembers(
     if (!orgId) throw new Error('Organization ID is required');
 
     const token = await getAuth0AccessToken();
-    const url = new URL(`${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members`);
+    const url = new URL(`${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members`);
 
     const page = params.page || 0;
     const limit = params.per_page || 25;
@@ -88,7 +88,7 @@ export async function deleteOrganizationMembers(orgId: string, members: string[]
     if (!Array.isArray(members) || members.length === 0) throw new Error('Members array is required');
 
     const token = await getAuth0AccessToken();
-    const url = `${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members`;
+    const url = `${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members`;
 
     const response = await fetch(url, {
         method: 'DELETE',
@@ -123,7 +123,7 @@ export async function getOrganizationMemberRoles(
     if (!userId) throw new Error('User ID is required');
 
     const token = await getAuth0AccessToken();
-    const url = new URL(`${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}/roles`);
+    const url = new URL(`${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}/roles`);
 
     const page = params.page || 0;
     const limit = params.per_page || 25;
@@ -176,7 +176,7 @@ export async function assignOrganizationMemberRoles(
     if (!Array.isArray(roles) || roles.length === 0) throw new Error('Roles array is required');
 
     const token = await getAuth0AccessToken();
-    const url = `${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}/roles`;
+    const url = `${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}/roles`;
 
     const response = await fetch(url, {
         method: 'POST',

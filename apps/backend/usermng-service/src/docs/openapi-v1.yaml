@@ -511,6 +511,79 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServerError"
 
+  /orgs/onboard:
+    post:
+      tags: [Organizations]
+      summary: Organization onboarding (orchestrated)
+      description: |
+        Orchestrates organization onboarding: creates org, adds user as member, assigns org_admin role, assigns global user role, and updates user metadata. Replaces Auth0 Actions onboarding.
+      operationId: onboardOrganization
+      security:
+        - bearerAuth: [admin:manage, org:write, user:write]
+      parameters:
+        - $ref: "#/components/parameters/RequestIdHeader"
+        - name: userId
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Auth0 user ID of the onboarding user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [companyName]
+              properties:
+                companyName:
+                  type: string
+                  description: Name of the company/organization
+                metadata:
+                  type: object
+                  description: Optional organization metadata
+            example:
+              companyName: "Acme Corp"
+              metadata:
+                industryType: "Bank"
+                country: "US"
+                contactEmail: "contact@acme.com"
+                contactPhone: "+1-800-555-1234"
+                website: "https://acmecorp.com"
+                headquarters_address: "123 Main St, New York, NY, USA"
+                created_by: "auth0|abc123"
+                created_at: "2025-12-31T12:00:00.000Z"
+                description: "Acme Corp is a leading provider of banking solutions in the US."
+                employees: 1200
+                registration_number: "US-123456789"
+      responses:
+        "200":
+          description: Onboarding completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  orgId:
+                    type: string
+                  userId:
+                    type: string
+              example:
+                success: true
+                orgId: "org_abc123"
+                userId: "auth0|123"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
   /orgs/{orgId}:
     parameters:
       - $ref: "#/components/parameters/OrgIdPath"
