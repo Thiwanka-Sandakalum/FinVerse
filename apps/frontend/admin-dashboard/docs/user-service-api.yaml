@@ -1,0 +1,1100 @@
+openapi: 3.0.1
+info:
+  title: FinVerse User Management Service API
+  version: "1.0.0"
+  description: |
+    REST API for managing organizations, members, roles, invitations, and users in the FinVerse platform.
+
+    **Authentication:** Auth0 JWT (RS256) bearer tokens required for all endpoints.
+
+    **Response Format:** All responses follow a standardized envelope structure with:
+    - `success` (boolean) - Indicates if the operation succeeded
+    - `message` (string) - Human-readable description of the result
+    - `data` (object/array) - Response payload (on success)
+    - `error` (object) - Error details (on failure)
+    - `meta` (object) - Metadata including timestamp and requestId for tracing
+
+    **Request Tracing:** Each request can include an `X-Request-ID` header for distributed tracing.
+    If not provided, the server generates a unique ID included in the response metadata.
+
+    **Pagination:** List endpoints return paginated data with page, limit, and total count.
+
+    **Error Handling:** Errors include descriptive messages, error codes, and optional field-level details.
+
+  contact:
+    name: FinVerse API Support
+    email: api-support@finverse.example.com
+    url: https://docs.finverse.example.com
+
+  license:
+    name: Proprietary
+    url: https://finverse.example.com/license
+
+servers:
+  - url: https://api.finverse.example.com/api/v1
+    description: Production server
+  - url: https://staging-api.finverse.example.com/api/v1
+    description: Staging server
+  - url: http://localhost:3001/api/v1
+    description: Local development
+
+tags:
+  - name: Organizations
+    description: |
+      Organization lifecycle management including creation, updates, deletion, and configuration.
+      Organizations represent financial institutions (banks, insurance companies, fintechs, etc.).
+  - name: Members
+    description: |
+      Organization membership management including adding/removing members and role assignments.
+      Controls user access and permissions within organizations.
+  - name: Invitations
+    description: |
+      User invitation workflows for onboarding new members to organizations.
+      Handles invitation creation, listing, and deletion.
+  - name: Users
+    description: |
+      User profile management and cross-organization user operations.
+      Includes user retrieval, updates, and deletion.
+  - name: Roles
+    description: |
+      Role and permission management for access control within organizations.
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Auth0-issued access token (RS256 algorithm).
+
+        **Required Header:** `Authorization: Bearer <token>`
+
+        **Example Scopes:**
+        - `admin:manage` - Super admin operations
+        - `org:read` - Read organization data
+        - `org:write` - Create/update organizations
+        - `user:read` - Read user data
+        - `user:write` - Update user data
+        - `invite:manage` - Create/manage invitations
+        - `member:manage` - Manage organization members
+
+  parameters:
+    RequestIdHeader:
+      name: X-Request-ID
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Optional request ID for distributed tracing
+
+    OrgIdPath:
+      name: orgId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Organization identifier
+
+    UserIdPath:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: User identifier (Auth0 user ID)
+
+    InvitationIdPath:
+      name: invitationId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Invitation identifier
+
+    PageQuery:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Page number (0-indexed)
+
+    LimitQuery:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+      description: Items per page
+
+  schemas:
+    # Response Envelopes
+    ApiSuccessResponse:
+      type: object
+      required: [success, message, data, meta]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        message:
+          type: string
+        data:
+          description: Response payload
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    ApiErrorResponse:
+      type: object
+      required: [success, message, error, meta]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        message:
+          type: string
+        error:
+          type: object
+          required: [code]
+          properties:
+            code:
+              type: string
+              enum:
+                - VALIDATION_ERROR
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - NOT_FOUND
+                - CONFLICT
+                - INTERNAL_SERVER_ERROR
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    ResponseMeta:
+      type: object
+      required: [timestamp]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    PaginatedData:
+      type: object
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {}
+        pagination:
+          type: object
+          required: [page, limit, total]
+          properties:
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+
+    # Domain Entities
+    Organization:
+      type: object
+      required: [id, name, display_name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        display_name:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/OrganizationMetadata"
+
+    OrganizationMetadata:
+      type: object
+      properties:
+        industryType:
+          type: string
+          enum:
+            [
+              Bank,
+              Insurance,
+              Fintech,
+              CreditUnion,
+              InvestmentFirm,
+              PaymentProvider,
+              Microfinance,
+              Other,
+            ]
+        country:
+          type: string
+        contactEmail:
+          type: string
+          format: email
+        contactPhone:
+          type: string
+        website:
+          type: string
+          format: uri
+
+    User:
+      type: object
+      required: [user_id, email]
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        picture:
+          type: string
+          format: uri
+
+    OrganizationInvitation:
+      type: object
+      required: [id, organization_id, invitee]
+      properties:
+        id:
+          type: string
+        organization_id:
+          type: string
+        inviter:
+          type: object
+          properties:
+            name:
+              type: string
+        invitee:
+          type: object
+          required: [email]
+          properties:
+            email:
+              type: string
+              format: email
+        invitation_url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+
+    Role:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+
+    Member:
+      type: object
+      required: [user_id, email, name]
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        picture:
+          type: string
+          format: uri
+
+  responses:
+    BadRequest:
+      description: Bad request - validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+          example:
+            success: false
+            message: "Validation failed"
+            error:
+              code: "VALIDATION_ERROR"
+              details:
+                - field: "name"
+                  message: "Name is required"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "abc123"
+
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+          example:
+            success: false
+            message: "Missing or invalid access token"
+            error:
+              code: "UNAUTHORIZED"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "abc123"
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+          example:
+            success: false
+            message: "Insufficient permissions for this operation"
+            error:
+              code: "FORBIDDEN"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "abc123"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+          example:
+            success: false
+            message: "Resource not found"
+            error:
+              code: "NOT_FOUND"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "abc123"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+          example:
+            success: false
+            message: "An unexpected error occurred"
+            error:
+              code: "INTERNAL_SERVER_ERROR"
+            meta:
+              timestamp: "2024-12-17T10:30:00.000Z"
+              requestId: "abc123"
+
+paths:
+  /orgs:
+    post:
+      tags: [Organizations]
+      summary: Create organization
+      description: Create a new financial institution organization (requires super_admin role)
+      operationId: createOrganization
+      security:
+        - bearerAuth: [admin:manage, org:write]
+      parameters:
+        - $ref: "#/components/parameters/RequestIdHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, metadata]
+              properties:
+                name:
+                  type: string
+                display_name:
+                  type: string
+                metadata:
+                  $ref: "#/components/schemas/OrganizationMetadata"
+            example:
+              name: "acme-corp"
+              display_name: "Acme Corporation"
+              metadata:
+                industryType: "Bank"
+                country: "US"
+                contactEmail: "contact@acme.com"
+      responses:
+        "201":
+          description: Organization created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Organization created successfully"
+                data:
+                  id: "org_abc123"
+                  name: "acme-corp"
+                  display_name: "Acme Corporation"
+                  metadata:
+                    industryType: "Bank"
+                    country: "US"
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    get:
+      tags: [Organizations]
+      summary: List organizations
+      description: Get paginated list of all organizations (requires super_admin role)
+      operationId: listOrganizations
+      security:
+        - bearerAuth: [admin:manage, org:read]
+      parameters:
+        - $ref: "#/components/parameters/RequestIdHeader"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/LimitQuery"
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Search term
+      responses:
+        "200":
+          description: Organizations retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Organizations retrieved successfully"
+                data:
+                  items:
+                    - id: "org_abc123"
+                      name: "acme-corp"
+                      display_name: "Acme Corporation"
+                  pagination:
+                    page: 0
+                    limit: 50
+                    total: 1
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /orgs/onboard:
+    post:
+      tags: [Organizations]
+      summary: Organization onboarding (orchestrated)
+      description: |
+        Orchestrates organization onboarding: creates org, adds user as member, assigns org_admin role, assigns global user role, and updates user metadata. Replaces Auth0 Actions onboarding.
+      operationId: onboardOrganization
+      security:
+        - bearerAuth: [admin:manage, org:write, user:write]
+      parameters:
+        - $ref: "#/components/parameters/RequestIdHeader"
+        - name: userId
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Auth0 user ID of the onboarding user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [companyName]
+              properties:
+                companyName:
+                  type: string
+                  description: Name of the company/organization
+                metadata:
+                  type: object
+                  description: Optional organization metadata
+            example:
+              companyName: "Acme Corp"
+              metadata:
+                industryType: "Bank"
+                country: "US"
+                contactEmail: "contact@acme.com"
+                contactPhone: "+1-800-555-1234"
+                website: "https://acmecorp.com"
+                headquarters_address: "123 Main St, New York, NY, USA"
+                created_by: "auth0|abc123"
+                created_at: "2025-12-31T12:00:00.000Z"
+                description: "Acme Corp is a leading provider of banking solutions in the US."
+                employees: 1200
+                registration_number: "US-123456789"
+      responses:
+        "200":
+          description: Onboarding completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  orgId:
+                    type: string
+                  userId:
+                    type: string
+              example:
+                success: true
+                orgId: "org_abc123"
+                userId: "auth0|123"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /orgs/{orgId}:
+    parameters:
+      - $ref: "#/components/parameters/OrgIdPath"
+      - $ref: "#/components/parameters/RequestIdHeader"
+
+    get:
+      tags: [Organizations]
+      summary: Get organization
+      description: Retrieve organization details by ID
+      operationId: getOrganization
+      security:
+        - bearerAuth: [org:read]
+      responses:
+        "200":
+          description: Organization retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Organization retrieved successfully"
+                data:
+                  id: "org_abc123"
+                  name: "acme-corp"
+                  display_name: "Acme Corporation"
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      tags: [Organizations]
+      summary: Update organization
+      description: Update organization details (requires org_admin role)
+      operationId: updateOrganization
+      security:
+        - bearerAuth: [org:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name:
+                  type: string
+                metadata:
+                  type: object
+            example:
+              display_name: "Acme Corp International"
+              metadata:
+                region: "EMEA"
+      responses:
+        "200":
+          description: Organization updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Organization updated successfully"
+                data:
+                  id: "org_abc123"
+                  name: "acme-corp"
+                  display_name: "Acme Corp International"
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      tags: [Organizations]
+      summary: Delete organization
+      description: Delete an organization (requires super_admin role)
+      operationId: deleteOrganization
+      security:
+        - bearerAuth: [admin:manage, org:write]
+      responses:
+        "200":
+          description: Organization deleted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Organization deleted successfully"
+                data: null
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /orgs/{orgId}/invitations:
+    parameters:
+      - $ref: "#/components/parameters/OrgIdPath"
+      - $ref: "#/components/parameters/RequestIdHeader"
+
+    post:
+      tags: [Invitations]
+      summary: Create invitation
+      description: Invite new user to organization via email
+      operationId: createOrganizationInvitation
+      security:
+        - bearerAuth: [invite:manage]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [inviter, invitee, roles]
+              properties:
+                inviter:
+                  type: object
+                  required: [name]
+                  properties:
+                    name:
+                      type: string
+                invitee:
+                  type: object
+                  required: [email]
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                roles:
+                  type: array
+                  items:
+                    type: string
+            example:
+              inviter:
+                name: "Admin User"
+              invitee:
+                email: "newuser@example.com"
+              roles: ["rol_member"]
+      responses:
+        "201":
+          description: Invitation created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Organization invitation created successfully"
+                data:
+                  id: "inv_xyz789"
+                  organization_id: "org_abc123"
+                  invitee:
+                    email: "newuser@example.com"
+                  invitation_url: "https://finverse.com/accept-invite?id=inv_xyz789"
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    get:
+      tags: [Invitations]
+      summary: List invitations
+      description: Get paginated list of pending invitations for organization
+      operationId: listOrganizationInvitations
+      security:
+        - bearerAuth: [invite:manage]
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/LimitQuery"
+      responses:
+        "200":
+          description: Invitations retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Organization invitations retrieved successfully"
+                data:
+                  items:
+                    - id: "inv_xyz789"
+                      organization_id: "org_abc123"
+                      invitee:
+                        email: "newuser@example.com"
+                  pagination:
+                    page: 0
+                    limit: 50
+                    total: 1
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /orgs/{orgId}/invitations/{invitationId}:
+    parameters:
+      - $ref: "#/components/parameters/OrgIdPath"
+      - $ref: "#/components/parameters/InvitationIdPath"
+      - $ref: "#/components/parameters/RequestIdHeader"
+
+    delete:
+      tags: [Invitations]
+      summary: Delete invitation
+      description: Delete a pending invitation
+      operationId: deleteOrganizationInvitation
+      security:
+        - bearerAuth: [invite:manage]
+      responses:
+        "200":
+          description: Invitation deleted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Organization invitation deleted successfully"
+                data: null
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /orgs/{orgId}/members:
+    parameters:
+      - $ref: "#/components/parameters/OrgIdPath"
+      - $ref: "#/components/parameters/RequestIdHeader"
+    get:
+      tags: [Members]
+      summary: List organization members
+      description: Get all members of an organization
+      operationId: getOrganizationMembers
+      responses:
+        "200":
+          description: Members retrieved successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags: [Members]
+      summary: Remove organization members
+      description: Remove members from an organization
+      operationId: deleteOrganizationMembers
+      responses:
+        "200":
+          description: Members removed successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /orgs/{orgId}/members/{userId}/roles:
+    parameters:
+      - $ref: "#/components/parameters/OrgIdPath"
+      - $ref: "#/components/parameters/UserIdPath"
+      - $ref: "#/components/parameters/RequestIdHeader"
+    get:
+      tags: [Members]
+      summary: Get organization member roles
+      operationId: getOrganizationMemberRoles
+      responses:
+        "200":
+          description: List of roles for the member
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+        "404":
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+    post:
+      tags: [Members]
+      summary: Assign organization member roles
+      operationId: assignOrganizationMemberRoles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roles:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Roles assigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSuccessResponse"
+        "404":
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List users
+      description: Get paginated list of all users (requires super_admin role)
+      operationId: listUsers
+      security:
+        - bearerAuth: [user:read]
+      parameters:
+        - $ref: "#/components/parameters/RequestIdHeader"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/LimitQuery"
+      responses:
+        "200":
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Users retrieved successfully"
+                data:
+                  items:
+                    - user_id: "auth0|123"
+                      email: "user@example.com"
+                      name: "John Doe"
+                  pagination:
+                    page: 0
+                    limit: 50
+                    total: 1
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: User identifier (Auth0 user ID)
+      - $ref: "#/components/parameters/RequestIdHeader"
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      operationId: getUserById
+      security:
+        - bearerAuth: [user:read]
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+    put:
+      tags: [Users]
+      summary: Update user
+      operationId: updateUser
+      security:
+        - bearerAuth: [user:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+    delete:
+      tags: [Users]
+      summary: Delete user
+      operationId: deleteUser
+      security:
+        - bearerAuth: [user:write]
+      responses:
+        "200":
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSuccessResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /roles:
+    get:
+      tags: [Roles]
+      summary: List roles
+      description: Get list of all available roles
+      operationId: listRoles
+      security:
+        - bearerAuth: [admin:manage]
+      parameters:
+        - $ref: "#/components/parameters/RequestIdHeader"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/LimitQuery"
+      responses:
+        "200":
+          description: Roles retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccessResponse"
+              example:
+                success: true
+                message: "Roles retrieved successfully"
+                data:
+                  - id: "rol_abc123"
+                    name: "Organization Admin"
+                    description: "Full access to organization"
+                  - id: "rol_xyz789"
+                    name: "Member"
+                    description: "Basic member access"
+                meta:
+                  timestamp: "2024-12-17T10:30:00.000Z"
+                  requestId: "abc123"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"

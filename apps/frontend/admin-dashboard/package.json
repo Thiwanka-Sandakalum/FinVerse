@@ -1,0 +1,33 @@
+{
+  "name": "finverse-admin-dashboard",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "type-gen": "openapi --input ./docs/banking-service-api.yaml --output ./src/api/products  --client axios && openapi --input ./docs/user-service-api.yaml --output ./src/api/users  --client axios"
+  },
+  "dependencies": {
+    "@auth0/auth0-react": "^2.11.0",
+    "@google/genai": "^1.33.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "axios": "^1.13.2",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.561.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-hook-form": "^7.69.0",
+    "react-router-dom": "^7.11.0",
+    "recharts": "^3.6.0",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "openapi-typescript-codegen": "^0.30.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

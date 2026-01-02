@@ -1,0 +1,287 @@
+import { User, Organization, Product, UserRole, Status, ChartDataPoint, OrganizationActivity, UserActivity } from '../types/common.types';
+import { LayoutDashboard, Building2, Users, CreditCard, BarChart2, Settings } from 'lucide-react';
+
+export const NAV_ITEMS = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+  { id: 'organizations', label: 'Organizations', icon: Building2, path: '/organizations' },
+  { id: 'users', label: 'Users', icon: Users, path: '/users' },
+  { id: 'products', label: 'Products', icon: CreditCard, path: '/products' },
+  { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
+];
+
+export const MOCK_USERS: User[] = [
+  {
+    id: '1',
+    name: 'Nidula Gunaratne',
+    email: 'nidula@finverse.com',
+    phone: '+1 (555) 123-4567',
+    role: UserRole.SUPER_ADMIN,
+    organization: 'Finverse HQ',
+    orgMemberships: [{ orgId: '0', orgName: 'Finverse HQ', role: UserRole.SUPER_ADMIN, joinedDate: '2023-01-01' }],
+    status: Status.ACTIVE,
+    lastLogin: '2 mins ago',
+    mfaEnabled: true,
+    authProvider: 'Auth0',
+    auth0Id: 'auth0|5f7d8e9c',
+    createdDate: '2023-01-01',
+    avatar: 'NG'
+  },
+  {
+    id: '2',
+    name: 'Sarah Jenkins',
+    email: 'sarah@apexbank.com',
+    phone: '+1 (555) 987-6543',
+    role: UserRole.ORG_ADMIN,
+    organization: 'Apex Bank',
+    orgMemberships: [{ orgId: '1', orgName: 'Apex Bank', role: UserRole.ORG_ADMIN, joinedDate: '2023-02-15' }],
+    status: Status.ACTIVE,
+    lastLogin: '1 hour ago',
+    mfaEnabled: true,
+    authProvider: 'Auth0',
+    auth0Id: 'auth0|9a8b7c6d',
+    createdDate: '2023-02-15',
+    invitedBy: 'Nidula Gunaratne',
+    avatar: 'SJ'
+  },
+  {
+    id: '3',
+    name: 'Michael Chen',
+    email: 'michael@cityfinance.com',
+    role: UserRole.VIEWER,
+    organization: 'City Finance',
+    orgMemberships: [{ orgId: '2', orgName: 'City Finance', role: UserRole.VIEWER, joinedDate: '2023-05-10' }],
+    status: Status.LOCKED,
+    lastLogin: '2 days ago',
+    mfaEnabled: false,
+    authProvider: 'Google',
+    auth0Id: 'google-oauth2|123456',
+    createdDate: '2023-05-10',
+    invitedBy: 'Sarah Jenkins',
+    avatar: 'MC'
+  },
+  {
+    id: '4',
+    name: 'Emma Wilson',
+    email: 'emma@finverse.com',
+    role: UserRole.MANAGER,
+    organization: 'Finverse HQ',
+    orgMemberships: [{ orgId: '0', orgName: 'Finverse HQ', role: UserRole.MANAGER, joinedDate: '2024-01-20' }],
+    status: Status.INVITED,
+    lastLogin: 'Never',
+    mfaEnabled: false,
+    authProvider: 'Auth0',
+    auth0Id: '',
+    createdDate: '2024-01-20',
+    invitedBy: 'Nidula Gunaratne',
+    avatar: 'EW'
+  },
+  {
+    id: '5',
+    name: 'David Miller',
+    email: 'david@trustcorp.com',
+    phone: '+44 20 7123 4567',
+    role: UserRole.ORG_ADMIN,
+    organization: 'TrustCorp',
+    orgMemberships: [{ orgId: '3', orgName: 'TrustCorp', role: UserRole.ORG_ADMIN, joinedDate: '2023-11-05' }],
+    status: Status.ACTIVE,
+    lastLogin: '5 hours ago',
+    mfaEnabled: true,
+    authProvider: 'Microsoft',
+    auth0Id: 'waad|david@trustcorp.com',
+    createdDate: '2023-11-05',
+    invitedBy: 'Nidula Gunaratne',
+    avatar: 'DM'
+  },
+];
+
+export const MOCK_USER_ACTIVITIES: UserActivity[] = [
+  { id: '1', userId: '1', action: 'Login Success', timestamp: '2025-05-20 09:15 AM', ip: '192.168.1.1', details: 'Logged in via Auth0' },
+  { id: '2', userId: '1', action: 'Update User', timestamp: '2025-05-19 02:30 PM', ip: '192.168.1.1', details: 'Changed role for Michael Chen' },
+  { id: '3', userId: '1', action: 'Create Org', timestamp: '2025-05-18 11:00 AM', ip: '192.168.1.1', details: 'Created organization "QuickLoans Ltd"' },
+  { id: '4', userId: '2', action: 'Login Failed', timestamp: '2025-05-20 08:00 AM', ip: '10.0.0.5', details: 'Invalid password attempt' },
+];
+
+export const MOCK_ORGS: Organization[] = [
+  {
+    id: '1',
+    name: 'Apex Bank',
+    type: 'Bank',
+    branches: 42,
+    status: Status.ACTIVE,
+    createdDate: '2023-01-15',
+    registrationNumber: 'REG-US-8821',
+    country: 'United States',
+    city: 'New York',
+    address: '10 Wall Street, NY',
+    contactEmail: 'contact@apexbank.com',
+    contactPhone: '+1 212 555 0199',
+    activeProducts: 12,
+    branding: { primaryColor: '#0f172a', secondaryColor: '#3b82f6', darkTheme: false },
+    capabilities: { productTypes: ['Loan', 'Card', 'Account'], maxProducts: 50, apiAccess: true, sandboxMode: true }
+  },
+  {
+    id: '2',
+    name: 'City Finance',
+    type: 'Microfinance',
+    branches: 12,
+    status: Status.ACTIVE,
+    createdDate: '2023-03-22',
+    registrationNumber: 'REG-UK-9921',
+    country: 'United Kingdom',
+    city: 'London',
+    address: '45 Canary Wharf',
+    contactEmail: 'info@cityfinance.co.uk',
+    contactPhone: '+44 20 7946 0958',
+    activeProducts: 4,
+    branding: { primaryColor: '#dc2626', secondaryColor: '#fca5a5', darkTheme: false },
+    capabilities: { productTypes: ['Loan'], maxProducts: 10, apiAccess: false, sandboxMode: false }
+  },
+  {
+    id: '3',
+    name: 'TrustCorp',
+    type: 'Fintech',
+    branches: 1,
+    status: Status.PENDING,
+    createdDate: '2023-11-05',
+    registrationNumber: 'REG-SG-1123',
+    country: 'Singapore',
+    city: 'Singapore',
+    address: '8 Marina Boulevard',
+    contactEmail: 'admin@trustcorp.sg',
+    contactPhone: '+65 6555 0123',
+    activeProducts: 1,
+    branding: { primaryColor: '#16a34a', secondaryColor: '#86efac', darkTheme: true },
+    capabilities: { productTypes: ['Account', 'Investment'], maxProducts: 100, apiAccess: true, sandboxMode: true }
+  },
+  {
+    id: '4',
+    name: 'Global Savings',
+    type: 'Bank',
+    branches: 156,
+    status: Status.ACTIVE,
+    createdDate: '2022-08-10',
+    registrationNumber: 'REG-CA-5512',
+    country: 'Canada',
+    city: 'Toronto',
+    address: '100 King St W',
+    contactEmail: 'support@globalsavings.ca',
+    contactPhone: '+1 416 555 0188',
+    activeProducts: 24,
+    branding: { primaryColor: '#2563eb', secondaryColor: '#93c5fd', darkTheme: false },
+    capabilities: { productTypes: ['Loan', 'Card', 'Account', 'Lease'], maxProducts: 200, apiAccess: true, sandboxMode: false }
+  },
+  {
+    id: '5',
+    name: 'QuickLoans Ltd',
+    type: 'Microfinance',
+    branches: 5,
+    status: Status.INACTIVE,
+    createdDate: '2024-01-02',
+    registrationNumber: 'REG-AU-3321',
+    country: 'Australia',
+    city: 'Sydney',
+    address: '200 George St',
+    contactEmail: 'hello@quickloans.com.au',
+    contactPhone: '+61 2 5550 1234',
+    activeProducts: 0,
+    branding: { primaryColor: '#d97706', secondaryColor: '#fcd34d', darkTheme: false },
+    capabilities: { productTypes: ['Loan'], maxProducts: 5, apiAccess: false, sandboxMode: true }
+  },
+];
+
+export const MOCK_PRODUCTS: Product[] = [
+  {
+    id: '1',
+    name: 'Personal Loan Classic',
+    code: 'PL-001',
+    type: 'Loan',
+    description: 'Standard unsecured personal loan for salaried individuals.',
+    status: Status.ACTIVE,
+    version: 1,
+    createdDate: '2024-01-10',
+    financialRules: { minAmount: 1000, maxAmount: 50000, interestRate: 12.5, interestType: 'Reducing', repaymentPeriodMin: 6, repaymentPeriodMax: 60, processingFee: 1.5 },
+    eligibility: { minAge: 21, maxAge: 60, minIncome: 25000, employmentTypes: ['Salaried'], documents: ['ID', 'Payslip'] },
+    assignedOrgs: [{ orgId: '1', orgName: 'Apex Bank', isAvailable: true }],
+    compliance: { regulatoryCategory: 'Consumer Credit', riskRating: 'Medium', countries: ['United States'], autoApproval: true }
+  },
+  {
+    id: '2',
+    name: 'Platinum Credit Card',
+    code: 'CC-PLAT',
+    type: 'Card',
+    description: 'Premium credit card with travel rewards.',
+    status: Status.ACTIVE,
+    version: 2,
+    createdDate: '2024-02-15',
+    financialRules: { creditLimit: 20000, annualFee: 150, interestRate: 18.0, lateFee: 35 },
+    eligibility: { minAge: 25, maxAge: 65, minIncome: 60000, creditScoreRange: [700, 850] },
+    assignedOrgs: [{ orgId: '1', orgName: 'Apex Bank', isAvailable: true }],
+    compliance: { regulatoryCategory: 'Revolving Credit', riskRating: 'Medium', countries: ['United States'], autoApproval: false }
+  },
+  {
+    id: '3',
+    name: 'SME Starter Lease',
+    code: 'LE-SME-01',
+    type: 'Lease',
+    description: 'Equipment leasing for small businesses.',
+    status: Status.ACTIVE,
+    version: 1,
+    createdDate: '2024-03-01',
+    financialRules: { minAmount: 5000, maxAmount: 200000, interestRate: 9.0, repaymentPeriodMin: 12, repaymentPeriodMax: 48 },
+    eligibility: { documents: ['Business Registration', 'Bank Statements'] },
+    assignedOrgs: [{ orgId: '2', orgName: 'City Finance', isAvailable: true }],
+    compliance: { regulatoryCategory: 'Commercial Leasing', riskRating: 'Low', countries: ['United Kingdom'], autoApproval: false }
+  },
+  {
+    id: '4',
+    name: 'High Yield Savings',
+    code: 'SAV-HY-01',
+    type: 'Account',
+    description: 'Online savings account with competitive interest.',
+    status: Status.PENDING,
+    version: 1,
+    createdDate: '2024-04-10',
+    financialRules: { minBalance: 500, interestRate: 4.5, interestType: 'Compound', maintenanceFee: 0 },
+    eligibility: { minAge: 18, documents: ['ID', 'Proof of Address'] },
+    assignedOrgs: [{ orgId: '3', orgName: 'TrustCorp', isAvailable: true }],
+    compliance: { regulatoryCategory: 'Deposit Account', riskRating: 'Low', countries: ['Singapore'], autoApproval: true }
+  },
+  {
+    id: '5',
+    name: 'Auto Loan 2024',
+    code: 'AL-24',
+    type: 'Loan',
+    description: 'Vehicle financing for new and used cars.',
+    status: Status.DRAFT,
+    version: 0,
+    createdDate: '2024-05-05',
+    financialRules: { minAmount: 5000, maxAmount: 75000, interestRate: 7.5, interestType: 'Flat', repaymentPeriodMin: 12, repaymentPeriodMax: 84 },
+    eligibility: { minAge: 21, minIncome: 30000 },
+    assignedOrgs: [],
+    compliance: { regulatoryCategory: 'Secured Loan', riskRating: 'Low', countries: ['Canada'], autoApproval: true }
+  },
+];
+
+export const MOCK_ACTIVITIES: OrganizationActivity[] = [
+  { id: '1', orgId: '1', action: 'Update', performedBy: 'Nidula G.', timestamp: '2025-05-12 10:30 AM', details: 'Updated branding colors' },
+  { id: '2', orgId: '1', action: 'Create Product', performedBy: 'Sarah Jenkins', timestamp: '2025-05-11 02:15 PM', details: 'Added "Platinum Credit Card"' },
+  { id: '3', orgId: '1', action: 'User Added', performedBy: 'Nidula G.', timestamp: '2025-05-10 09:00 AM', details: 'Added John Doe as Manager' },
+  { id: '4', orgId: '1', action: 'Status Change', performedBy: 'System', timestamp: '2025-05-01 12:00 AM', details: 'Organization activated automatically' },
+];
+
+export const CHART_DATA_ACTIVITY: ChartDataPoint[] = [
+  { name: 'Mon', value: 4000, secondaryValue: 2400 },
+  { name: 'Tue', value: 3000, secondaryValue: 1398 },
+  { name: 'Wed', value: 2000, secondaryValue: 9800 },
+  { name: 'Thu', value: 2780, secondaryValue: 3908 },
+  { name: 'Fri', value: 1890, secondaryValue: 4800 },
+  { name: 'Sat', value: 2390, secondaryValue: 3800 },
+  { name: 'Sun', value: 3490, secondaryValue: 4300 },
+];
+
+export const CHART_DATA_PRODUCTS: ChartDataPoint[] = [
+  { name: 'Loans', value: 400 },
+  { name: 'Cards', value: 300 },
+  { name: 'Accounts', value: 300 },
+  { name: 'Leases', value: 200 },
+];
