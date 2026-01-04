@@ -4,19 +4,18 @@ name: Trigger auto deployment for ca-chatagent-srv
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
-      [ main ]
+    branches: [main]
     paths:
-    - '**'
-    - '.github/workflows/ca-chatagent-srv-AutoDeployTrigger-fd3ce555-6dfd-45ff-958c-c0e951575ff8.yml'
+      - "**"
+      - ".github/workflows/ca-chatagent-srv-AutoDeployTrigger-fd3ce555-6dfd-45ff-958c-c0e951575ff8.yml"
 
-  # Allow manual trigger 
-  workflow_dispatch:      
+  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       id-token: write #This is required for requesting the OIDC JWT Token
       contents: read #Required when GH token is used to authenticate with private repo
 
@@ -34,16 +33,11 @@ jobs:
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
         with:
-          appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
-          _targetLabelKey_: _targetLabel_
-          registryUrl: 
+          appSourcePath: ${{ github.workspace }}/apps/backend/chatbot-service
+          dockerfilePath: apps/backend/chatbot-service/Dockerfile
+          registryUrl: ${{ secrets.CACHATAGENTSRV_REGISTRY_URL }}
           registryUsername: ${{ secrets.CACHATAGENTSRV_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.CACHATAGENTSRV_REGISTRY_PASSWORD }}
           containerAppName: ca-chatagent-srv
           resourceGroup: rg-bankguru
-          imageToBuild: default/[parameters('containerAppName')]:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
-
-
+          imageToBuild: default/ca-chatagent-srv:${{ github.sha }}
