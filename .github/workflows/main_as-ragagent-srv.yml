@@ -67,9 +67,31 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0E2F37BB4D9F4DA6B9551A2397925EDD }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_38FBEAEF2AA94E058397DEABDCC6DEFC }}
 
+      - name: Get runner IP address
+        id: ip
+        run: echo "RUNNER_IP=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+
+      - name: Add GitHub Actions IP to App Service firewall
+        run: |
+          az webapp config access-restriction add \
+            --resource-group rg-bankguru \
+            --name as-ragagent-srv \
+            --rule-name "GitHub-Actions-${{ github.run_id }}" \
+            --action Allow \
+            --ip-address ${{ steps.ip.outputs.RUNNER_IP }}/32 \
+            --priority 100
+
       - name: "Deploy to Azure Web App"
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: "as-ragagent-srv"
           slot-name: "Production"
+
+      - name: Remove GitHub Actions IP from App Service firewall
+        if: always()
+        run: |
+          az webapp config access-restriction remove \
+            --resource-group rg-bankguru \
+            --name as-ragagent-srv \
+            --rule-name "GitHub-Actions-${{ github.run_id }}"
