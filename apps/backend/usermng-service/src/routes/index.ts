@@ -12,7 +12,7 @@ import roleRoutes from './role.routes';
 
 const router = Router();
 
-// Organization routes
+// Organization routes (includes onboarding)
 router.use('/orgs', organizationRoutes);
 
 // Member routes (nested under organizations)

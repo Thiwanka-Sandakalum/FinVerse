@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+    /* Font families */
+    --font-sans: 'Inter', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+
+    /* Brand colors */
+    --color-brand-50: #F2F6FA;
+    --color-brand-100: #E0E3EB;
+    --color-brand-200: #b4cce0;
+    --color-brand-300: #18A0FB;
+    --color-brand-400: #4dabf7;
+    --color-brand-500: #0D6EFD;
+    --color-brand-600: #0A1A3B;
+    --color-brand-700: #08152f;
+    --color-brand-800: #0A1A3B;
+    --color-brand-900: #050d1e;
+
+    /* Accent colors */
+    --color-accent-400: #34c5c1;
+    --color-accent-500: #16B2AE;
+    --color-accent-600: #128f8c;
+
+    /* Status colors */
+    --color-success: #28A745;
+    --color-warning: #FFB300;
+    --color-error: #DC3545;
+
+    /* Custom animations */
+    --animate-fade-in: fadeIn 1s ease-out forwards;
+    --animate-fade-in-up: fadeInUp 1s ease-out forwards;
+    --animate-bounce-slow: bounce 3s infinite;
+    --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

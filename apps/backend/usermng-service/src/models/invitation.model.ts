@@ -3,7 +3,7 @@
  * Handles all Auth0 API interactions for organization invitations
  */
 
-import { config } from '../config/env';
+
 import { getAuth0AccessToken } from '../utils/auth0';
 import {
     OrganizationInvitation,
@@ -22,7 +22,7 @@ export async function createOrganizationInvitation(
     if (!payload) throw new Error('Invitation payload is required');
 
     const token = await getAuth0AccessToken();
-    const url = `${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/invitations`;
+    const url = `${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/invitations`;
 
     const response = await fetch(url, {
         method: 'POST',
@@ -58,7 +58,7 @@ export async function getOrganizationInvitations(
     if (!orgId) throw new Error('Organization ID is required');
 
     const token = await getAuth0AccessToken();
-    const url = new URL(`${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/invitations`);
+    const url = new URL(`${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/invitations`);
 
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) url.searchParams.append(key, String(value));
@@ -90,7 +90,7 @@ export async function deleteOrganizationInvitation(
     if (!invitationId) throw new Error('Invitation ID is required');
 
     const token = await getAuth0AccessToken();
-    const url = `${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/invitations/${encodeURIComponent(invitationId)}`;
+    const url = `${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/invitations/${encodeURIComponent(invitationId)}`;
 
     const response = await fetch(url, {
         method: 'DELETE',

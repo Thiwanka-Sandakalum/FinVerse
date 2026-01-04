@@ -1,0 +1,536 @@
+openapi: 3.0.3
+info:
+  title: FinVerse Chatbot API
+  version: 1.0.0
+  description: |
+    FinVerse Chatbot API provides intelligent conversational capabilities for financial products.
+    The API includes general chat, product-specific chat, and product comparison features.
+  contact:
+    name: FinVerse Team
+    email: support@finverse.com
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://ca-chatagent-srv.agreeablesand-b0821b46.canadacentral.azurecontainerapps.io
+    description: Production server
+
+tags:
+  - name: Chat
+    description: General chat endpoints for financial product queries
+  - name: Product Chat
+    description: Product-specific conversational endpoints
+  - name: Product Comparison
+    description: Compare multiple financial products
+
+paths:
+  /:
+    get:
+      summary: Root endpoint
+      description: Serves the static HTML interface
+      responses:
+        "200":
+          description: HTML page served successfully
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /chat:
+    post:
+      tags:
+        - Chat
+      summary: General chat
+      description: |
+        Handle general chat messages about financial products. The system uses LLM to:
+        1. Analyze the user's message
+        2. Generate SQL queries to find relevant products
+        3. Fetch related products from the database
+        4. Generate intelligent responses with context
+      operationId: chat
+      parameters:
+        - name: x-user-id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the user
+          example: "user-12345"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+            examples:
+              savingsAccount:
+                summary: Query about savings accounts
+                value:
+                  sessionId: "session-abc123"
+                  message: "What are the best savings accounts with high interest rates?"
+              creditCard:
+                summary: Query about credit cards
+                value:
+                  sessionId: "session-xyz789"
+                  message: "Show me credit cards with no annual fee"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIResponse"
+              examples:
+                success:
+                  summary: Successful chat response
+                  value:
+                    success: true
+                    message: "OK"
+                    data:
+                      reply: "Based on your requirements, here are some excellent savings accounts with competitive interest rates..."
+                    meta:
+                      timestamp: "2026-01-04T12:30:00.000000"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /product-chat:
+    post:
+      tags:
+        - Product Chat
+      summary: Product-specific chat
+      description: |
+        Chat about a specific financial product. The system:
+        1. Fetches the product details by ID
+        2. Uses LLM with product-specific context
+        3. Generates accurate responses based on actual product information
+      operationId: productChat
+      parameters:
+        - name: x-user-id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the user
+          example: "user-12345"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductChatRequest"
+            examples:
+              productQuestion:
+                summary: Question about specific product
+                value:
+                  sessionId: "session-abc123"
+                  productId: "prod-savings-001"
+                  message: "What is the minimum balance requirement for this account?"
+              productFeatures:
+                summary: Query about product features
+                value:
+                  sessionId: "session-xyz789"
+                  productId: "prod-cc-premium-002"
+                  message: "Tell me about the rewards program"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIResponse"
+              examples:
+                success:
+                  summary: Successful product chat response
+                  value:
+                    success: true
+                    message: "OK"
+                    data:
+                      reply: "This savings account requires a minimum balance of $1,000 to avoid monthly fees..."
+                    meta:
+                      timestamp: "2026-01-04T12:30:00.000000"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /compare-products:
+    post:
+      tags:
+        - Product Comparison
+      summary: Compare products
+      description: |
+        Compare multiple financial products side-by-side. The system:
+        1. Fetches details for all specified products
+        2. Uses LLM to generate comprehensive comparison
+        3. Returns product details and AI-generated comparison summary
+      operationId: compareProducts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompareRequest"
+            examples:
+              savingsAccounts:
+                summary: Compare savings accounts
+                value:
+                  productIds:
+                    - "prod-savings-001"
+                    - "prod-savings-002"
+                    - "prod-savings-003"
+                  message: "Compare these savings accounts focusing on interest rates and fees"
+              creditCards:
+                summary: Compare credit cards
+                value:
+                  productIds:
+                    - "prod-cc-basic-001"
+                    - "prod-cc-premium-002"
+      responses:
+        "200":
+          description: Successful comparison
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComparisonResponse"
+              examples:
+                success:
+                  summary: Successful product comparison
+                  value:
+                    success: true
+                    message: "OK"
+                    data:
+                      products:
+                        - id: "prod-savings-001"
+                          name: "High Yield Savings Account"
+                          categoryId: "cat-savings"
+                          details:
+                            interestRate: "4.5%"
+                            minimumBalance: "$1000"
+                            monthlyFee: "$0"
+                          isFeatured: true
+                          isActive: true
+                          createdAt: "2025-01-01T00:00:00"
+                          updatedAt: "2025-12-01T00:00:00"
+                        - id: "prod-savings-002"
+                          name: "Premium Savings Plus"
+                          categoryId: "cat-savings"
+                          details:
+                            interestRate: "4.8%"
+                            minimumBalance: "$5000"
+                            monthlyFee: "$10"
+                          isFeatured: false
+                          isActive: true
+                          createdAt: "2025-02-01T00:00:00"
+                          updatedAt: "2025-12-15T00:00:00"
+                      summary: |
+                        ## Comparison Summary
+
+                        **Interest Rates:**
+                        - Premium Savings Plus offers the highest rate at 4.8%
+                        - High Yield Savings Account offers 4.5%
+
+                        **Fees & Minimums:**
+                        - High Yield Savings has no monthly fee with $1,000 minimum
+                        - Premium Savings Plus charges $10/month but requires $5,000 minimum
+
+                        **Recommendation:**
+                        For balances under $5,000, the High Yield Savings Account is better due to no monthly fee.
+                    meta:
+                      timestamp: "2026-01-04T12:30:00.000000"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: One or more products not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - sessionId
+        - message
+      properties:
+        sessionId:
+          type: string
+          description: Unique identifier for the chat session
+          example: "session-abc123"
+        message:
+          type: string
+          description: User's message or query
+          example: "What are the best credit cards for travel rewards?"
+          minLength: 1
+          maxLength: 2000
+
+    ProductChatRequest:
+      type: object
+      required:
+        - sessionId
+        - productId
+        - message
+      properties:
+        sessionId:
+          type: string
+          description: Unique identifier for the chat session
+          example: "session-abc123"
+        productId:
+          type: string
+          description: Unique identifier of the product to chat about
+          example: "prod-savings-001"
+        message:
+          type: string
+          description: User's question about the product
+          example: "What are the interest rates?"
+          minLength: 1
+          maxLength: 2000
+
+    CompareRequest:
+      type: object
+      required:
+        - productIds
+      properties:
+        productIds:
+          type: array
+          description: Array of product IDs to compare
+          items:
+            type: string
+          minItems: 2
+          maxItems: 5
+          example: ["prod-savings-001", "prod-savings-002", "prod-savings-003"]
+        message:
+          type: string
+          description: Optional custom comparison prompt
+          example: "Compare these products focusing on fees and interest rates"
+          default: "Compare these products"
+          maxLength: 500
+
+    ProductDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique product identifier
+          example: "prod-savings-001"
+        name:
+          type: string
+          description: Product name
+          example: "High Yield Savings Account"
+        categoryId:
+          type: string
+          description: Category identifier
+          example: "cat-savings"
+        details:
+          type: object
+          description: Flexible JSON object containing product-specific details
+          additionalProperties: true
+          example:
+            interestRate: "4.5%"
+            minimumBalance: "$1000"
+            monthlyFee: "$0"
+            atmAccess: true
+            onlineBanking: true
+        isFeatured:
+          type: boolean
+          description: Whether the product is featured
+          example: true
+        isActive:
+          type: boolean
+          description: Whether the product is currently active
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the product was created
+          example: "2025-01-01T00:00:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the product was last updated
+          example: "2025-12-01T00:00:00"
+
+    APIResponse:
+      type: object
+      required:
+        - success
+        - message
+        - data
+        - meta
+      properties:
+        success:
+          type: boolean
+          description: Whether the request was successful
+          example: true
+        message:
+          type: string
+          description: Response message
+          example: "OK"
+        data:
+          type: object
+          description: Response data (varies by endpoint)
+          properties:
+            reply:
+              type: string
+              description: AI-generated response
+              example: "Based on your query, here are the top recommendations..."
+        meta:
+          type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              description: ISO 8601 timestamp of the response
+              example: "2026-01-04T12:30:00.000000"
+
+    ComparisonResponse:
+      type: object
+      required:
+        - success
+        - message
+        - data
+        - meta
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "OK"
+        data:
+          type: object
+          required:
+            - products
+            - summary
+          properties:
+            products:
+              type: array
+              description: Array of product details being compared
+              items:
+                $ref: "#/components/schemas/ProductDetails"
+            summary:
+              type: string
+              description: AI-generated comparison summary
+              example: "Product A offers better interest rates while Product B has lower fees..."
+        meta:
+          type: object
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              example: "2026-01-04T12:30:00.000000"
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Error message
+          example: "An error occurred while processing your request"
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "INTERNAL_ERROR"
+            details:
+              type: string
+              example: "Database connection failed"
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            properties:
+              loc:
+                type: array
+                items:
+                  oneOf:
+                    - type: string
+                    - type: integer
+                description: Location of the validation error
+                example: ["body", "message"]
+              msg:
+                type: string
+                description: Error message
+                example: "field required"
+              type:
+                type: string
+                description: Error type
+                example: "value_error.missing"
+
+  securitySchemes:
+    UserIdHeader:
+      type: apiKey
+      in: header
+      name: x-user-id
+      description: User ID header required for chat and product-chat endpoints
+
+security:
+  - UserIdHeader: []

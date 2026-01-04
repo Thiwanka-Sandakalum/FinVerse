@@ -3,7 +3,7 @@
  * Handles all Auth0 API interactions for users
  */
 
-import { config } from '../config/env';
+
 import { getAuth0AccessToken } from '../utils/auth0';
 import { handleAuth0Error } from '../utils/errors';
 import {
@@ -20,7 +20,7 @@ export async function deleteUser(id: string): Promise<void> {
     if (!id) throw new Error('User ID is required');
 
     const token = await getAuth0AccessToken();
-    const url = `${config.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`;
+    const url = `${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`;
     const response = await fetch(url, {
         method: 'DELETE',
         headers: {
@@ -41,7 +41,7 @@ export async function updateUser(id: string, updates: AllowedUserUpdates): Promi
     if (!id) throw new Error('User ID is required');
 
     const token = await getAuth0AccessToken();
-    const url = `${config.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`;
+    const url = `${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`;
     const response = await fetch(url, {
         method: 'PATCH',
         headers: {
@@ -72,7 +72,7 @@ export async function getUserById(
     if (!id) throw new Error('User ID is required');
 
     const token = await getAuth0AccessToken();
-    const url = new URL(`${config.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`);
+    const url = new URL(`${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`);
 
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) url.searchParams.append(key, String(value));
@@ -109,7 +109,7 @@ export async function getUsers(params: {
     primary_order?: boolean;
 } = {}): Promise<Auth0UserListResponse | Auth0User[]> {
     const token = await getAuth0AccessToken();
-    const url = new URL(`${config.AUTH0_DOMAIN}/api/v2/users`);
+    const url = new URL(`${process.env.AUTH0_DOMAIN}/api/v2/users`);
 
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) url.searchParams.append(key, String(value));
@@ -135,7 +135,7 @@ export async function getUsers(params: {
  */
 export async function updateUserMetadata(userId: string, metadata: Record<string, any>): Promise<Auth0User> {
     const token = await getAuth0AccessToken();
-    const url = `${config.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(userId)}`;
+    const url = `${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(userId)}`;
 
     const updatePayload = {
         app_metadata: metadata
@@ -163,7 +163,7 @@ export async function updateUserMetadata(userId: string, metadata: Record<string
  */
 export async function getOrganizationById(orgId: string): Promise<Organization> {
     const token = await getAuth0AccessToken();
-    const response = await fetch(`${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}`, {
+    const response = await fetch(`${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -183,7 +183,7 @@ export async function getOrganizationById(orgId: string): Promise<Organization> 
  */
 export async function addUserToOrganization(orgId: string, userId: string): Promise<void> {
     const token = await getAuth0AccessToken();
-    const url = `${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members`;
+    const url = `${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(orgId)}/members`;
 
     const body = {
         members: [userId]
@@ -210,7 +210,7 @@ export async function addUserToOrganization(orgId: string, userId: string): Prom
  */
 export async function assignUserToRole(roleId: string, userId: string): Promise<void> {
     const token = await getAuth0AccessToken();
-    const url = `${config.AUTH0_DOMAIN}/api/v2/roles/${encodeURIComponent(roleId)}/users`;
+    const url = `${process.env.AUTH0_DOMAIN}/api/v2/roles/${encodeURIComponent(roleId)}/users`;
 
     const body = {
         users: [userId]

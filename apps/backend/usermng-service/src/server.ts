@@ -3,11 +3,11 @@
  * Starts the Express server
  */
 
-import app from './app';
-import { config } from './config/env';
+// import app from './app';
+// require('dotenv').config();
 
-app.listen(config.PORT, () => {
-    console.log(config.AUTH0_API_AUDIENCE);
-    console.log(`User Management Service running on port ${config.PORT}`);
-    console.log(`Environment: ${config.NODE_ENV}`);
-});
+// app.listen(process.env.PORT, () => {
+//     console.log(process.env.AUTH0_API_AUDIENCE);
+//     console.log(`User Management Service running on port ${process.env.PORT}`);
+//     console.log(`Environment: ${process.env.NODE_ENV}`);
+// });

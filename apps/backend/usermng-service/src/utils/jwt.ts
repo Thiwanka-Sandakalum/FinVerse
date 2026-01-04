@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { config } from '../config/env';
+
 
 // JWKS client instance (will be loaded dynamically)
 let jwksClientInstance: any = null;
@@ -11,7 +11,7 @@ async function getJwksClient(): Promise<any> {
     if (!jwksClientInstance) {
         const { default: jwksClient } = await import('jwks-client');
         jwksClientInstance = jwksClient({
-            jwksUri: `${config.AUTH0_DOMAIN}/.well-known/jwks.json`,
+            jwksUri: `${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
             cache: true,
             cacheMaxEntries: 5,
             cacheMaxAge: 60000 * 10 // 10 minutes
@@ -66,8 +66,8 @@ export function verifyToken(token: string): Promise<DecodedToken> {
             token,
             getKey,
             {
-                audience: config.AUTH0_API_AUDIENCE,
-                issuer: `${config.AUTH0_DOMAIN}/`,
+                audience: process.env.AUTH0_API_AUDIENCE,
+                issuer: `${process.env.AUTH0_DOMAIN}/`,
                 algorithms: ['RS256']
             },
             (err, decoded) => {

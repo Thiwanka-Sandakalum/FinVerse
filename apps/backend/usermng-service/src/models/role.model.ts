@@ -3,7 +3,7 @@
  * Handles all Auth0 API interactions for roles
  */
 
-import { config } from '../config/env';
+
 import { getAuth0AccessToken } from '../utils/auth0';
 import { Auth0Role, RoleListResponse } from '../types/role.types';
 
@@ -17,7 +17,7 @@ export async function getRoles(params: {
     name_filter?: string;
 } = {}): Promise<RoleListResponse> {
     const token = await getAuth0AccessToken();
-    const url = new URL(`${config.AUTH0_DOMAIN}/api/v2/roles`);
+    const url = new URL(`${process.env.AUTH0_DOMAIN}/api/v2/roles`);
 
     const page = params.page || 0;
     const limit = params.per_page || 25;

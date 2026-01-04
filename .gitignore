@@ -37,7 +37,7 @@ apps/backend/usermng-service/src/config/organizationConnections.json
 apps/backend/banking-service-api/prisma/data.json
 apps/backend/banking-service-api/.vscode/launch.json
 apps/backend/banking-service-api/.vscode/settings.json
-<<<<<<< HEAD
 apps/backend/chatbot-service/.vscode/tasks.json
-=======
->>>>>>> 8f53030875a8853a882f4a0582e2281ce2847267
+apps/frontend/client/public/config.js
+apps/frontend/admin-dashboard/public/config.js
+apps/frontend/admin-dashboard/.firebase/hosting.ZGlzdA.cache

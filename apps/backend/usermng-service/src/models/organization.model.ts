@@ -3,7 +3,6 @@
  * Handles all Auth0 API interactions for organizations
  */
 
-import { config } from '../config/env';
 import { getAuth0AccessToken } from '../utils/auth0';
 import { handleAuth0Error } from '../utils/errors';
 import {
@@ -17,7 +16,7 @@ import { PaginatedResponse, SingleItemResponse } from '../interfaces/response';
  */
 export async function createOrganization(orgData: OrganizationCreateRequest): Promise<Organization> {
     const token = await getAuth0AccessToken();
-    const response = await fetch(`${config.AUTH0_DOMAIN}/api/v2/organizations`, {
+    const response = await fetch(`${process.env.AUTH0_DOMAIN}/api/v2/organizations`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -41,7 +40,7 @@ export async function updateOrganization(id: string, updates: Partial<Organizati
     if (!id) throw new Error('Organization ID is required');
 
     const token = await getAuth0AccessToken();
-    const response = await fetch(`${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(id)}`, {
+    const response = await fetch(`${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -65,7 +64,7 @@ export async function deleteOrganization(id: string): Promise<void> {
     if (!id) throw new Error('Organization ID is required');
 
     const token = await getAuth0AccessToken();
-    const response = await fetch(`${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(id)}`, {
+    const response = await fetch(`${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -85,7 +84,7 @@ export async function getOrganizationById(id: string): Promise<Organization> {
     if (!id) throw new Error('Organization ID is required');
 
     const token = await getAuth0AccessToken();
-    const response = await fetch(`${config.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(id)}`, {
+    const response = await fetch(`${process.env.AUTH0_DOMAIN}/api/v2/organizations/${encodeURIComponent(id)}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -112,7 +111,7 @@ export async function getOrganizations(params: {
     sort?: string;
 } = {}): Promise<PaginatedResponse<Organization>> {
     const token = await getAuth0AccessToken();
-    const url = new URL(`${config.AUTH0_DOMAIN}/api/v2/organizations`);
+    const url = new URL(`${process.env.AUTH0_DOMAIN}/api/v2/organizations`);
 
     const page = params.page || 0;
     const limit = params.per_page || 25;
