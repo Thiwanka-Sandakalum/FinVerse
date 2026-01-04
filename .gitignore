@@ -39,3 +39,5 @@ apps/backend/banking-service-api/.vscode/launch.json
 apps/backend/banking-service-api/.vscode/settings.json
 apps/backend/chatbot-service/.vscode/tasks.json
 apps/frontend/client/public/config.js
+apps/frontend/admin-dashboard/public/config.js
+apps/frontend/admin-dashboard/.firebase/hosting.ZGlzdA.cache

@@ -1,0 +1,27 @@
+{
+  "emulators": {
+    "apphosting": {
+      "port": 5173,
+      "rootDirectory": "./",
+      "startCommand": "npm run dev"
+    },
+    "ui": {
+      "enabled": false
+    },
+    "singleProjectMode": true
+  },
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
