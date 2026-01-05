@@ -52,7 +52,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "*Banking Service API – Test Job*",
+              "text": "*Banking Service API – Test Result*",
               "attachments": [
                 {
                   "color": "${{ needs.test.result == 'success' && 'good' || 'danger' }}",
@@ -71,6 +71,11 @@ jobs:
                       "title": "Commit",
                       "value": "${{ github.sha }}",
                       "short": false
+                    },
+                    {
+                      "title": "Triggered By",
+                      "value": "${{ github.actor }}",
+                      "short": true
                     }
                   ]
                 }
@@ -80,8 +85,8 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   build:
-    needs: test
     runs-on: ubuntu-latest
+    needs: test
     permissions:
       contents: read
 
@@ -98,21 +103,21 @@ jobs:
           username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}
           password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_4C4C8D9566ED4D688B5928449A2AEF0F }}
 
-      - name: Build and push container image to registry
+      - name: Build and push container image
         uses: docker/build-push-action@v3
         with:
           context: ./apps/backend/banking-service-api
           push: true
-          tags: portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}/img-product-srv:${{ github.sha }}
           file: ./apps/backend/banking-service-api/Dockerfile
+          tags: |
+            portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}/img-product-srv:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
+    needs: build
     permissions:
       id-token: write
       contents: read
-
-    needs: build
 
     steps:
       - name: Login to Azure
@@ -123,24 +128,24 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3474259CACC9411187191ACD7A5E2C31 }}
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: "as-product-srv"
           slot-name: "Production"
-          images: "portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}/img-product-srv:${{ github.sha }}"
+          images: |
+            portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}/img-product-srv:${{ github.sha }}
 
   notify-deployment:
     runs-on: ubuntu-latest
     needs: deploy
-    if: always()
+    if: needs.deploy.result != 'skipped'
     steps:
       - name: Notify Slack (Deployment)
         uses: slackapi/slack-github-action@v1.24.0
         with:
           payload: |
             {
-              "text": "*Deployment Completed – as-product-srv*",
+              "text": "*Deployment Result – as-product-srv*",
               "attachments": [
                 {
                   "color": "${{ needs.deploy.result == 'success' && 'good' || 'danger' }}",
