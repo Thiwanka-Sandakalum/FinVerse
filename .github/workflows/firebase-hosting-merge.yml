@@ -46,10 +46,10 @@ jobs:
         run: |
           echo "### :rocket: Deployment Successful" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Live URL:** ${{ steps.deploy.outputs.details_url }}\" >> $GITHUB_STEP_SUMMARY
-          echo \"**Environment:** Production\" >> $GITHUB_STEP_SUMMARY
-          echo \"**Project:** finverselk\" >> $GITHUB_STEP_SUMMARY
-          echo \"**Commit:** ${{ github.sha }}\" >> $GITHUB_STEP_SUMMARY
+          echo "**Live URL:** ${{ steps.deploy.outputs.details_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Production" >> $GITHUB_STEP_SUMMARY
+          echo "**Project:** finverselk" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
 
   notify-deployment:
     runs-on: ubuntu-latest
