@@ -41,3 +41,4 @@ apps/backend/chatbot-service/.vscode/tasks.json
 apps/frontend/client/public/config.js
 apps/frontend/admin-dashboard/public/config.js
 apps/frontend/admin-dashboard/.firebase/hosting.ZGlzdA.cache
+apps/frontend/client/.firebase/hosting.ZGlzdA.cache
