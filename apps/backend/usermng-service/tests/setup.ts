@@ -3,14 +3,11 @@
  * Global test configuration and mocks
  */
 
-// Mock environment variables
-process.env.AUTH0_DOMAIN = 'https://test-tenant.auth0.com';
-process.env.AUTH0_CLIENT_ID = 'test-client-id';
-process.env.AUTH0_CLIENT_SECRET = 'test-client-secret';
-process.env.AUTH0_AUDIENCE = 'https://test-tenant.auth0.com/api/v2/';
-process.env.AUTH0_API_AUDIENCE = 'https://test-api-audience';
-process.env.PORT = '3001';
-process.env.NODE_ENV = 'test';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load test environment variables from .env.test
+config({ path: resolve(__dirname, '../.env.test') });
 
 // Global test timeout
 jest.setTimeout(10000);
