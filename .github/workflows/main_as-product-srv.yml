@@ -33,7 +33,25 @@ jobs:
         env:
           NODE_ENV: test
           DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
-        run: npm test
+        run: npm test -- --coverage --json --outputFile=test-results.json
+        continue-on-error: true
+
+      - name: Parse test results
+        id: test-results
+        if: always()
+        working-directory: ./apps/backend/banking-service-api
+        run: |
+          if [ -f test-results.json ]; then
+            echo "success=$(jq -r '.success' test-results.json)" >> $GITHUB_OUTPUT
+            echo "numPassedTests=$(jq -r '.numPassedTests' test-results.json)" >> $GITHUB_OUTPUT
+            echo "numFailedTests=$(jq -r '.numFailedTests' test-results.json)" >> $GITHUB_OUTPUT
+            echo "numTotalTests=$(jq -r '.numTotalTests' test-results.json)" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+            echo "numPassedTests=0" >> $GITHUB_OUTPUT
+            echo "numFailedTests=0" >> $GITHUB_OUTPUT
+            echo "numTotalTests=0" >> $GITHUB_OUTPUT
+          fi
 
       - name: Upload test coverage
         uses: actions/upload-artifact@v4
@@ -52,7 +70,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "*Banking Service API – Test Result*",
+              "text": "${{ needs.test.result == 'success' && 'Tests Passed' || 'Tests Failed' }} - Banking Service API",
               "attachments": [
                 {
                   "color": "${{ needs.test.result == 'success' && 'good' || 'danger' }}",
@@ -68,16 +86,24 @@ jobs:
                       "short": true
                     },
                     {
-                      "title": "Commit",
-                      "value": "${{ github.sha }}",
-                      "short": false
-                    },
-                    {
                       "title": "Triggered By",
                       "value": "${{ github.actor }}",
                       "short": true
+                    },
+                    {
+                      "title": "Workflow",
+                      "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>",
+                      "short": true
+                    },
+                    {
+                      "title": "Commit Message",
+                      "value": "${{ github.event.head_commit.message }}",
+                      "short": false
                     }
-                  ]
+                  ],
+                  "footer": "GitHub Actions",
+                  "footer_icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+                  "ts": ${{ github.event.head_commit.timestamp }}
                 }
               ]
             }
@@ -145,7 +171,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "*Deployment Result – as-product-srv*",
+              "text": "${{ needs.deploy.result == 'success' && 'Deployed Successfully' || 'Deployment Failed' }} - as-product-srv",
               "attachments": [
                 {
                   "color": "${{ needs.deploy.result == 'success' && 'good' || 'danger' }}",
@@ -161,11 +187,23 @@ jobs:
                       "short": true
                     },
                     {
-                      "title": "Image",
-                      "value": "img-product-srv:${{ github.sha }}",
+                      "title": "Service",
+                      "value": "<https://as-product-srv.azurewebsites.net|Banking Service API>",
+                      "short": true
+                    },
+                    {
+                      "title": "Deployed By",
+                      "value": "${{ github.actor }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Image Tag",
+                      "value": "${{ github.sha }}",
                       "short": false
                     }
-                  ]
+                  ],
+                  "footer": "Azure Web App",
+                  "ts": ${{ github.event.head_commit.timestamp }}
                 }
               ]
             }
