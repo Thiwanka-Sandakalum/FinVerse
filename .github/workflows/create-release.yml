@@ -1,0 +1,89 @@
+name: Create Release
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "apps/frontend/client/package.json"
+            - "apps/backend/banking-service-api/package.json"
+            - "apps/backend/usermng-service/package.json"
+
+jobs:
+    create-release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 2
+
+            - name: Check if version changed
+              id: version-check
+              run: |
+                  # Get version from package.json files
+                  CLIENT_VERSION=$(jq -r '.version' apps/frontend/client/package.json)
+                  BANKING_VERSION=$(jq -r '.version' apps/backend/banking-service-api/package.json)
+                  USERMNG_VERSION=$(jq -r '.version' apps/backend/usermng-service/package.json)
+
+                  # Create version tag
+                  VERSION="v${CLIENT_VERSION}"
+
+                  # Check if tag already exists
+                  if git rev-parse "$VERSION" >/dev/null 2>&1; then
+                    echo "Tag $VERSION already exists"
+                    echo "create_release=false" >> $GITHUB_OUTPUT
+                  else
+                    echo "create_release=true" >> $GITHUB_OUTPUT
+                    echo "version=$VERSION" >> $GITHUB_OUTPUT
+                    echo "client_version=$CLIENT_VERSION" >> $GITHUB_OUTPUT
+                    echo "banking_version=$BANKING_VERSION" >> $GITHUB_OUTPUT
+                    echo "usermng_version=$USERMNG_VERSION" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Generate release notes
+              if: steps.version-check.outputs.create_release == 'true'
+              id: release-notes
+              run: |
+                  # Get commits since last tag
+                  LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+                  if [ -z "$LAST_TAG" ]; then
+                    COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+                  else
+                    COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+                  fi
+
+                  # Create release notes
+                  cat << EOF > release_notes.md
+                  ## 🚀 FinVerse Release ${{ steps.version-check.outputs.version }}
+
+                  ### 📦 Component Versions
+                  - **Client (Frontend):** v${{ steps.version-check.outputs.client_version }}
+                  - **Banking Service API:** v${{ steps.version-check.outputs.banking_version }}
+                  - **User Management Service:** v${{ steps.version-check.outputs.usermng_version }}
+
+                  ### 🔗 Deployments
+                  - **Frontend:** https://finverselk.web.app
+                  - **Banking API:** https://as-product-srv.azurewebsites.net
+                  - **User Management API:** https://as-usermng-srv.azurewebsites.net
+
+                  ### 📝 Changes
+                  ${COMMITS}
+
+                  ---
+                  *Deployed: $(date -u '+%Y-%m-%d %H:%M:%S UTC')*
+                  EOF
+
+            - name: Create Release
+              if: steps.version-check.outputs.create_release == 'true'
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ steps.version-check.outputs.version }}
+                  release_name: Release ${{ steps.version-check.outputs.version }}
+                  body_path: release_notes.md
+                  draft: false
+                  prerelease: false

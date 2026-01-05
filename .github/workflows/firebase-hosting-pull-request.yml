@@ -34,8 +34,57 @@ jobs:
         run: npm run build
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
+        id: deploy
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FINVERSELK }}
           projectId: finverselk
           entryPoint: ./apps/frontend/client
+
+      - name: Add PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### :white_check_mark: Preview Deployment Ready\n\n**Preview URL:** ${{ steps.deploy.outputs.details_url }}\n**Expires:** 7 days\n\n---\n*Commit: ${{ github.sha }}*`
+            })
+  notify-preview:
+    runs-on: ubuntu-latest
+    needs: build_and_preview
+    if: always() && github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "${{ needs.build_and_preview.result == 'success' && ':mag: Preview Deployed' || ':x: Preview Deployment Failed' }} - PR #${{ github.event.pull_request.number }}",
+              "attachments": [
+                {
+                  "color": "${{ needs.build_and_preview.result == 'success' && 'good' || 'danger' }}",
+                  "fields": [
+                    {
+                      "title": "Pull Request",
+                      "value": "<${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}>",
+                      "short": false
+                    },
+                    {
+                      "title": "Status",
+                      "value": "${{ needs.build_and_preview.result }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Author",
+                      "value": "${{ github.event.pull_request.user.login }}",
+                      "short": true
+                    }
+                  ],
+                  "footer": "Firebase Hosting Preview"
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
