@@ -2,13 +2,13 @@
  * Invitation Service Unit Tests
  */
 
-import * as InvitationService from '../../../services/invitation.service';
-import * as InvitationModel from '../../../models/invitation.model';
-import * as InvitationValidation from '../../../validations/invitation.validation';
-import { OrganizationInvitation, CreateInvitationPayload } from '../../../types/invitation.types';
+import * as InvitationService from '../../../src/services/invitation.service';
+import * as InvitationModel from '../../../src/models/invitation.model';
+import * as InvitationValidation from '../../../src/validations/invitation.validation';
+import { OrganizationInvitation, CreateInvitationPayload } from '../../../src/types/invitation.types';
 
-jest.mock('../../../models/invitation.model');
-jest.mock('../../../validations/invitation.validation');
+jest.mock('../../../src/models/invitation.model');
+jest.mock('../../../src/validations/invitation.validation');
 
 describe('Invitation Service', () => {
     beforeEach(() => {

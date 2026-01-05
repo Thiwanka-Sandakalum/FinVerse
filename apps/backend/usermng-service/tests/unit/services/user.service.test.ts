@@ -2,13 +2,13 @@
  * User Service Unit Tests
  */
 
-import * as UserService from '../../../services/user.service';
-import * as UserModel from '../../../models/user.model';
-import * as UserValidation from '../../../validations/user.validation';
-import { Auth0User } from '../../../types/user.types';
+import * as UserService from '../../../src/services/user.service';
+import * as UserModel from '../../../src/models/user.model';
+import * as UserValidation from '../../../src/validations/user.validation';
+import { Auth0User } from '../../../src/types/user.types';
 
-jest.mock('../../../models/user.model');
-jest.mock('../../../validations/user.validation');
+jest.mock('../../../src/models/user.model');
+jest.mock('../../../src/validations/user.validation');
 
 describe('User Service', () => {
     beforeEach(() => {

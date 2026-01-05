@@ -12,19 +12,19 @@ import {
     expectPaginatedResponse,
     mockUserData
 } from '../setup/testHelpers';
-import * as UserModel from '../../../models/user.model';
+import * as UserModel from '../../../src/models/user.model';
 
 // Mock the User Model
-jest.mock('../../../models/user.model');
+jest.mock('../../../src/models/user.model');
 
 // Mock the Auth0 client
-jest.mock('../../../utils/auth0', () => ({
+jest.mock('../../../src/utils/auth0', () => ({
     getAuth0Client: jest.fn(() => createMockAuth0Client()),
     getAuth0AccessToken: jest.fn(() => Promise.resolve('mock_token'))
 }));
 
 // Mock the auth middleware
-jest.mock('../../../middlewares/auth', () => ({
+jest.mock('../../../src/middlewares/auth', () => ({
     decodeAccessToken: jest.fn((req, res, next) => {
         req.user = {
             sub: 'auth0|test123',

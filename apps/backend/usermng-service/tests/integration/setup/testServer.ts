@@ -5,9 +5,9 @@
 
 import express from 'express';
 import cors from 'cors';
-import routes from '../../../routes';
-import errorHandler from '../../../middlewares/errorHandler';
-import { requestIdMiddleware } from '../../../middlewares/requestId';
+import routes from '../../../src/routes';
+import errorHandler from '../../../src/middlewares/errorHandler';
+import { requestIdMiddleware } from '../../../src/middlewares/requestId';
 
 /**
  * Creates a test instance of the Express app

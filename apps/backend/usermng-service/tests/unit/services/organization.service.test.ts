@@ -2,14 +2,14 @@
  * Organization Service Unit Tests
  */
 
-import * as OrganizationService from '../../../services/organization.service';
-import * as OrganizationModel from '../../../models/organization.model';
-import * as OrganizationValidation from '../../../validations/organization.validation';
-import { Organization, OrganizationCreateRequest, IndustryType } from '../../../types/organization.types';
+import * as OrganizationService from '../../../src/services/organization.service';
+import * as OrganizationModel from '../../../src/models/organization.model';
+import * as OrganizationValidation from '../../../src/validations/organization.validation';
+import { Organization, OrganizationCreateRequest, IndustryType } from '../../../src/types/organization.types';
 
 // Mock the model and validation layers
-jest.mock('../../../models/organization.model');
-jest.mock('../../../validations/organization.validation');
+jest.mock('../../../src/models/organization.model');
+jest.mock('../../../src/validations/organization.validation');
 
 describe('Organization Service', () => {
     beforeEach(() => {

@@ -2,10 +2,10 @@
  * Member Service Unit Tests  
  */
 
-import * as MemberService from '../../../services/member.service';
-import * as MemberModel from '../../../models/member.model';
+import * as MemberService from '../../../src/services/member.service';
+import * as MemberModel from '../../../src/models/member.model';
 
-jest.mock('../../../models/member.model');
+jest.mock('../../../src/models/member.model');
 
 describe('Member Service', () => {
     beforeEach(() => {

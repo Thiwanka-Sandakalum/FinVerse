@@ -12,13 +12,13 @@ import {
     expectPaginatedResponse,
     mockOrganizationData
 } from '../setup/testHelpers';
-import * as OrganizationModel from '../../../models/organization.model';
+import * as OrganizationModel from '../../../src/models/organization.model';
 
 // Mock the organization model
-jest.mock('../../../models/organization.model');
+jest.mock('../../../src/models/organization.model');
 
 // Mock the auth middleware to simulate authenticated requests
-jest.mock('../../../middlewares/auth', () => ({
+jest.mock('../../../src/middlewares/auth', () => ({
     decodeAccessToken: jest.fn((req, res, next) => {
         req.user = {
             sub: 'auth0|test123',

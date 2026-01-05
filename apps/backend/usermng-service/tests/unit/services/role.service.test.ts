@@ -2,10 +2,10 @@
  * Role Service Unit Tests
  */
 
-import * as RoleService from '../../../services/role.service';
-import * as RoleModel from '../../../models/role.model';
+import * as RoleService from '../../../src/services/role.service';
+import * as RoleModel from '../../../src/models/role.model';
 
-jest.mock('../../../models/role.model');
+jest.mock('../../../src/models/role.model');
 
 describe('Role Service', () => {
     beforeEach(() => {
