@@ -70,7 +70,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "${{ needs.test.result == 'success' && 'Tests Passed' || 'Tests Failed' }} - Banking Service API",
+              "text": "${{ needs.test.result == 'success' && ':white_check_mark: Tests Passed' || ':x: Tests Failed' }} - Banking Service API",
               "attachments": [
                 {
                   "color": "${{ needs.test.result == 'success' && 'good' || 'danger' }}",
@@ -102,8 +102,7 @@ jobs:
                     }
                   ],
                   "footer": "GitHub Actions",
-                  "footer_icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                  "ts": ${{ github.event.head_commit.timestamp }}
+                  "footer_icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
                 }
               ]
             }
@@ -171,7 +170,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "${{ needs.deploy.result == 'success' && 'Deployed Successfully' || 'Deployment Failed' }} - as-product-srv",
+              "text": "${{ needs.deploy.result == 'success' && ':rocket: Deployed Successfully' || ':warning: Deployment Failed' }} - as-product-srv",
               "attachments": [
                 {
                   "color": "${{ needs.deploy.result == 'success' && 'good' || 'danger' }}",
@@ -202,8 +201,7 @@ jobs:
                       "short": false
                     }
                   ],
-                  "footer": "Azure Web App",
-                  "ts": ${{ github.event.head_commit.timestamp }}
+                  "footer": "Azure Web App"
                 }
               ]
             }
