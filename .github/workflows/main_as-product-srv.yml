@@ -21,41 +21,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          cache: npm
           cache-dependency-path: apps/backend/banking-service-api/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./apps/backend/banking-service-api
+        working-directory: apps/backend/banking-service-api
         run: npm ci
 
       - name: Run tests
-        working-directory: ./apps/backend/banking-service-api
+        working-directory: apps/backend/banking-service-api
         env:
           NODE_ENV: test
           DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
-        run: npm test -- --coverage --json --outputFile=test-results.json
-        continue-on-error: true
-
-      - name: Parse test results
-        id: test-results
-        if: always()
-        working-directory: ./apps/backend/banking-service-api
-        run: |
-          if [ -f test-results.json ]; then
-            echo "success=$(jq -r '.success' test-results.json)" >> $GITHUB_OUTPUT
-            echo "numPassedTests=$(jq -r '.numPassedTests' test-results.json)" >> $GITHUB_OUTPUT
-            echo "numFailedTests=$(jq -r '.numFailedTests' test-results.json)" >> $GITHUB_OUTPUT
-            echo "numTotalTests=$(jq -r '.numTotalTests' test-results.json)" >> $GITHUB_OUTPUT
-          else
-            echo "success=false" >> $GITHUB_OUTPUT
-            echo "numPassedTests=0" >> $GITHUB_OUTPUT
-            echo "numFailedTests=0" >> $GITHUB_OUTPUT
-            echo "numTotalTests=0" >> $GITHUB_OUTPUT
-          fi
+        run: npm test -- --coverage
 
       - name: Upload test coverage
-        uses: actions/upload-artifact@v4
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: test-coverage
           path: apps/backend/banking-service-api/coverage/
@@ -64,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: always()
+
     steps:
       - name: Notify Slack (Tests)
         uses: slackapi/slack-github-action@v1.24.0
@@ -75,34 +58,15 @@ jobs:
                 {
                   "color": "${{ needs.test.result == 'success' && 'good' || 'danger' }}",
                   "fields": [
+                    { "title": "Status", "value": "${{ needs.test.result }}", "short": true },
+                    { "title": "Branch", "value": "${{ github.ref_name }}", "short": true },
+                    { "title": "Triggered By", "value": "${{ github.actor }}", "short": true },
                     {
-                      "title": "Status",
-                      "value": "${{ needs.test.result }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Branch",
-                      "value": "${{ github.ref_name }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Triggered By",
-                      "value": "${{ github.actor }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Workflow",
+                      "title": "Workflow Run",
                       "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>",
-                      "short": true
-                    },
-                    {
-                      "title": "Commit Message",
-                      "value": "${{ github.event.head_commit.message }}",
                       "short": false
                     }
-                  ],
-                  "footer": "GitHub Actions",
-                  "footer_icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                  ]
                 }
               ]
             }
@@ -112,6 +76,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: test
+    if: needs.test.result == 'success'
     permissions:
       contents: read
 
@@ -121,25 +86,28 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Log in to container registry
+      - name: Login to Azure Container Registry
         uses: docker/login-action@v2
         with:
-          registry: portfolioacr01.azurecr.io/
-          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}
-          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_4C4C8D9566ED4D688B5928449A2AEF0F }}
+          registry: portfolioacr01.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build and push container image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
-          context: ./apps/backend/banking-service-api
+          context: apps/backend/banking-service-api
           push: true
-          file: ./apps/backend/banking-service-api/Dockerfile
+          file: apps/backend/banking-service-api/Dockerfile
           tags: |
-            portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}/img-product-srv:${{ github.sha }}
+            portfolioacr01.azurecr.io/img-product-srv:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment:
+      name: production
+      url: https://as-product-srv.azurewebsites.net
     permissions:
       id-token: write
       contents: read
@@ -148,60 +116,42 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_469B5B2623324FBC8B50D88FEB16A202 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_26CC8CD59B004FDD917C5BB82BF0ADCA }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3474259CACC9411187191ACD7A5E2C31 }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "as-product-srv"
-          slot-name: "Production"
+          app-name: as-product-srv
           images: |
-            portfolioacr01.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_2F7763C4C7A44E5AAC2F93CE444F7FCC }}/img-product-srv:${{ github.sha }}
+            portfolioacr01.azurecr.io/img-product-srv:${{ github.sha }}
 
   notify-deployment:
     runs-on: ubuntu-latest
     needs: deploy
-    if: needs.deploy.result != 'skipped'
+    if: always()
+
     steps:
       - name: Notify Slack (Deployment)
         uses: slackapi/slack-github-action@v1.24.0
         with:
           payload: |
             {
-              "text": "${{ needs.deploy.result == 'success' && ':rocket: Deployed Successfully' || ':warning: Deployment Failed' }} - as-product-srv",
+              "text": "${{ needs.deploy.result == 'success' && ':rocket: Deployment Successful' || ':warning: Deployment Failed' }} - as-product-srv",
               "attachments": [
                 {
                   "color": "${{ needs.deploy.result == 'success' && 'good' || 'danger' }}",
                   "fields": [
+                    { "title": "Environment", "value": "Production", "short": true },
+                    { "title": "Status", "value": "${{ needs.deploy.result }}", "short": true },
+                    { "title": "Image", "value": "${{ github.sha }}", "short": false },
                     {
-                      "title": "Environment",
-                      "value": "Production",
-                      "short": true
-                    },
-                    {
-                      "title": "Status",
-                      "value": "${{ needs.deploy.result }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Service",
-                      "value": "<https://as-product-srv.azurewebsites.net|Banking Service API>",
-                      "short": true
-                    },
-                    {
-                      "title": "Deployed By",
-                      "value": "${{ github.actor }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Image Tag",
-                      "value": "${{ github.sha }}",
+                      "title": "Service URL",
+                      "value": "<https://as-product-srv.azurewebsites.net|Open Application>",
                       "short": false
                     }
-                  ],
-                  "footer": "Azure Web App"
+                  ]
                 }
               ]
             }
