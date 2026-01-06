@@ -42,6 +42,10 @@ jobs:
         working-directory: ./apps/frontend/client
         run: npm run build
 
+      - name: Ensure config.js is in dist
+        working-directory: ./apps/frontend/client
+        run: cp public/config.js dist/config.js
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         id: deploy
         with:
