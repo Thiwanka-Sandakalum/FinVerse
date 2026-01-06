@@ -11,6 +11,7 @@
     "singleProjectMode": true
   },
   "hosting": {
+    "site": "finverse-admin",
     "public": "dist",
     "ignore": [
       "firebase.json",
