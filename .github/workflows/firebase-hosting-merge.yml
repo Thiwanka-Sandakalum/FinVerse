@@ -30,13 +30,13 @@ jobs:
         working-directory: ./apps/frontend/client
         run: |
           mkdir -p public
-          echo "window.config = {" > config.js
-          echo "  AUTH0_AUDIENCE: '${{ secrets.AUTH0_AUDIENCE }}'," >> config.js
-          echo "  AUTH0_CLIENT_ID: '${{ secrets.AUTH0_CLIENT_ID }}'," >> config.js
-          echo "  AUTH0_CLIENT_SECRET: '${{ secrets.AUTH0_CLIENT_SECRET }}'," >> config.js
-          echo "  AUTH0_DOMAIN: '${{ secrets.AUTH0_DOMAIN }}'," >> config.js
-          echo "  API_BASE_URL: '${{ secrets.API_BASE_URL }}'" >> config.js
-          echo "};" >> config.js
+          echo "window.config = {" > public/config.js
+          echo "  AUTH0_AUDIENCE: '${{ secrets.AUTH0_AUDIENCE }}'," >> public/config.js
+          echo "  AUTH0_CLIENT_ID: '${{ secrets.AUTH0_CLIENT_ID }}'," >> public/config.js
+          echo "  AUTH0_CLIENT_SECRET: '${{ secrets.AUTH0_CLIENT_SECRET }}'," >> public/config.js
+          echo "  AUTH0_DOMAIN: '${{ secrets.AUTH0_DOMAIN }}'," >> public/config.js
+          echo "  API_BASE_URL: '${{ secrets.API_BASE_URL }}'" >> public/config.js
+          echo "};" >> public/config.js
 
       - name: Build
         working-directory: ./apps/frontend/client
