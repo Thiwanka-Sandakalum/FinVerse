@@ -92,7 +92,7 @@ const Signup: React.FC = () => {
           </ul>
 
 
-          <button onClick={() => window.location.href = "https://finverselk.web.app/"} className="w-full bg-brand-900 hover:bg-black text-white font-bold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center active:scale-95 transform shadow-md hover:shadow-lg">
+          <button onClick={() => window.location.href = "https://finverse-admin.web.app/"} className="w-full bg-brand-900 hover:bg-black text-white font-bold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center active:scale-95 transform shadow-md hover:shadow-lg">
             Become a Partner
             <svg className="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
           </button>
