@@ -10,7 +10,7 @@ import ProductList from '../components/ProductList';
 import Calculators from '../components/Calculators';
 import Testimonials from '../components/Testimonials';
 import { useAuth0 } from '@auth0/auth0-react';
-import FloatingMarketingOverlay from '@/components/FloatingMarketingOverlay';
+import FloatingMarketingOverlay from '@/src/components/FloatingMarketingOverlay';
 
 
 const LATEST_INSIGHTS = [

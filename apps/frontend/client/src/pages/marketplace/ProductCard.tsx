@@ -1,4 +1,4 @@
-import { Product as ApiProduct, ProductCategory } from '@/services/products';
+import { Product as ApiProduct, ProductCategory } from '@/src/services/products';
 import React from 'react';
 import { getInstitutionName } from './utils';
 import { useSavedProducts } from '../../context/SavedProductsContext';

@@ -1,28 +1,27 @@
+import { useAuth0 } from '@auth0/auth0-react';
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import MainLayout from './layouts/MainLayout';
-import HomePage from './pages/HomePage';
-import MarketplacePage from './pages/MarketplacePage';
-import InstitutionsPage from './pages/InstitutionsPage';
-import SignupPage from './pages/SignupPage';
-import BlogPage from './pages/BlogPage';
-import BlogPostPage from './pages/BlogPostPage';
-import ProfilePage from './pages/ProfilePage';
-import AboutPage from './pages/AboutPage';
-import ChatPage from './pages/ChatPage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import ToolsPage from './pages/ToolsPage';
-import ComparisonView from './components/ComparisonView';
 import AdModal from './components/AdModal';
 import ComparisonBar from './components/ComparisonBar';
+import ComparisonView from './components/ComparisonView';
 import ProtectedRoute from './components/ProtectedRoute';
-import { ComparisonProvider } from './context/ComparisonContext';
 import { ChatProvider } from './context/ChatContext';
-import { useAuth0 } from '@auth0/auth0-react';
+import { ComparisonProvider } from './context/ComparisonContext';
+import { SavedProductsProvider } from './context/SavedProductsContext';
+import MainLayout from './layouts/MainLayout';
+import AboutPage from './pages/AboutPage';
+import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
+import ChatPage from './pages/ChatPage';
+import HomePage from './pages/HomePage';
+import InstitutionsPage from './pages/InstitutionsPage';
+import MarketplacePage from './pages/MarketplacePage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import ProfilePage from './pages/ProfilePage';
+import SignupPage from './pages/SignupPage';
+import ToolsPage from './pages/ToolsPage';
 import { OpenAPI as ProductAPI } from './services/products';
 import { OpenAPI as ChatAPI } from './services/chat';
-import { SavedProductsProvider } from './context/SavedProductsContext';
-
 const App: React.FC = () => {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
