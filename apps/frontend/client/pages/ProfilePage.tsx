@@ -4,7 +4,6 @@ import { ProductsService } from '../services/products/services/ProductsService';
 import { useSavedProducts } from '../context/SavedProductsContext';
 import { ProductCard } from './marketplace/ProductCard';
 
-// Skeleton loader for product cards (copied from ProductList for consistency)
 const ProductCardSkeleton = () => (
   <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col animate-pulse">
     <div className="flex items-center justify-between mb-4">

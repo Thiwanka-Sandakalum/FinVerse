@@ -18,9 +18,8 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   timestamp: Date;
-  // New fields for Rich UI
   type?: 'text' | 'product-recommendation' | 'tool-suggestion' | 'comparison';
-  data?: any; 
+  data?: any;
 }
 
 export enum ViewState {

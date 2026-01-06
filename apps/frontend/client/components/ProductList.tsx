@@ -22,7 +22,7 @@ const ProductCardSkeleton = () => (
     </div>
   </div>
 );
-import { Product } from '../types';
+import { Product } from '../services/types';
 import { useComparison } from '../context/ComparisonContext';
 import { ProductsService } from '../services/products/services/ProductsService';
 import { useNavigate } from 'react-router-dom';

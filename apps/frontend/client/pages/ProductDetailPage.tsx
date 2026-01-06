@@ -112,7 +112,7 @@ const ProductDetailSkeleton = () => (
 );
 import { useComparison } from '../context/ComparisonContext';
 import { useChat } from '../context/ChatContext';
-import { Product } from '../types';
+import { Product } from '../services/types';
 import { ProductsService } from '../services/products';
 import type { Product as ApiProduct, ProductCategory } from '../services/products';
 import { useNavigate, useParams } from 'react-router-dom';

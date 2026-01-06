@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChatMessage } from '../types';
+import { ChatMessage } from '../services/types';
 import { sendChatMessage, sendProductChatMessage, generateSessionId } from '../services/chatService';
 import Calculators from '../components/Calculators';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -45,7 +45,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ initialMessage, onMessageHandled })
       {
          id: 'welcome',
          role: 'model',
-         text: productId 
+         text: productId
             ? `Hello! I'm here to help you with this specific product. Feel free to ask me anything about features, pricing, comparisons, or how this product can meet your needs.`
             : "Hello! I'm FinVerse Assistant, your financial copilot. I can help you compare products, calculate payments, or plan your savings. How can I help you today?",
          timestamp: new Date(),
@@ -104,7 +104,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ initialMessage, onMessageHandled })
          {
             id: 'welcome',
             role: 'model',
-            text: productId 
+            text: productId
                ? `Hello! I'm here to help you with this specific product. Feel free to ask me anything about features, pricing, comparisons, or how this product can meet your needs.`
                : "Hello! I'm FinVerse Assistant, your financial copilot. I can help you compare products, calculate payments, or plan your savings. How can I help you today?",
             timestamp: new Date(),
@@ -182,7 +182,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ initialMessage, onMessageHandled })
          }
 
          // Use product chat if productId is present, otherwise use general chat
-         const responseText = productId 
+         const responseText = productId
             ? await sendProductChatMessage(currentSessionId, productId, text)
             : await sendChatMessage(currentSessionId, text);
 

@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { sendChatMessage, generateSessionId } from '../services/chatService';
-import { ChatMessage } from '../types';
+import { ChatMessage } from '../services/types';
 import { useChat } from '../context/ChatContext';
 import { useNavigate } from 'react-router-dom';
 import { MarkdownRenderer } from '../utils/formatChatText';

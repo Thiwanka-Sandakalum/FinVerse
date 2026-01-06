@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getProductById, getRelatedProducts } from '../data/products';
 import { useComparison } from '../context/ComparisonContext';
 import { useChat } from '../context/ChatContext';
-import { Product } from '../types';
+import { Product } from '../services/types';
 
 interface ProductDetailPageProps {
    productId: string | null;

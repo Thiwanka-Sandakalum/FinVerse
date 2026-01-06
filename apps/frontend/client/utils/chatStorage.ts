@@ -1,4 +1,4 @@
-import { ChatMessage } from '../types';
+import { ChatMessage } from '../services/types';
 
 export interface ChatSession {
     id: string;
@@ -11,9 +11,6 @@ export interface ChatSession {
 const STORAGE_KEY = 'finverse_chat_sessions';
 const MAX_SESSIONS = 50; // Limit number of stored sessions
 
-/**
- * Get all chat sessions from localStorage
- */
 export const getAllChatSessions = (): ChatSession[] => {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -36,17 +33,11 @@ export const getAllChatSessions = (): ChatSession[] => {
     }
 };
 
-/**
- * Get a single chat session by ID
- */
 export const getChatSession = (sessionId: string): ChatSession | null => {
     const sessions = getAllChatSessions();
     return sessions.find(s => s.id === sessionId) || null;
 };
 
-/**
- * Save or update a chat session
- */
 export const saveChatSession = (session: ChatSession): void => {
     try {
         let sessions = getAllChatSessions();
@@ -80,9 +71,6 @@ export const saveChatSession = (session: ChatSession): void => {
     }
 };
 
-/**
- * Delete a chat session
- */
 export const deleteChatSession = (sessionId: string): void => {
     try {
         const sessions = getAllChatSessions();
@@ -93,9 +81,6 @@ export const deleteChatSession = (sessionId: string): void => {
     }
 };
 
-/**
- * Delete all chat sessions
- */
 export const deleteAllChatSessions = (): void => {
     try {
         localStorage.removeItem(STORAGE_KEY);
@@ -104,9 +89,6 @@ export const deleteAllChatSessions = (): void => {
     }
 };
 
-/**
- * Generate a chat title from the first user message
- */
 export const generateChatTitle = (messages: ChatMessage[]): string => {
     const firstUserMessage = messages.find(m => m.role === 'user');
     if (!firstUserMessage) return 'New Conversation';
@@ -120,9 +102,6 @@ export const generateChatTitle = (messages: ChatMessage[]): string => {
     return title;
 };
 
-/**
- * Get chat sessions grouped by date
- */
 export const getChatSessionsGrouped = () => {
     const sessions = getAllChatSessions();
     const now = new Date();

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import MarketplacePage from './pages/MarketplacePage';
@@ -15,36 +15,16 @@ import ToolsPage from './pages/ToolsPage';
 import ComparisonView from './components/ComparisonView';
 import AdModal from './components/AdModal';
 import ComparisonBar from './components/ComparisonBar';
+import ProtectedRoute from './components/ProtectedRoute';
 import { ComparisonProvider } from './context/ComparisonContext';
 import { ChatProvider } from './context/ChatContext';
 import { useAuth0 } from '@auth0/auth0-react';
-
-// ProtectedRoute component for route protection
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth0();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return isAuthenticated ? <>{children}</> : <Navigate to="/signup" replace />;
-}
 import { OpenAPI as ProductAPI } from './services/products';
 import { OpenAPI as ChatAPI } from './services/chat';
-
-
 import { SavedProductsProvider } from './context/SavedProductsContext';
 
-
 const App: React.FC = () => {
-  const { getAccessTokenSilently, isLoading, isAuthenticated } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   React.useEffect(() => {
     const tokenFn = async () => {

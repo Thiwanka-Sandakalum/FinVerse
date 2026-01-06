@@ -1,9 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
-/**
- * Component to render markdown text with proper styling
- */
 interface MarkdownRendererProps {
   content: string;
   className?: string;
@@ -106,7 +103,6 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, cla
   );
 };
 
-// Keep for backward compatibility
 export const parseMarkdownToJSX = (text: string) => {
   return <MarkdownRenderer content={text} />;
 };

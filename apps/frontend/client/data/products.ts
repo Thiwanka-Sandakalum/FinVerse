@@ -1,5 +1,5 @@
 
-import { Product } from '../types';
+import { Product } from '../services/types';
 
 // Helper to parse rate for sorting/filtering
 export const parseRate = (rateStr: string): number => {
@@ -118,7 +118,7 @@ const GENERATED_PRODUCTS: Product[] = Array.from({ length: 24 }).map((_, i) => {
     ...base,
     id: `gen-${i}`,
     name: `${base.name} ${Math.floor(i / 8) + 1}`,
-    rate: base.type === 'loan' || base.type === 'card' 
+    rate: base.type === 'loan' || base.type === 'card'
       ? `${(parseRate(base.rate) + (Math.random() * 2 - 1)).toFixed(2)}% APR`
       : `${(parseRate(base.rate) + (Math.random() * 0.5)).toFixed(2)}% APY`,
     featured: Math.random() > 0.8,

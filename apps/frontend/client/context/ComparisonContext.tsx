@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Product } from '../types';
+import { Product } from '../services/types';
 
 interface ComparisonContextType {
   selectedProducts: Product[];
