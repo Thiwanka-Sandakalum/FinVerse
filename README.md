@@ -166,3 +166,42 @@ AI-first design using a RAG-based agent architecture
 The diagram below illustrates the complete FinVerse system architecture, including frontend hosting, API gateway, backend microservices, private networking, databases, and external services.
 
 ![FinVerse Architecture](assets/diagram.png)
+
+---
+
+<!-- ## 🖼️ Application Screenshots
+
+Here are some key screens from the FinVerse platform to give you a visual overview of the user and admin experience: -->
+<!-- 
+<table align="center">
+	<tr>
+		<td align="center">
+			<b>inVerse App Promo Popup</b><br>
+			<img src="assets/screenshots/inVerse_app_promo_popup.png" alt="inVerse App Promo Popup" width="350"/>
+		</td>
+		<td align="center">
+			<b>FinVerse Admin Dashboard</b><br>
+			<img src="assets/screenshots/finverse_admin_dashboard.png" alt="FinVerse Admin Dashboard" width="350"/>
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<b>inVerse Homepage – Mobile Banking</b><br>
+			<img src="assets/screenshots/inVerse_homepage_mobile_banking.png" alt="inVerse Homepage Mobile Banking" width="350"/>
+		</td>
+		<td align="center">
+			<b>inVerse Smart Financial Tools</b><br>
+			<img src="assets/screenshots/inVerse_smart_financial_tools.png" alt="inVerse Smart Financial Tools" width="350"/>
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<b>inVerse Homepage – Smart Money</b><br>
+			<img src="assets/screenshots/inVerse_homepage_smart_money.png" alt="inVerse Homepage Smart Money" width="350"/>
+		</td>
+		<td align="center">
+			<b>FinVerse AI Copilot Chat</b><br>
+			<img src="assets/screenshots/finverse_ai_copilot_chat.png" alt="FinVerse AI Copilot Chat" width="350"/>
+		</td>
+	</tr>
+</table> -->
