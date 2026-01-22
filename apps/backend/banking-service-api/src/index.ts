@@ -6,6 +6,7 @@ import { logger } from './config/logger';
 import productRoutes from './routes/product.routes';
 import dataExtractorMiddleware from './middleware/data-extractor.middleware';
 import { errorHandler } from './middleware/errorHandler';
+import { decodeAccessToken } from './middleware/auth';
 
 const ORIGIN = process.env.CORS_ORIGIN || '*';
 
@@ -15,6 +16,7 @@ const app = express();
 app.use(cors({ origin: ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(decodeAccessToken);
 
 app.use((req, res, next) => {
     logger.info(`API Request: ${req.method} ${req.path}`);
