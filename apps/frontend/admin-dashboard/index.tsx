@@ -3,8 +3,8 @@ import { OpenAPI as ProductsOpenAPI } from './src/api/products/core/OpenAPI';
 import { OpenAPI as UsersOpenAPI } from './src/api/users/core/OpenAPI';
 
 if (config?.API_BASE_URL) {
-  ProductsOpenAPI.BASE = `${config.API_BASE_URL}/product-srv`;
-  UsersOpenAPI.BASE = `${config.API_BASE_URL}/usermng`;
+  ProductsOpenAPI.BASE = config.PRODUCT_API;
+  UsersOpenAPI.BASE = config.USER_MNG_API;
 }
 
 import React from 'react';
