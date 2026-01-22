@@ -1,14 +1,9 @@
 fastapi
 uvicorn[standard]
 pydantic
-
-mysqlclient
 SQLAlchemy
 pymysql
-
 yfinance
-
 cachetools
-
 google-genai
 gunicorn
