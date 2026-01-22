@@ -55,9 +55,9 @@ export function decodeAccessToken(req: Request, res: Response, next: NextFunctio
             return;
         }
 
-        const decodedToken = jwtDecode(token);
-        const { orgid, role, sub } = decodedToken as { orgid: string; role: string; sub: string };
-        req.user = { orgid, role, sub } as DecodedToken;
+        const decodedToken = jwtDecode(token) as DecodedToken;
+        // Map to expected user shape for downstream usage
+        req.user = decodedToken;
         console.log('Decoded Token:', req.user);
         next();
     } catch (error) {
