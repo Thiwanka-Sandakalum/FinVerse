@@ -13,7 +13,7 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
-ProductAPI.BASE = `${config.API_BASE_URL}/product-srv`;
+ProductAPI.BASE = config.PRODUCT_API;
 ChatAPI.BASE = `${config.API_BASE_URL}/chat`;
 
 const root = ReactDOM.createRoot(rootElement);
