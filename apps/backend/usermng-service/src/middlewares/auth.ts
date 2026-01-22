@@ -33,9 +33,8 @@ export function decodeAccessToken(req: Request, res: Response, next: NextFunctio
 
         const decodedToken = jwtDecode(token);
         const { orgid, role, sub } = decodedToken as { orgid: string; role: string; sub: string };
-        res.setHeader('x-user-id', sub);
-
         req.user = { orgid, role, sub } as DecodedToken;
+        console.log('Decoded Token:', req.user);
         next();
     } catch (error) {
         console.error('Token decoding failed:', error);

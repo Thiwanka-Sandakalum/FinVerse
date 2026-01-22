@@ -9,9 +9,9 @@ import { addUserToOrganization, assignUserToRole } from '../models/user.model';
 export const onboardOrganization = async (req: Request, res: Response) => {
     try {
         // 1. Validate input
-        const userId = req.header('x-user-id');
+        const userId = req.user?.sub;
         if (!userId || typeof userId !== 'string') {
-            return res.status(400).json({ success: false, message: 'Missing or invalid userId in header' });
+            return res.status(400).json({ success: false, message: 'Missing or invalid userId in token' });
         }
         const { companyName, metadata } = req.body;
         if (!companyName || typeof companyName !== 'string') {
