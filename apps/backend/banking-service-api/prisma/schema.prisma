@@ -7,6 +7,15 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model Institute {
+    id        String    @id
+    name      String    @unique
+    metadata  Json?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    products  Product[]
+}
+
 model ProductCategory {
     id          String  @id @default(uuid())
     parentId    String?
@@ -35,6 +44,7 @@ model Product {
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
 
+    institute     Institute       @relation(fields: [institutionId], references: [id], onDelete: Cascade)
     category      ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
     savedProducts SavedProduct[]
 
