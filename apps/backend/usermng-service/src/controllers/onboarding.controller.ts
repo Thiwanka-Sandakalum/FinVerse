@@ -5,6 +5,7 @@ import { updateUser } from '../services/user.service';
 import { getRoles } from '../services/role.service';
 import { getOrganizations } from '../services/organization.service';
 import { addUserToOrganization, assignUserToRole } from '../models/user.model';
+import { createInstitute } from '../models/institute.model';
 
 export const onboardOrganization = async (req: Request, res: Response) => {
     try {
@@ -41,6 +42,9 @@ export const onboardOrganization = async (req: Request, res: Response) => {
                 return res.status(400).json({ success: false, message: err?.message || 'Error creating organization.' });
             }
         }
+
+        // 2b. Create Institute record in DB using org.id
+        await createInstitute({ id: org.id, name: org.name, metadata: org.metadata });
 
         // 3. Assign user to organization
         await addUserToOrganization(org.id, userId);

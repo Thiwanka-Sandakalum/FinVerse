@@ -1,0 +1,103 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model Institute {
+    id        String   @id @default(uuid())
+    name      String   @unique
+    metadata  Json?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    products Product[]
+}
+
+model ProductCategory {
+    id          String  @id @default(uuid())
+    parentId    String?
+    name        String  @unique
+    description String?
+    level       Int     @default(0)
+
+    parent   ProductCategory?  @relation("CategoryParent", fields: [parentId], references: [id], onDelete: SetNull)
+    children ProductCategory[] @relation("CategoryParent")
+
+    FieldDefinition FieldDefinition[]
+    Product         Product[]
+
+    @@index([parentId])
+    @@index([level])
+}
+
+model Product {
+    id            String   @id @default(uuid())
+    institutionId String
+    categoryId    String
+    name          String
+    details       Json? // Flexible JSON field for additional product details
+    isFeatured    Boolean  @default(false)
+    isActive      Boolean  @default(true)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    institute     Institute       @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+    category      ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    savedProducts SavedProduct[]
+
+    @@index([institutionId, isActive])
+    @@index([categoryId, isActive])
+    @@index([isFeatured, isActive])
+    @@index([createdAt])
+    @@index([name])
+}
+
+// Defined custom fields for products details object belonging to a category
+model FieldDefinition {
+    id         String  @id @default(uuid())
+    categoryId String
+    name       String
+    dataType   String
+    isRequired Boolean @default(false)
+    validation Json?
+
+    category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+    @@unique([categoryId, name])
+    @@index([categoryId])
+}
+
+// Model to track products saved by users
+model SavedProduct {
+    id        String   @id @default(uuid())
+    UserId    String
+    productId String
+    createdAt DateTime @default(now())
+
+    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+    @@unique([UserId, productId])
+    @@index([UserId])
+    @@index([productId])
+}
+
+model AuditLog {
+    id        String   @id @default(uuid())
+    userId    String?
+    sessionId String?
+    action    String
+    details   Json?
+    ipAddress String?
+    userAgent String?
+    referrer  String?
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+    @@index([sessionId])
+    @@index([action])
+    @@index([createdAt])
+}
