@@ -1,6 +1,3 @@
-
-
-
 import os
 import json
 import logging
@@ -23,73 +20,49 @@ SQL_PROMPT_JSON = load_json_prompt('user_query_to_sql.json')
 RESPONSE_PROMPT_JSON = load_json_prompt('response_prompt.json')
 
 class ChatOrchestrator:
-    def __init__(self, chat_repo, product_repo, finance_service, llm=None):
+    def __init__(self, chat_repo, product_repo, llm=None):
         self.llm = llm or GeminiClient()
         self.products = product_repo
         self.chat_repo = chat_repo
-        self.finance = finance_service
-
     def handle_chat(self, session_id, user_id, message: str):
-        # 1. Load last 5 messages
+         # 1. Load last 5 messages
         history = self.chat_repo.get_recent_messages(session_id, limit=5)
         history_str = "\n".join([
             f"{msg.role.capitalize()}: {msg.content}" for msg in history
         ]) if history else "(No previous messages)"
 
-        # 2. Generate SQL WHERE clause from user message using LLM
-        # Add example values for details fields
-        details_examples = "\n".join([
-            f"- {field}: example value" for field in SQL_PROMPT_JSON["schema"].get("details_fields", [])
-        ])
-        # Add example product categories
-        categories_examples = ", ".join(SQL_PROMPT_JSON["schema"].get("product_categories_names", []))
-        sql_prompt = (
-            SQL_PROMPT_JSON["instruction"] + "\n" +
-            "# Product Table Schema:\n" +
-            "products(" + ", ".join(SQL_PROMPT_JSON["schema"]["products"]) + ")\n" +
-            "product_categories(" + ", ".join(SQL_PROMPT_JSON["schema"]["product_categories"]) + ")\n" +
-            f"# Example values for details fields in products table:\n{details_examples}\n" +
-            f"# Example product categories:\n{categories_examples}\n" +
-            f"# Example:\nUser: {SQL_PROMPT_JSON['examples'][0]['user']}\nSQL: {SQL_PROMPT_JSON['examples'][0]['sql']}\n" +
-            f"# Now, generate a SQL WHERE clause for this user question:\nUser: {message}\nSQL:"
-        )
-        logger.info("LLM SQL prompt:\n%s", sql_prompt)
         try:
-            sql_where = self.llm.generate(user_prompt=sql_prompt, context=SYSTEM_PROMPT)
-            logger.info("LLM SQL response:\n%s", sql_where)
-            # Clean up LLM output: remove code block markers and leading SQL:
-            sql_where = sql_where.strip()
-            if sql_where.startswith('```sql'):
-                sql_where = sql_where[6:]
-            if sql_where.startswith('```'):
-                sql_where = sql_where[3:]
-            sql_where = sql_where.replace('```', '').strip()
-            sql_where = sql_where.split('\n')[0].replace('SQL:', '').strip()
+            products = self.products.vector_search(query=message, limit=5)
         except Exception as e:
-            logger.error(f"LLM SQL generation failed: {e}")
-            raise
+            logger.error(f"Vector search failed: {e}")
+            
+        def build_context(products):
+            formatted = []
+            for i, p in enumerate(products, 1):
+                details = p.get("details", {})
+                formatted.append(
+                    f"""
+Product {i}
+Name: {p.get('name') or p.get('service_name')}
+Category: {p.get('category')}
+Description: {p.get('description')}
+Key Features: {p.get('key_features')}
+Eligibility: {details.get('eligibility') or p.get('eligibility')}
+Fees or Rates: {details.get('interestRate') or p.get('fees_or_rates')}
+Source: {p.get('source_url')}
+Similarity Score: {p.get('score')}
+"""
+                )
+            return "\n".join(formatted)
 
-        # 3. Fetch relevant products using generated SQL (fallback to default if fails)
-        try:
-            products = self.products.get_by_sql_where(sql_where, limit=5)
-        except Exception:
-            products = self.products.get_relevant_products(limit=3)
-
-        product_summary = "\n".join([
-            f"{getattr(p, 'name', '')}: {getattr(p, 'details', '')}" for p in products
-        ]) if products else "(No relevant products)"
-
-        # 4. Fetch Yahoo Finance snapshot (optional)
-        # market = self.finance.get_snapshot()
-        # market_str = f"Interest Rate: {market.get('interestRate', 'N/A')}" if market else "(No market data)"
-
-        # 5. Compose response prompt
+        context = build_context(products) if products else "No relevant products found."
+        
         response_prompt = (
             RESPONSE_PROMPT_JSON["instruction"] + "\n\n" +
             "## Context:\n" +
             f"Chat History:\n{history_str}\n\n" +
-            f"Product Summary:\n{product_summary}\n\n" +
-            # f"Finance Snapshot:\n{market_str}\n\n" +
+            f"Product Context:\n{context}\n\n" +
+           
             f"## User Question:\n{message}\n\n" +
             RESPONSE_PROMPT_JSON["answer_prefix"]
         )
