@@ -17,17 +17,19 @@ class MongoProductRepository:
 		return embedding
 
 	def vector_search(self, query: str, num_candidates: int = 200, limit: int = 5, filter: Optional[dict] = None) -> list:
-		results = list(self.collection.aggregate([
-                    {
-                        "$vectorSearch": {
-                        "index": "vector_index_finvserv",
-                        "path": "embedding",
-                        "queryVector": self.get_query_embedding(query),
-                        "numCandidates": num_candidates,
-                        "limit": limit
-                        }
-                    }
-                    ]))
+		vector_search_stage = {
+			"$vectorSearch": {
+				"index": "vector_index_finvserv",
+				"path": "embedding",
+				"queryVector": self.get_query_embedding(query),
+				"numCandidates": num_candidates,
+				"limit": limit
+			}
+		}
+		if filter:
+			vector_search_stage["$vectorSearch"]["filter"] = filter
+		pipeline = [vector_search_stage]
+		results = list(self.collection.aggregate(pipeline))
 		for doc in results:
 			print(doc.get("name"), doc.get("score"))  # Debug: print scores
 		return results

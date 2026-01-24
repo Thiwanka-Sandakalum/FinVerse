@@ -25,17 +25,44 @@ class ChatOrchestrator:
         self.products = product_repo
         self.chat_repo = chat_repo
     def handle_chat(self, session_id, user_id, message: str):
-         # 1. Load last 5 messages
-        history = self.chat_repo.get_recent_messages(session_id, limit=5)
-        history_str = "\n".join([
-            f"{msg.role.capitalize()}: {msg.content}" for msg in history
-        ]) if history else "(No previous messages)"
+        # 1. Load last 5 messages
+        # history = self.chat_repo.get_recent_messages(session_id, limit=5)
+        # history_str = "\n".join([
+        #     f"{msg.role.capitalize()}: {msg.content}" for msg in history
+        # ]) if history else "(No previous messages)"
+
+        # 2. Classify user query to category using LLM
+        category_prompt_json = load_json_prompt('category_classification.json')
+        category_instruction = category_prompt_json["instruction"]
+        categories = category_prompt_json["categories"]
+        cat_prompt = (
+            category_instruction + "\n\n" +
+            "Categories: " + ", ".join(categories) + "\n" +
+            f"User Query: {message}\nCategory:"
+        )
 
         try:
-            products = self.products.vector_search(query=message, limit=5)
+            category_raw = self.llm.generate(user_prompt=cat_prompt, context=None).strip()
+            # Remove 'Category:' prefix if present, and extra whitespace
+            if category_raw.lower().startswith('category:'):
+                category = category_raw[len('category:'):].strip()
+            else:
+                category = category_raw
+            logger.info(f"Predicted category: {category}")
+        except Exception as e:
+            logger.error(f"Category classification failed: {e}")
+            category = None
+
+        # 3. Generate filter dict from LLM output
+        filter_dict = {"category": category} if category and category != "Other" else None
+
+        # 4. Use filter in vector_search
+        try:
+            products = self.products.vector_search(query=message, limit=5, filter=filter_dict)
         except Exception as e:
             logger.error(f"Vector search failed: {e}")
-            
+            products = []
+
         def build_context(products):
             formatted = []
             for i, p in enumerate(products, 1):
@@ -56,13 +83,12 @@ Similarity Score: {p.get('score')}
             return "\n".join(formatted)
 
         context = build_context(products) if products else "No relevant products found."
-        
+
         response_prompt = (
             RESPONSE_PROMPT_JSON["instruction"] + "\n\n" +
             "## Context:\n" +
-            f"Chat History:\n{history_str}\n\n" +
+            # f"Chat History:\n{history_str}\n\n" +
             f"Product Context:\n{context}\n\n" +
-           
             f"## User Question:\n{message}\n\n" +
             RESPONSE_PROMPT_JSON["answer_prefix"]
         )
