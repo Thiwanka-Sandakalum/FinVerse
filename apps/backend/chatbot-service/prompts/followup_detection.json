@@ -1,0 +1,3 @@
+{
+    "instruction": "Is this message a follow-up question to the previous assistant response?\n\nPrevious Assistant:\n{last_assistant}\n\nUser:\n{user}\n\nAnswer only YES or NO."
+}
