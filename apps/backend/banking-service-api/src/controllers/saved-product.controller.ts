@@ -12,11 +12,8 @@ interface RequestWithContext extends Request {
         role: Role;
         userId?: string;
     };
-    user?: {
-        userId: string;
-        institutionId?: string;
-        role: Role;
-    };
+    // Override the user property to allow custom user object
+    user?: any;
 }
 
 export const saveProductController = async (req: RequestWithContext, res: Response) => {
