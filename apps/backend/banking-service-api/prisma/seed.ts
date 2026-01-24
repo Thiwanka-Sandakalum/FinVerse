@@ -16,6 +16,24 @@ async function main() {
     await prisma.product.deleteMany();
     await prisma.fieldDefinition.deleteMany();
     await prisma.productCategory.deleteMany();
+    await prisma.institute.deleteMany();
+
+    // Seed institutions first
+    if (Array.isArray(data.institutions)) {
+        for (const inst of data.institutions) {
+            const { id, name, metadata, createdAt, updatedAt } = inst;
+            await prisma.institute.create({
+                data: {
+                    id: id || randomUUID(),
+                    name,
+                    metadata: metadata || null,
+                    createdAt: createdAt ? new Date(createdAt) : undefined,
+                    updatedAt: updatedAt ? new Date(updatedAt) : undefined
+                }
+            });
+        }
+        console.log(`Seeded ${data.institutions.length} institutions.`);
+    }
 
     if (Array.isArray(data.categories)) {
         for (const cat of data.categories) {
