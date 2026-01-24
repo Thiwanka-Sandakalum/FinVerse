@@ -48,15 +48,11 @@ export function decodeAccessToken(req: Request, res: Response, next: NextFunctio
         const token = extractToken(req.headers.authorization);
 
         if (!token) {
-            res.status(400).json({
-                error: 'Token missing',
-                message: 'No access token provided in the Authorization header'
-            });
-            return;
+            // No token provided, continue without setting req.user
+            return next();
         }
 
         const decodedToken = jwtDecode(token) as DecodedToken;
-        // Map to expected user shape for downstream usage
         req.user = decodedToken;
         console.log('Decoded Token:', req.user);
         next();
