@@ -44,9 +44,9 @@ router.delete('/:productId/save', institutionContextMiddleware, unsaveProductCon
 router.put('/:productId/save', institutionContextMiddleware, toggleSaveProductController);
 router.get('/:productId/save-status', institutionContextMiddleware, checkProductSaveStatusController);
 
-router.get('/', institutionContextMiddleware, getAllProducts);
+router.get('/', getAllProducts);
 router.post('/', institutionContextMiddleware, createProduct);
-router.get('/:id', institutionContextMiddleware, validateProductAccessMiddleware, getProductById);
+router.get('/:id', getProductById);
 router.put('/:id', institutionContextMiddleware, validateProductAccessMiddleware, updateProduct);
 router.delete('/:id', institutionContextMiddleware, validateProductAccessMiddleware, deleteProduct);
 
