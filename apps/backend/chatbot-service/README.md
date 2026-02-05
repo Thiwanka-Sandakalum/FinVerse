@@ -2,30 +2,34 @@
 
 A production-ready FastAPI backend for a financial chatbot with LLM integration, multi-database support, and a modern static chat UI.
 
-## Features
-- FastAPI backend with modular architecture
-- LLM-driven SQL and response generation
-- MySQL (Azure) multi-database support (product & chat history)
-- Modular prompt templates (JSON)
-- Product and chat history models
-- Logging for LLM requests and responses
-- Static chat UI (Markdown supported)
-- Dockerized for easy deployment
 
 ## Requirements
 - Python 3.11+
-- MySQL (Azure, with SSL)
+- MongoDB (Atlas or local)
 - Docker (optional, for containerized deployment)
+- Modular prompt templates (JSON)
 
 ## Environment Variables
 Create a `.env` file in the project root:
 ```
-PRODUCT_DB_URL=...   # MySQL URL for product DB
-CHAT_DB_URL=...      # MySQL URL for chat history DB
-GEMINI_API_KEY=...   # Your Gemini LLM API key
-ENV=development      # or production
+MONGODB_URL=...         # MongoDB connection string
+MONGODB_DB=...          # MongoDB database name
+MONGODB_COLLECTION=...  # MongoDB collection name (default: services)
+GEMINI_API_KEY=...      # Your Gemini LLM API key
+ENV=development         # or production
 LOG_LEVEL=INFO
 ```
+
+
+## Features
+- FastAPI backend with modular architecture
+- LLM-driven response generation
+- MongoDB support for product & chat history
+- Modular prompt templates (JSON)
+- Product and chat history models (MongoDB)
+- Logging for LLM requests and responses
+- Static chat UI (Markdown supported)
+- Dockerized for easy deployment
 
 ## Local Development
 1. Install dependencies:

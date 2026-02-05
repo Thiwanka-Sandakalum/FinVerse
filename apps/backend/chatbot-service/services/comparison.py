@@ -1,35 +1,34 @@
 
 
 import json
-from repositories.product_repo import ProductRepository
+from repositories.mongo_product_repo import MongoProductRepository
 from core.llm_client import GeminiClient
 
 class ComparisonService:
-    def __init__(self, db):
-        self.products = ProductRepository(db)
+    def __init__(self, mongo_collection):
+        self.products = MongoProductRepository(mongo_collection, None)
         self.llm = GeminiClient()
 
     def serialize_product(self, product):
         if not product:
             return {}
         return {
-            "id": product.id,
-            "name": product.name,
-            "categoryId": product.categoryId if hasattr(product, 'categoryId') else getattr(product, 'category_id', None),
-            "details": product.details,
-            "isFeatured": getattr(product, 'isFeatured', getattr(product, 'is_featured', None)),
-            "isActive": getattr(product, 'isActive', getattr(product, 'is_active', None)),
-            "createdAt": str(getattr(product, 'createdAt', getattr(product, 'created_at', ''))),
-            "updatedAt": str(getattr(product, 'updatedAt', getattr(product, 'updated_at', '')))
+            "id": product.get("_id", ""),
+            "name": product.get("name", ""),
+            "categoryId": product.get("categoryId", None),
+            "details": product.get("details", {}),
+            "isFeatured": product.get("isFeatured", None),
+            "isActive": product.get("isActive", None),
+            "createdAt": str(product.get("createdAt", "")),
+            "updatedAt": str(product.get("updatedAt", ""))
         }
 
     def load_prompt_template(self, path):
-        import json
         with open(path, 'r') as f:
             return json.load(f)
 
     def compare(self, product_ids, user_prompt="Compare these products"):
-        products = [self.products.get_by_id(pid) for pid in product_ids]
+        products = self.products.get_relevant_products(filter={"_id": {"$in": product_ids}}, limit=len(product_ids))
         products_details = [self.serialize_product(p) for p in products]
 
         prompt_template = self.load_prompt_template("prompts/compare_products.json")

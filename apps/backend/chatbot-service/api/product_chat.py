@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Header, Depends
+
+from fastapi import APIRouter, Header
 from schemas.chat import ProductChatRequest
 from schemas.response import APIResponse
-from repositories.product_repo import ProductRepository
+from repositories.mongo_product_repo import MongoProductRepository
 from core.llm_client import GeminiClient
-from core.db_client import get_product_db
+from core.mongo_client import get_mongo_collection
 import json
 
 router = APIRouter()
@@ -13,14 +14,14 @@ def serialize_product(product):
     if not product:
         return {}
     return {
-        "id": product.id,
-        "name": product.name,
-        "categoryId": product.categoryId if hasattr(product, 'categoryId') else getattr(product, 'category_id', None),
-        "details": product.details,
-        "isFeatured": getattr(product, 'isFeatured', getattr(product, 'is_featured', None)),
-        "isActive": getattr(product, 'isActive', getattr(product, 'is_active', None)),
-        "createdAt": str(getattr(product, 'createdAt', getattr(product, 'created_at', ''))),
-        "updatedAt": str(getattr(product, 'updatedAt', getattr(product, 'updated_at', '')))
+        "id": product.get("_id", ""),
+        "name": product.get("name", ""),
+        "categoryId": product.get("categoryId", None),
+        "details": product.get("details", {}),
+        "isFeatured": product.get("isFeatured", None),
+        "isActive": product.get("isActive", None),
+        "createdAt": str(product.get("createdAt", "")),
+        "updatedAt": str(product.get("updatedAt", ""))
     }
 
 def load_prompt_template(path):
@@ -31,11 +32,11 @@ def load_prompt_template(path):
 def product_chat(
     payload: ProductChatRequest,
     x_user_id: str = Header(...),
-    db=Depends(get_product_db)
 ):
-    products = ProductRepository(db)
-    product = products.get_by_id(payload.productId)
-    product_details = serialize_product(product)
+    mongo_collection = get_mongo_collection()
+    product_repo = MongoProductRepository(mongo_collection, None)
+    product = product_repo.get_relevant_products(filter={"_id": payload.productId}, limit=1)
+    product_details = serialize_product(product[0] if product else None)
 
     prompt_template = load_prompt_template("prompts/product_chat.json")
     system_prompt = prompt_template["system"]

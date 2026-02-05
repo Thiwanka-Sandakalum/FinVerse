@@ -51,13 +51,13 @@ class ChatOrchestrator:
         # 1. Load last 5 messages
         history = self.chat_repo.get_recent_messages(session_id, limit=5)
         history_str = "\n".join([
-            f"{msg.role.capitalize()}: {msg.content}" for msg in history
+            f"{msg.get('role', '').capitalize()}: {msg.get('content', '')}" for msg in history
         ]) if history else "(No previous messages)"
         last_assistant = None
         if history:
             for msg in reversed(history):
-                if msg.role == "assistant":
-                    last_assistant = msg.content
+                if msg.get('role', '') == "assistant":
+                    last_assistant = msg.get('content', '')
                     break
 
         # 2. Follow-up detection
